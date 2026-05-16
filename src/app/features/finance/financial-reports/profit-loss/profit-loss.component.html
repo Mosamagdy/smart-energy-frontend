@@ -1,0 +1,262 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6" dir="rtl">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold mb-2">{{ 'profitLoss.title' | translate }}</h1>
+          <p class="text-blue-100">{{ 'profitLoss.subtitle' | translate }}</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button 
+          (click)="exportToPDF()"
+          [disabled]="isLoading() || !reportData()"
+          class="px-6 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          {{ 'profitLoss.exportPDF' | translate }}
+        </button>
+        <button 
+          (click)="loadProfitLoss()"
+          [disabled]="isLoading()"
+          class="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+          {{ 'profitLoss.refresh' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'profitLoss.startDate' | translate }}</label>
+        <input 
+          type="date"
+          [ngModel]="startDate()"
+          (ngModelChange)="startDate.set($event)"
+          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'profitLoss.endDate' | translate }}</label>
+        <input 
+          type="date"
+          [ngModel]="endDate()"
+          (ngModelChange)="endDate.set($event)"
+          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
+      </div>
+      <div class="flex items-end">
+        <button 
+          (click)="loadProfitLoss()"
+          [disabled]="isLoading()"
+          class="w-full py-3 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-semibold shadow-md disabled:opacity-50">
+          {{ 'profitLoss.viewReport' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">{{ 'profitLoss.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Report Content -->
+  @if (!isLoading() && reportData()) {
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <!-- Total Revenue -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-blue-100 p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-600">{{ 'profitLoss.totalRevenue' | translate }}</h3>
+        </div>
+        <p class="text-2xl font-bold text-blue-700">{{ formatCurrency(totalRevenue()) }} <span class="text-sm">{{ 'profitLoss.sar' | translate }}</span></p>
+      </div>
+
+      <!-- COGS -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-orange-100 p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-600">{{ 'profitLoss.cogs' | translate }}</h3>
+        </div>
+        <p class="text-2xl font-bold text-orange-700">{{ formatCurrency(totalCOGS()) }} <span class="text-sm">{{ 'profitLoss.sar' | translate }}</span></p>
+      </div>
+
+      <!-- Gross Profit -->
+      <div class="bg-white rounded-2xl shadow-lg border-2 border-purple-100 p-6">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold text-gray-600">{{ 'profitLoss.grossProfit' | translate }}</h3>
+        </div>
+        <p class="text-2xl font-bold text-purple-700">{{ formatCurrency(grossProfit()) }} <span class="text-sm">{{ 'profitLoss.sar' | translate }}</span></p>
+      </div>
+
+      <!-- Net Profit/Loss -->
+      <div [class]="getProfitLossBgClass() + ' rounded-2xl shadow-lg p-6 text-white'">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              @if (isProfitable()) {
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              } @else {
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+              }
+            </svg>
+          </div>
+          <h3 class="text-sm font-semibold">
+            {{ isProfitable() ? ('profitLoss.netProfit' | translate) : ('profitLoss.netLoss' | translate) }}
+          </h3>
+        </div>
+        <p class="text-3xl font-bold">{{ formatCurrency(abs(netProfit())) }} <span class="text-lg">{{ 'profitLoss.sar' | translate }}</span></p>
+        <p class="text-sm mt-2 opacity-90">{{ isProfitable() ? ('profitLoss.profit' | translate) : ('profitLoss.loss' | translate) }}</p>
+      </div>
+    </div>
+
+    <!-- Detailed P&L Table -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-2xl font-bold text-gray-900">{{ 'profitLoss.detailedPL' | translate }}</h2>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Revenue Section -->
+        @if (reportData().revenue?.accounts?.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-blue-700 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+              </svg>
+              {{ 'profitLoss.revenue' | translate }}
+            </h3>
+            <div class="bg-blue-50 rounded-lg p-4">
+              @for (account of reportData().revenue.accounts; track account.account_code) {
+                <div class="flex justify-between items-center py-2 border-b border-blue-200 last:border-b-0">
+                  <div>
+                    <p class="font-semibold text-gray-900">{{ account.account_code }} - {{ account.account_name_ar || account.account_name }}</p>
+                    @if (account.normal_balance === 'debit') {
+                      <p class="text-xs text-red-600">{{ 'profitLoss.deductedFromRevenue' | translate }}</p>
+                    }
+                  </div>
+                  <p class="font-bold" 
+                     [class]="account.normal_balance === 'debit' ? 'text-red-700' : 'text-blue-700'">
+                    @if (account.normal_balance === 'debit') {
+                      -{{ formatCurrency(account.balance) }} {{ 'profitLoss.sar' | translate }}
+                    } @else {
+                      {{ formatCurrency(account.balance) }} {{ 'profitLoss.sar' | translate }}
+                    }
+                  </p>
+                </div>
+              }
+              <div class="flex justify-between items-center pt-3 mt-3 border-t-2 border-blue-300">
+                <p class="font-bold text-lg text-blue-900">{{ 'profitLoss.totalRevenueLabel' | translate }}</p>
+                <p class="font-bold text-lg text-blue-900">{{ formatCurrency(reportData().revenue.total) }} {{ 'profitLoss.sar' | translate }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- COGS Section -->
+        @if (reportData().cogs?.accounts?.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-orange-700 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+              </svg>
+              {{ 'profitLoss.cogsLabel' | translate }}
+            </h3>
+            <div class="bg-orange-50 rounded-lg p-4">
+              @for (account of reportData().cogs.accounts; track account.account_code) {
+                <div class="flex justify-between items-center py-2 border-b border-orange-200 last:border-b-0">
+                  <div>
+                    <p class="font-semibold text-gray-900">{{ account.account_code }} - {{ account.account_name_ar || account.account_name }}</p>
+                  </div>
+                  <p class="font-bold text-orange-700">{{ formatCurrency(account.balance) }} {{ 'profitLoss.sar' | translate }}</p>
+                </div>
+              }
+              <div class="flex justify-between items-center pt-3 mt-3 border-t-2 border-orange-300">
+                <p class="font-bold text-lg text-orange-900">{{ 'profitLoss.totalCogs' | translate }}</p>
+                <p class="font-bold text-lg text-orange-900">{{ formatCurrency(reportData().cogs.total) }} {{ 'profitLoss.sar' | translate }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Gross Profit -->
+        <div class="bg-purple-50 border-2 border-purple-200 rounded-lg p-4">
+          <div class="flex justify-between items-center">
+            <p class="font-bold text-lg text-purple-900">{{ 'profitLoss.grossProfitLabel' | translate }}</p>
+            <p class="font-bold text-xl text-purple-700">{{ formatCurrency(reportData().gross_profit) }} {{ 'profitLoss.sar' | translate }}</p>
+          </div>
+        </div>
+
+        <!-- Operating Expenses Section -->
+        @if (reportData().operating_expenses?.accounts?.length > 0) {
+          <div>
+            <h3 class="text-lg font-bold text-red-700 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'profitLoss.operatingExpenses' | translate }}
+            </h3>
+            <div class="bg-red-50 rounded-lg p-4">
+              @for (account of reportData().operating_expenses.accounts; track account.account_code) {
+                <div class="flex justify-between items-center py-2 border-b border-red-200 last:border-b-0">
+                  <div>
+                    <p class="font-semibold text-gray-900">{{ account.account_code }} - {{ account.account_name_ar || account.account_name }}</p>
+                  </div>
+                  <p class="font-bold text-red-700">{{ formatCurrency(account.balance) }} {{ 'profitLoss.sar' | translate }}</p>
+                </div>
+              }
+              <div class="flex justify-between items-center pt-3 mt-3 border-t-2 border-red-300">
+                <p class="font-bold text-lg text-red-900">{{ 'profitLoss.totalOperatingExpenses' | translate }}</p>
+                <p class="font-bold text-lg text-red-900">{{ formatCurrency(reportData().operating_expenses.total) }} {{ 'profitLoss.sar' | translate }}</p>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Net Profit/Loss Final -->
+        <div [class]="getProfitLossBgClass() + ' rounded-lg p-6 text-white'">
+          <div class="flex justify-between items-center">
+            <div>
+              <p class="text-sm opacity-90 mb-1">
+                {{ isProfitable() ? ('profitLoss.netProfit' | translate) : ('profitLoss.netLoss' | translate) }}
+              </p>
+              <p class="font-bold text-2xl">{{ 'profitLoss.grossProfitMinusExpenses' | translate }}</p>
+            </div>
+            <div class="text-left">
+              <p class="font-bold text-3xl">{{ formatCurrency(abs(netProfit())) }} {{ 'profitLoss.sar' | translate }}</p>
+              <p class="text-sm mt-1 opacity-90">{{ isProfitable() ? ('profitLoss.profitable' | translate) : ('profitLoss.notProfitable' | translate) }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

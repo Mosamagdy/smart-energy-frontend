@@ -1,0 +1,183 @@
+<div class="container mx-auto p-6 max-w-7xl">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-24">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600"></div>
+    </div>
+  }
+
+  @if (!loading() && asset()) {
+    <!-- Header -->
+    <div class="mb-6 flex justify-between items-center">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <button
+            (click)="goBack()"
+            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i>
+            رجوع
+          </button>
+          <span class="text-sm text-gray-500">|</span>
+          <span class="text-sm text-blue-600 font-semibold">{{ asset()!.asset_number }}</span>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800">{{ asset()!.asset_name }}</h1>
+        @if (asset()!.asset_name_ar) {
+          <p class="text-lg text-gray-600 mt-1">{{ asset()!.asset_name_ar }}</p>
+        }
+      </div>
+      <span class="px-4 py-2 text-sm font-semibold rounded-full"
+            [class]="asset()!.status === 'active' ? 'bg-green-100 text-green-800' : 
+                     asset()!.status === 'fully_depreciated' ? 'bg-yellow-100 text-yellow-800' : 
+                     'bg-gray-100 text-gray-800'">
+        {{ getStatusLabel(asset()!.status) }}
+      </span>
+    </div>
+
+    <!-- Asset Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <!-- Basic Information -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle text-blue-600"></i>
+          المعلومات الأساسية
+        </h2>
+        <div class="space-y-3">
+          <div>
+            <span class="text-sm text-gray-500">الفئة:</span>
+            <p class="font-semibold text-gray-800">{{ getCategoryLabel(asset()!.category) }}</p>
+          </div>
+          <div>
+            <span class="text-sm text-gray-500">تاريخ الشراء:</span>
+            <p class="font-semibold text-gray-800">{{ formatDate(asset()!.purchase_date) }}</p>
+          </div>
+          <div>
+            <span class="text-sm text-gray-500">طريقة الإهلاك:</span>
+            <p class="font-semibold text-gray-800">{{ getMethodLabel(asset()!.depreciation_method) }}</p>
+          </div>
+          <div>
+            <span class="text-sm text-gray-500">العمر الإنتاجي:</span>
+            <p class="font-semibold text-gray-800">{{ asset()!.useful_life_years }} سنوات</p>
+          </div>
+          @if (asset()!.notes) {
+            <div>
+              <span class="text-sm text-gray-500">ملاحظات:</span>
+              <p class="text-gray-700 mt-1">{{ asset()!.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Financial Information -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-money-bill-wave text-green-600"></i>
+          المعلومات المالية
+        </h2>
+        <div class="space-y-4">
+          <div class="p-3 bg-blue-50 rounded-lg">
+            <span class="text-sm text-blue-600">تكلفة الشراء:</span>
+            <p class="text-2xl font-bold text-blue-800">{{ formatCurrency(asset()!.purchase_cost) }}</p>
+          </div>
+          <div class="p-3 bg-yellow-50 rounded-lg">
+            <span class="text-sm text-yellow-600">قيمة الخردة:</span>
+            <p class="text-xl font-bold text-yellow-800">{{ formatCurrency(asset()!.salvage_value) }}</p>
+          </div>
+          <div class="p-3 bg-red-50 rounded-lg">
+            <span class="text-sm text-red-600">الإهلاك المتراكم:</span>
+            <p class="text-xl font-bold text-red-700">{{ formatCurrency(asset()!.accumulated_depr) }}</p>
+          </div>
+          <div class="p-3 bg-green-50 rounded-lg">
+            <span class="text-sm text-green-600">القيمة الصافية:</span>
+            <p class="text-2xl font-bold text-green-700">{{ formatCurrency(asset()!.net_book_value) }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Depreciation Summary -->
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-chart-line text-purple-600"></i>
+          ملخص الإهلاك
+        </h2>
+        <div class="space-y-3">
+          <div>
+            <span class="text-sm text-gray-500">القابل للإهلاك:</span>
+            <p class="font-bold text-gray-800">{{ formatCurrency(asset()!.purchase_cost - asset()!.salvage_value) }}</p>
+          </div>
+          <div>
+            <span class="text-sm text-gray-500">الإهلاك السنوي (تقريبي):</span>
+            <p class="font-bold text-gray-800">
+              {{ formatCurrency((asset()!.purchase_cost - asset()!.salvage_value) / asset()!.useful_life_years) }}
+            </p>
+          </div>
+          <div>
+            <span class="text-sm text-gray-500">نسعة الإهلاك:</span>
+            <p class="font-bold text-gray-800">{{ (100 / asset()!.useful_life_years).toFixed(2) }}% سنوياً</p>
+          </div>
+          <div class="pt-3 border-t border-gray-200">
+            <span class="text-sm text-gray-500">سنوات مرت:</span>
+            <p class="font-bold text-gray-800">
+              {{ calculateYearsPassed(asset()!.purchase_date) }} سنوات
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Depreciation Schedule Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-calendar-alt text-orange-600"></i>
+          جدول الإهلاك
+        </h2>
+      </div>
+
+      @if (loadingSchedule()) {
+        <div class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+        </div>
+      } @else if (schedule().length === 0) {
+        <div class="p-12 text-center">
+          <i class="fas fa-calendar-times text-5xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500">لا يوجد جدول إهلاك بعد. قم بتشغيل الإهلاك الشهري أولاً.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الفترة</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">التاريخ</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">مبلغ الإهلاك</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">الإهلاك المتراكم</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">القيمة الصافية</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              @for (record of schedule(); track record.id) {
+                <tr class="hover:bg-gray-50">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-semibold text-gray-900">#{{ record.period_number }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm text-gray-600">{{ formatDate(record.depreciation_date) }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-bold text-red-600">{{ formatCurrency(record.depreciation_amount) }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-semibold text-orange-600">{{ formatCurrency(record.accumulated_depreciation) }}</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-bold text-green-600">{{ formatCurrency(record.net_book_value) }}</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

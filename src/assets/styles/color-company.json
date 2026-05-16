@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Smart Energy ERP - Company Design Tokens",
+  "version": "1.0.0",
+  "source": {
+    "derivedFrom": "src/styles.css (@theme CSS variables)",
+    "date": "2026-04-08"
+  },
+  "tokens": {
+    "color": {
+      "company": {
+        "primary": "#0055aa",
+        "secondary": "#f1c40f",
+        "accent": "#e67e22",
+        "surface": "#ffffff",
+        "text": "#1a1a1a"
+      }
+    },
+    "font": {
+      "family": {
+        "brand": "Cairo, sans-serif"
+      }
+    }
+  },
+  "cssVariables": {
+    "--color-company-primary": "{tokens.color.company.primary}",
+    "--color-company-secondary": "{tokens.color.company.secondary}",
+    "--color-company-accent": "{tokens.color.company.accent}",
+    "--color-company-surface": "{tokens.color.company.surface}",
+    "--color-company-text": "{tokens.color.company.text}",
+    "--font-family-brand": "{tokens.font.family.brand}"
+  }
+}
+

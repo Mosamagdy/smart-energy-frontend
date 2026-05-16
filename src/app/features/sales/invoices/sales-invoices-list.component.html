@@ -1,0 +1,214 @@
+<div class="container mx-auto p-6 max-w-7xl">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">{{ 'salesInvoices.title' | translate }}</h1>
+      <p class="text-gray-600 mt-1">{{ 'salesInvoices.subtitle' | translate }}</p>
+    </div>
+    <button
+      (click)="createNewInvoice()"
+      class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2">
+      <i class="fas fa-plus"></i>
+      {{ 'salesInvoices.createNew' | translate }}
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && invoices().length === 0) {
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+      <i class="fas fa-file-invoice text-6xl text-gray-300 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">{{ 'salesInvoices.empty.title' | translate }}</h3>
+      <p class="text-gray-500 mb-4">{{ 'salesInvoices.empty.message' | translate }}</p>
+      <button
+        (click)="createNewInvoice()"
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        {{ 'salesInvoices.empty.createFirst' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Invoices Table -->
+  @if (!loading() && invoices().length > 0) {
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.invoiceNumber' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.client' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.project' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.date' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.amount' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.status' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'salesInvoices.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (invoice of invoices(); track invoice.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-semibold text-blue-600">{{ invoice.invoice_number }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-900">{{ invoice.client_name }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-600">{{ invoice.project_name || '-' }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-600">{{ invoice.issue_date | date:'yyyy-MM-dd' }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-bold text-gray-900">{{ invoice.total_amount | number:'1.2-2' }} {{ 'common.sar' | translate }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                      [class]="invoice.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
+                               invoice.payment_status === 'partial' ? 'bg-yellow-100 text-yellow-800' : 
+                               'bg-red-100 text-red-800'">
+                  {{ invoice.payment_status === 'paid' ? ('salesInvoices.paid' | translate) : 
+                     invoice.payment_status === 'partial' ? ('salesInvoices.partial' | translate) : 
+                     ('salesInvoices.unpaid' | translate) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex gap-2 flex-wrap">
+                  <!-- PDF Button -->
+                  <button
+                    (click)="viewPdf(invoice)"
+                    [disabled]="!invoice.pdf_path"
+                    class="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md text-xs font-bold"
+                    title="{{ 'salesInvoices.viewPdf' | translate }}">
+                    <i class="fas fa-file-pdf"></i>
+                    {{ 'salesInvoices.viewPdf' | translate }}
+                  </button>
+                  
+                  <!-- Finalize Button - ONLY for draft status -->
+                  @if (invoice.status === 'draft') {
+                    <button
+                      (click)="finalizeInvoice(invoice.id); $event.stopPropagation()"
+                      [disabled]="finalizingInvoiceId() === invoice.id"
+                      class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="{{ 'salesInvoices.finalize' | translate }}">
+                      @if (finalizingInvoiceId() === invoice.id) {
+                        <i class="fas fa-spinner fa-spin"></i>
+                        {{ 'salesInvoices.finalizing' | translate }}
+                      } @else {
+                        <i class="fas fa-check-double"></i>
+                        {{ 'salesInvoices.finalize' | translate }}
+                      }
+                    </button>
+                  }
+                  
+                  <!-- Tax Invoice Button - HARD LOCK based on database state -->
+                  @if (invoice.status === 'final' && !invoice.is_tax_invoice) {
+                    <!-- Show Purple Button - NOT yet taxed -->
+                    <button
+                      (click)="generateTaxInvoice(invoice.id); $event.stopPropagation()"
+                      [disabled]="generatingTaxInvoiceId() === invoice.id"
+                      class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-purple-100 text-purple-700 hover:bg-purple-600 hover:text-white border border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="{{ 'salesInvoices.generateTaxInvoice' | translate }}">
+                      @if (generatingTaxInvoiceId() === invoice.id) {
+                        <i class="fas fa-spinner fa-spin"></i>
+                        {{ 'salesInvoices.generating' | translate }}
+                      } @else {
+                        <i class="fas fa-file-invoice"></i>
+                        {{ 'salesInvoices.generateTaxInvoice' | translate }}
+                      }
+                    </button>
+                  } @else if (invoice.status === 'final' && invoice.is_tax_invoice) {
+                    <!-- HARD LOCKED Green Button - Already taxed in database -->
+                    <!-- ✅ تم إصلاح الخطأ هنا ✅ -->
+                    <button
+                      disabled
+                      class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm bg-green-500 text-white border-2 border-green-600 cursor-not-allowed opacity-90"
+                      [attr.title]="('salesInvoices.taxInvoiceIssued' | translate) + ': ' + invoice.tax_invoice_no">
+                      <i class="fas fa-check-circle"></i>
+                      {{ 'salesInvoices.taxInvoice' }} ✅
+                    </button>
+                  } @else if (invoice.status !== 'draft') {
+                    <!-- Not final and not draft - show locked -->
+                    <button
+                      (click)="showDraftToast(); $event.stopPropagation()"
+                      class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200"
+                      title="{{ 'salesInvoices.notAvailable' | translate }}">
+                      <i class="fas fa-lock"></i>
+                      {{ 'salesInvoices.notAvailable' | translate }}
+                    </button>
+                  }
+                  
+                  <!-- Create Return / Credit Note Button - ONLY for final invoices -->
+                  @if (invoice.status === 'final') {
+                    <button
+                      (click)="createCreditNote(invoice.id); $event.stopPropagation()"
+                      class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-orange-100 text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200"
+                      title="{{ 'salesInvoices.createCreditNote' | translate }}">
+                      <i class="fas fa-undo"></i>
+                      {{ 'salesInvoices.createCreditNote' | translate }}
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Warehouse Selection Modal -->
+@if (showWarehouseModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" dir="rtl">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-bold text-gray-900">{{ 'salesInvoices.selectWarehouse' | translate }}</h3>
+          <button (click)="cancelFinalize()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+        
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            {{ 'salesInvoices.warehouseToDeduct' | translate }} *
+          </label>
+          <select 
+            [(ngModel)]="selectedWarehouseId"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all text-base">
+            @for (warehouse of warehouses(); track warehouse.id) {
+              <option [value]="warehouse.id">
+                {{ warehouse.warehouse_name_ar || warehouse.warehouse_name }} ({{ warehouse.warehouse_code }})
+              </option>
+            }
+          </select>
+          <p class="mt-2 text-xs text-gray-500">
+            {{ 'salesInvoices.deductionInfo' | translate }}
+          </p>
+        </div>
+        
+        <div class="flex gap-3">
+          <button 
+            (click)="confirmFinalize()"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-lg hover:shadow-xl">
+            <i class="fas fa-check ml-2"></i>
+            {{ 'salesInvoices.confirmFinalize' | translate }}
+          </button>
+          <button 
+            (click)="cancelFinalize()"
+            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-4 rounded-xl transition-all">
+            <i class="fas fa-times ml-2"></i>
+            {{ 'salesInvoices.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

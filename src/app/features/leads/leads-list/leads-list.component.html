@@ -1,0 +1,340 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-900">{{ 'leads.title' | translate }}</h1>
+      <p class="text-gray-600 mt-2">{{ 'leads.subtitle' | translate }}</p>
+    </div>
+    @if (canCreateLead()) {
+      <button 
+        (click)="openAddModal()"
+        class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>{{ 'leads.add' | translate }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-linear-to-r from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm font-medium">{{ 'leads.total' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().total }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">📊</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm font-medium">{{ 'leads.new' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().new }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">✨</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-purple-500 to-purple-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-purple-100 text-sm font-medium">{{ 'leads.qualified' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().qualified }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🎯</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-emerald-500 to-emerald-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-emerald-100 text-sm font-medium">{{ 'leads.won' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().won }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🏆</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery"
+        placeholder="{{ 'leads.search' | translate }}"
+        class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+      
+      <select 
+        [(ngModel)]="filterStatus"
+        class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+        <option value="">{{ 'leads.allStatuses' | translate }}</option>
+        @for (opt of statusOptions; track opt.value) {
+          <option [value]="opt.value">{{ 'leads.' + opt.value | translate }}</option>
+        }
+      </select>
+
+      <select 
+        [(ngModel)]="filterPriority"
+        class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+        <option value="">{{ 'leads.allPriorities' | translate }}</option>
+        @for (opt of priorityOptions; track opt.value) {
+          <option [value]="opt.value">{{ 'leads.priority.' + opt.value | translate }}</option>
+        }
+      </select>
+
+      <button 
+        (click)="resetFilters()"
+        class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-semibold">
+        {{ 'leads.reset' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+      <p class="text-red-700 font-medium">{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Leads Card Grid -->
+  @if (!loading() && filteredLeads().length === 0) {
+    <div class="text-center py-20">
+      <div class="text-8xl mb-4">📋</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ 'leads.empty' | translate }}</h3>
+      <p class="text-gray-600">{{ 'leads.emptyHint' | translate }}</p>
+    </div>
+  }
+
+  @if (!loading() && filteredLeads().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (lead of filteredLeads(); track lead.id) {
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group">
+          
+          <!-- Card Header with Priority Badge -->
+          <div class="relative bg-linear-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ lead.client_name }}</h3>
+                @if (lead.service_type) {
+                  <p class="text-sm text-company-primary font-semibold">{{ lead.service_type }}</p>
+                }
+              </div>
+              <div class="flex gap-2">
+                <!-- Priority Badge -->
+                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-sm"
+                      [ngClass]="getPriorityColor(lead.priority)">
+                  {{ getPriorityText(lead.priority) }}
+                </span>
+                <!-- Status Badge -->
+                <span class="px-3 py-1 text-xs font-bold rounded-full shadow-sm"
+                      [ngClass]="getStatusColor(lead.status)">
+                  {{ getStatusText(lead.status) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="p-4 space-y-3">
+            <!-- Contact Info -->
+            @if (lead.contact_phone) {
+              <div class="flex items-center gap-2 text-sm text-gray-700">
+                <svg class="w-4 h-4 text-company-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+                <span>{{ lead.contact_phone }}</span>
+              </div>
+            }
+            
+            @if (lead.contact_email) {
+              <div class="flex items-center gap-2 text-sm text-gray-700">
+                <svg class="w-4 h-4 text-company-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+                <span class="truncate">{{ lead.contact_email }}</span>
+              </div>
+            }
+
+            @if (lead.source) {
+              <div class="flex items-center gap-2 text-sm text-gray-700">
+                <svg class="w-4 h-4 text-company-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span>{{ lead.source }}</span>
+              </div>
+            }
+
+
+
+          </div>
+
+          <!-- Card Footer with Actions -->
+          <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-2">
+            <button 
+              (click)="viewLeadDetails(lead.id)"
+              class="flex-1 px-4 py-2 bg-company-primary text-white text-sm font-semibold rounded-lg hover:bg-company-primary/90 transition shadow-sm">
+              {{ 'leads.viewDetails' | translate }}
+            </button>
+            @if (canEditDelete(lead)) {
+              <button 
+                (click)="deleteLead(lead.id)"
+                class="px-4 py-2 bg-red-500 text-white text-sm font-semibold rounded-lg hover:bg-red-600 transition shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Add Lead Modal -->
+  @if (showAddModal()) {
+    <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         (click)="closeAddModal()">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+           (click)="$event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div class="bg-linear-to-r from-company-primary to-company-primary/90 p-6 rounded-t-2xl">
+          <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            {{ 'leads.add' | translate }}
+          </h3>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-4">
+          <!-- Client Name -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'leads.clientName' | translate }} *
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="formClientName"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="{{ 'leads.clientNamePlaceholder' | translate }}">
+          </div>
+
+          <!-- Service Type -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'leads.serviceType' | translate }} *
+            </label>
+            <input
+              type="text"
+              [(ngModel)]="formServiceType"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="{{ 'leads.serviceTypePlaceholder' | translate }}">
+          </div>
+
+          <!-- Contact Info Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                {{ 'leads.email' | translate }}
+              </label>
+              <input
+                type="email"
+                [(ngModel)]="formContactEmail"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+                placeholder="email@example.com">
+            </div>
+
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">
+                {{ 'leads.phone' | translate }}
+              </label>
+              <input
+                type="tel"
+                [(ngModel)]="formContactPhone"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+                placeholder="+966 5XX XXX XXX">
+            </div>
+          </div>
+
+          <!-- Priority -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'leads.priority.title' | translate }}
+            </label>
+            <div class="grid grid-cols-4 gap-2">
+              @for (opt of priorityOptions; track opt.value) {
+                <button
+                  type="button"
+                  (click)="formPriority.set(opt.value)"
+                  class="p-3 border-2 rounded-xl transition-all duration-200 text-sm font-semibold"
+                  [class.border-company-primary]="formPriority() === opt.value"
+                  [class.bg-company-primary/10]="formPriority() === opt.value"
+                  [class.border-gray-200]="formPriority() !== opt.value">
+                  {{ 'leads.priority.' + opt.value | translate }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Technical Department (CRITICAL: Only shows dept_type='technical') -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'leads.technicalDept' | translate }} *
+            </label>
+            <select
+              [(ngModel)]="formTechnicalDeptId"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+              <option value="">{{ 'leads.selectTechnicalDept' | translate }}</option>
+              @for (dept of technicalDepartments(); track dept.id) {
+                <option [value]="dept.id">{{ dept.name }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Notes -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'leads.notes' | translate }}
+            </label>
+            <textarea
+              [(ngModel)]="formNotes"
+              rows="3"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="{{ 'leads.notesPlaceholder' | translate }}">
+            </textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-6 border-t border-gray-200 flex gap-3">
+          <button
+            (click)="closeAddModal()"
+            class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition">
+            {{ 'common.cancel' | translate }}
+          </button>
+          <button
+            (click)="submitForm()"
+            class="flex-1 px-4 py-3 bg-company-primary text-white rounded-xl font-bold hover:bg-company-primary/90 transition">
+            {{ 'leads.create' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

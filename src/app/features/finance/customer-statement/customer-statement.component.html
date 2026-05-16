@@ -1,0 +1,39 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">{{ 'customerStatement.title' | translate }}</h1>
+    <p class="text-gray-600 mt-1">{{ clientName() || ('customerStatement.customer' | translate) }}</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow border border-gray-100 overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="text-left p-3">{{ 'customerStatement.date' | translate }}</th>
+          <th class="text-left p-3">{{ 'customerStatement.reference' | translate }}</th>
+          <th class="text-left p-3">{{ 'customerStatement.transactionType' | translate }}</th>
+          <th class="text-right p-3">{{ 'customerStatement.debit' | translate }}</th>
+          <th class="text-right p-3">{{ 'customerStatement.credit' | translate }}</th>
+          <th class="text-right p-3">{{ 'customerStatement.runningBalance' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="6" class="p-6 text-center text-gray-500">{{ 'customerStatement.loading' | translate }}</td></tr>
+        } @else if (entries().length === 0) {
+          <tr><td colspan="6" class="p-6 text-center text-gray-500">{{ 'customerStatement.noEntries' | translate }}</td></tr>
+        } @else {
+          @for (e of entries(); track e.reference_no + e.date) {
+            <tr class="border-t">
+              <td class="p-3">{{ e.date | date:'yyyy-MM-dd' }}</td>
+              <td class="p-3">{{ e.reference_no }}</td>
+              <td class="p-3">{{ getTransactionTypeLabel(e.transaction_type) }}</td>
+              <td class="p-3 text-right">{{ formatCurrency(e.debit) }}</td>
+              <td class="p-3 text-right">{{ formatCurrency(e.credit) }}</td>
+              <td class="p-3 text-right font-semibold">{{ formatCurrency(e.running_balance) }}</td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

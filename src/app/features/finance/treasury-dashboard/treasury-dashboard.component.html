@@ -1,0 +1,197 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6" dir="rtl">
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-3xl font-bold mb-2">{{ 'treasury.title' | translate }}</h1>
+          <p class="text-blue-100">{{ 'treasury.subtitle' | translate }}</p>
+        </div>
+      </div>
+      <button 
+        (click)="loadTreasuryData()"
+        [disabled]="isLoading()"
+        class="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ 'treasury.refresh' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">{{ 'treasury.loading' | translate }}</p>
+    </div>
+  }
+
+  @if (!isLoading() && treasuryData()) {
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <!-- Total Cash -->
+      <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold">{{ 'treasury.totalCash' | translate }}</h3>
+        </div>
+        <p class="text-3xl font-bold">{{ formatCurrency(treasuryData()!.total_cash) }} {{ 'common.sar' | translate }}</p>
+        <p class="text-sm mt-2 opacity-90">{{ treasuryData()!.cash_accounts.length }} {{ 'treasury.accounts' | translate }}</p>
+      </div>
+
+      <!-- Total Bank -->
+      <div class="bg-gradient-to-r from-blue-500 to-indigo-600 rounded-2xl shadow-lg p-6 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold">{{ 'treasury.totalBank' | translate }}</h3>
+        </div>
+        <p class="text-3xl font-bold">{{ formatCurrency(treasuryData()!.total_bank) }} {{ 'common.sar' | translate }}</p>
+        <p class="text-sm mt-2 opacity-90">{{ treasuryData()!.bank_accounts.length }} {{ 'treasury.accounts' | translate }}</p>
+      </div>
+
+      <!-- Total Treasury -->
+      <div class="bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl shadow-lg p-6 text-white">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold">{{ 'treasury.totalTreasury' | translate }}</h3>
+        </div>
+        <p class="text-3xl font-bold">{{ formatCurrency(treasuryData()!.total_treasury) }} {{ 'common.sar' | translate }}</p>
+        <p class="text-sm mt-2 opacity-90">{{ 'treasury.cashPlusBank' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Cash Accounts -->
+    @if (treasuryData()!.cash_accounts.length > 0) {
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          {{ 'treasury.cashAccounts' | translate }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (account of treasuryData()!.cash_accounts; track account.id) {
+            <div class="border-2 border-green-200 rounded-xl p-4 hover:shadow-md transition">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold text-green-700">{{ account.account_code }}</span>
+                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">{{ 'treasury.cash' | translate }}</span>
+              </div>
+              <p class="text-sm text-gray-700 mb-3">{{ account.account_name_ar }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(account.current_balance) }} {{ 'common.sar' | translate }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Bank Accounts -->
+    @if (treasuryData()!.bank_accounts.length > 0) {
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"/>
+          </svg>
+          {{ 'treasury.bankAccounts' | translate }}
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (account of treasuryData()!.bank_accounts; track account.id) {
+            <div class="border-2 border-blue-200 rounded-xl p-4 hover:shadow-md transition">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-bold text-blue-700">{{ account.account_code }}</span>
+                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">{{ 'treasury.bank' | translate }}</span>
+              </div>
+              <p class="text-sm text-gray-700 mb-3">{{ account.account_name_ar }}</p>
+              <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(account.current_balance) }} {{ 'common.sar' | translate }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Recent Transactions -->
+    <div class="bg-white rounded-2xl shadow-lg p-6">
+      <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        {{ 'treasury.recentTransactions' | translate }}
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200">
+            <tr>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.date' | translate }}</th>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.account' | translate }}</th>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.description' | translate }}</th>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.type' | translate }}</th>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.amount' | translate }}</th>
+              <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'treasury.journalEntry' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (trans of treasuryData()!.recent_transactions; track trans.journal_entry_id) {
+              <tr class="border-b border-gray-100 hover:bg-purple-50 transition">
+                <td class="px-4 py-3">
+                  <p class="text-sm text-gray-900">{{ formatDate(trans.created_at) }}</p>
+                </td>
+                <td class="px-4 py-3">
+                  <div>
+                    <p class="text-sm font-semibold text-blue-700">{{ trans.account_code }}</p>
+                    <p class="text-xs text-gray-600">{{ trans.account_name }}</p>
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <p class="text-sm text-gray-700">{{ trans.description }}</p>
+                </td>
+                <td class="px-4 py-3">
+                  @if (trans.transaction_type === 'in') {
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                      {{ 'treasury.in' | translate }}
+                    </span>
+                  } @else {
+                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                      {{ 'treasury.out' | translate }}
+                    </span>
+                  }
+                </td>
+                <td class="px-4 py-3">
+                  <p class="text-lg font-bold" [class]="trans.transaction_type === 'in' ? 'text-green-700' : 'text-red-700'">
+                    {{ formatCurrency(trans.amount) }} {{ 'common.sar' | translate }}
+                  </p>
+                </td>
+                <td class="px-4 py-3">
+                  <a 
+                    [routerLink]="['/accounting/journal-entries', trans.journal_entry_id]"
+                    class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 hover:bg-purple-200 transition cursor-pointer">
+                    <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                    </svg>
+                    {{ 'treasury.entry' | translate }}{{ trans.journal_entry_id }}
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>

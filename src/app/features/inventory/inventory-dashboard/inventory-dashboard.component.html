@@ -1,0 +1,430 @@
+<div class="inventory-dashboard">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'inventory.title' | translate }}</h1>
+      <p>{{ 'inventory.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      @if (canManageInventory()) {
+        <button class="btn-create-item" (click)="openCreateItemModal()">
+          <span>➕</span>
+          <span>{{ 'inventory.createItem' | translate }}</span>
+        </button>
+        <button class="btn-stock-in" (click)="openStockInModal()">
+          <span>📥</span>
+          <span>{{ 'inventory.stockIn' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-icon">📦</div>
+      <div class="card-content">
+        <h3>{{ summary().total_items }}</h3>
+        <p>{{ 'inventory.summary.totalItems' | translate }}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏭</div>
+      <div class="card-content">
+        <h3>{{ summary().total_warehouses }}</h3>
+        <p>{{ 'inventory.summary.totalWarehouses' | translate }}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <div class="card-content">
+        <h3>{{ summary().total_stock | number:'1.0-0' }}</h3>
+        <p>{{ 'inventory.summary.totalStock' | translate }}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">💰</div>
+      <div class="card-content">
+        <h3>{{ formatCurrency(summary().total_value || 0) }}</h3>
+        <p>{{ 'inventory.summary.totalValue' | translate }}</p>
+      </div>
+    </div>
+    <div class="card" [class.low-stock]="summary().low_stock_items > 0">
+      <div class="card-icon">⚠️</div>
+      <div class="card-content">
+        <h3>{{ summary().low_stock_items }}</h3>
+        <p>{{ 'inventory.summary.lowStockItems' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-group">
+      <label>{{ 'inventory.filters.warehouse' | translate }}</label>
+      <select (change)="onWarehouseChange($event)" [value]="selectedWarehouse()">
+        <option [value]="null">{{ 'inventory.filters.allWarehouses' | translate }}</option>
+        @for (warehouse of warehouses(); track warehouse.id) {
+          <option [value]="warehouse.id">{{ warehouse.warehouse_name_ar || warehouse.warehouse_name }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>{{ 'inventory.filters.category' | translate }}</label>
+      <select (change)="onCategoryChange($event)" [value]="selectedCategory()">
+        <option value="">{{ 'inventory.filters.allCategories' | translate }}</option>
+        @for (category of categories(); track category) {
+          <option [value]="category">{{ category }}</option>
+        }
+      </select>
+    </div>
+
+    <button class="btn-clear" (click)="clearFilters()">
+      <span>🔄</span>
+      <span>{{ 'inventory.filters.clearFilters' | translate }}</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>{{ 'inventory.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Inventory Table -->
+  @if (!loading()) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'inventory.table.itemCode' | translate }}</th>
+            <th>{{ 'inventory.table.itemName' | translate }}</th>
+            <th>{{ 'inventory.table.category' | translate }}</th>
+            <th>{{ 'inventory.table.warehouse' | translate }}</th>
+            <th>{{ 'inventory.table.availableQuantity' | translate }}</th>
+            <th>{{ 'inventory.table.reservedQuantity' | translate }}</th>
+            <th>{{ 'inventory.table.totalStock' | translate }}</th>
+            <th>{{ 'inventory.table.unitPrice' | translate }}</th>
+            <th>{{ 'inventory.table.stockStatus' | translate }}</th>
+            <th>{{ 'inventory.table.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of filteredItems(); track item.id + '-' + item.warehouse_id) {
+            <tr>
+              <td class="code-cell">{{ item.item_code }}</td>
+              <td>
+                <div class="name-cell">
+                  <span class="name-ar">{{ item.item_name_ar || item.item_name }}</span>
+                  @if (item.item_name && item.item_name_ar) {
+                    <span class="name-en">{{ item.item_name }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ item.category }}</td>
+              <td>
+                <div class="warehouse-cell">
+                  <span class="warehouse-code">{{ item.warehouse_code }}</span>
+                  <span class="warehouse-name">{{ item.warehouse_name_ar || item.warehouse_name }}</span>
+                </div>
+              </td>
+              <td class="quantity-cell">
+                <span class="quantity-value">{{ item.available_quantity | number:'1.0-3' }}</span>
+              </td>
+              <td class="quantity-cell">
+                <span class="quantity-reserved">{{ item.reserved_quantity | number:'1.0-3' }}</span>
+              </td>
+              <td class="quantity-cell">
+                <span class="quantity-total">{{ item.quantity_on_hand | number:'1.0-3' }}</span>
+              </td>
+              <td>{{ formatCurrency(item.unit_cost || 0) }}</td>
+              <td>
+                <span class="status-badge" [style.background]="getStockStatus(item).color">
+                  {{ getStockStatus(item).text }}
+                </span>
+              </td>
+              <td>
+                <button class="btn btn-sm btn-secondary" (click)="openEditModal(item)" [title]="'inventory.actions.edit' | translate">
+                  ✏️
+                </button>
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="10" class="empty-state">
+                <div class="empty-icon">📦</div>
+                <p>{{ 'inventory.table.noItems' | translate }}</p>
+                @if (selectedWarehouse() || selectedCategory()) {
+                  <button class="btn-primary" (click)="clearFilters()">{{ 'inventory.filters.clearFilters' | translate }}</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Stock-In Modal -->
+@if (showStockInModal()) {
+  <div class="modal-overlay" (click)="closeStockInModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ 'inventory.stockInModal.title' | translate }}</h2>
+        <button class="close-btn" (click)="closeStockInModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>{{ 'inventory.stockInModal.item' | translate }} *</label>
+          <select [(ngModel)]="stockInForm().item_id" class="form-control">
+            <option [value]="null">{{ 'inventory.stockInModal.selectItem' | translate }}</option>
+            @for (item of allInventoryItems(); track item.id) {
+              <option [value]="item.id">{{ item.item_name_ar || item.item_name }} ({{ item.item_code }})</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.stockInModal.warehouse' | translate }} *</label>
+          <select [(ngModel)]="stockInForm().warehouse_id" class="form-control">
+            @for (warehouse of warehouses(); track warehouse.id) {
+              <option [value]="warehouse.id">{{ warehouse.warehouse_name_ar || warehouse.warehouse_name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.stockInModal.quantity' | translate }} *</label>
+          <input
+            type="number"
+            [(ngModel)]="stockInForm().quantity"
+            class="form-control"
+            [placeholder]="'inventory.stockInModal.quantityPlaceholder' | translate"
+            min="1"
+            step="1"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.stockInModal.notes' | translate }}</label>
+          <textarea
+            [(ngModel)]="stockInForm().notes"
+            class="form-control"
+            rows="3"
+            [placeholder]="'inventory.stockInModal.notesPlaceholder' | translate"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeStockInModal()">{{ 'inventory.stockInModal.cancel' | translate }}</button>
+        <button class="btn btn-primary" (click)="submitStockIn()">{{ 'inventory.stockInModal.submit' | translate }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Create New Item Modal -->
+@if (showCreateItemModal()) {
+  <div class="modal-overlay" (click)="closeCreateItemModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ 'inventory.createItemModal.title' | translate }}</h2>
+        <button class="close-btn" (click)="closeCreateItemModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label>{{ 'inventory.createItemModal.itemNameAr' | translate }} *</label>
+          <input
+            type="text"
+            [(ngModel)]="newItemForm().item_name_ar"
+            class="form-control"
+            [placeholder]="'inventory.createItemModal.itemNameArPlaceholder' | translate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.createItemModal.itemNameEn' | translate }} *</label>
+          <input
+            type="text"
+            [(ngModel)]="newItemForm().item_name"
+            class="form-control"
+            [placeholder]="'inventory.createItemModal.itemNameEnPlaceholder' | translate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.createItemModal.category' | translate }} *</label>
+          <select [(ngModel)]="newItemForm().category" class="form-control">
+            <option value="">{{ 'inventory.createItemModal.selectCategory' | translate }}</option>
+            <option value="solar_panel">{{ 'inventory.createItemModal.categories.solarPanel' | translate }} (solar_panel)</option>
+            <option value="inverter">{{ 'inventory.createItemModal.categories.inverter' | translate }} (inverter)</option>
+            <option value="cable">{{ 'inventory.createItemModal.categories.cable' | translate }} (cable)</option>
+            <option value="accessory">{{ 'inventory.createItemModal.categories.accessory' | translate }} (accessory)</option>
+            <option value="other">{{ 'inventory.createItemModal.categories.other' | translate }} (other)</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ 'inventory.createItemModal.unitOfMeasure' | translate }}</label>
+            <select [(ngModel)]="newItemForm().unit_of_measure" class="form-control">
+              <option value="pcs">{{ 'inventory.createItemModal.units.pcs' | translate }} (pcs)</option>
+              <option value="m">{{ 'inventory.createItemModal.units.m' | translate }} (m)</option>
+              <option value="kg">{{ 'inventory.createItemModal.units.kg' | translate }} (kg)</option>
+              <option value="set">{{ 'inventory.createItemModal.units.set' | translate }} (set)</option>
+              <option value="box">{{ 'inventory.createItemModal.units.box' | translate }} (box)</option>
+              <option value="roll">{{ 'inventory.createItemModal.units.roll' | translate }} (roll)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'inventory.createItemModal.unitCost' | translate }}</label>
+            <input
+              type="number"
+              [(ngModel)]="newItemForm().unit_cost"
+              class="form-control"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'inventory.createItemModal.reorderLevel' | translate }}</label>
+            <input
+              type="number"
+              [(ngModel)]="newItemForm().reorder_level"
+              class="form-control"
+              placeholder="0"
+              min="0"
+              step="1"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeCreateItemModal()">{{ 'inventory.createItemModal.cancel' | translate }}</button>
+        <button class="btn btn-primary" (click)="createNewItem()">{{ 'inventory.createItemModal.submit' | translate }}</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Item Modal -->
+@if (showEditModal()) {
+  <div class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ 'inventory.editItemModal.title' | translate }} — {{ editingItem()?.item_code }}</h2>
+        <button class="close-btn" (click)="closeEditModal()">×</button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Error message -->
+        @if (editError()) {
+          <div style="margin-bottom:16px; padding:10px 14px; background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; border-radius:6px; font-size:13px;">
+            ⚠️ {{ editError() }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label>{{ 'inventory.editItemModal.itemNameAr' | translate }}</label>
+          <input
+            type="text"
+            [ngModel]="editItemForm().item_name_ar"
+            (ngModelChange)="editItemForm.update(f => ({ ...f, item_name_ar: $event }))"
+            class="form-control"
+            [placeholder]="'inventory.editItemModal.itemNameArPlaceholder' | translate"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.editItemModal.itemNameEn' | translate }}</label>
+          <input
+            type="text"
+            [ngModel]="editItemForm().item_name"
+            (ngModelChange)="editItemForm.update(f => ({ ...f, item_name: $event }))"
+            class="form-control"
+            [placeholder]="'inventory.editItemModal.itemNameEnPlaceholder' | translate"
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>{{ 'inventory.editItemModal.unitOfMeasure' | translate }}</label>
+            <select
+              [ngModel]="editItemForm().unit_of_measure"
+              (ngModelChange)="editItemForm.update(f => ({ ...f, unit_of_measure: $event }))"
+              class="form-control"
+            >
+              <option value="pcs">{{ 'inventory.createItemModal.units.pcs' | translate }} (pcs)</option>
+              <option value="m">{{ 'inventory.createItemModal.units.m' | translate }} (m)</option>
+              <option value="kg">{{ 'inventory.createItemModal.units.kg' | translate }} (kg)</option>
+              <option value="set">{{ 'inventory.createItemModal.units.set' | translate }} (set)</option>
+              <option value="box">{{ 'inventory.createItemModal.units.box' | translate }} (box)</option>
+              <option value="roll">{{ 'inventory.createItemModal.units.roll' | translate }} (roll)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'inventory.editItemModal.unitCost' | translate }}</label>
+            <input
+              type="number"
+              [ngModel]="editItemForm().unit_cost"
+              (ngModelChange)="editItemForm.update(f => ({ ...f, unit_cost: +$event }))"
+              class="form-control"
+              placeholder="0.00"
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>{{ 'inventory.editItemModal.reorderLevel' | translate }}</label>
+            <input
+              type="number"
+              [ngModel]="editItemForm().reorder_level"
+              (ngModelChange)="editItemForm.update(f => ({ ...f, reorder_level: +$event }))"
+              class="form-control"
+              placeholder="0"
+              min="0"
+              step="1"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>{{ 'inventory.editItemModal.notes' | translate }}</label>
+          <textarea
+            [ngModel]="editItemForm().notes"
+            (ngModelChange)="editItemForm.update(f => ({ ...f, notes: $event }))"
+            class="form-control"
+            rows="3"
+            [placeholder]="'inventory.editItemModal.notesPlaceholder' | translate"
+          ></textarea>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeEditModal()" [disabled]="editLoading()">
+          {{ 'inventory.editItemModal.cancel' | translate }}
+        </button>
+        <button class="btn btn-primary" (click)="submitEdit()" [disabled]="editLoading()">
+          {{ editLoading() ? ('inventory.editItemModal.saving' | translate) : ('inventory.editItemModal.submit' | translate) }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

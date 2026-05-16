@@ -1,0 +1,66 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">{{ 'projectProfitability.title' | translate }}</h1>
+    <p class="text-gray-600 mt-1">{{ 'projectProfitability.subtitle' | translate }}</p>
+  </div>
+
+  <div class="bg-white p-4 rounded-xl shadow border border-gray-100 grid grid-cols-1 md:grid-cols-4 gap-3">
+    <input
+      type="text"
+      [(ngModel)]="projectSearch"
+      [placeholder]="'projectProfitability.searchPlaceholder' | translate"
+      class="px-3 py-2 border rounded-lg"
+    />
+    <input
+      type="date"
+      [(ngModel)]="startDate"
+      class="px-3 py-2 border rounded-lg"
+    />
+    <input
+      type="date"
+      [(ngModel)]="endDate"
+      class="px-3 py-2 border rounded-lg"
+    />
+    <button
+      (click)="loadData()"
+      class="px-4 py-2 bg-company-primary text-white rounded-lg font-semibold"
+    >
+      {{ 'projectProfitability.applyFilters' | translate }}
+    </button>
+  </div>
+
+  <div class="bg-white rounded-xl shadow border border-gray-100 overflow-x-auto">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="text-left p-3">{{ 'projectProfitability.table.projectName' | translate }}</th>
+          <th class="text-right p-3">{{ 'projectProfitability.table.materialSpend' | translate }}</th>
+          <th class="text-right p-3">{{ 'projectProfitability.table.invoicedAmount' | translate }}</th>
+          <th class="text-right p-3">{{ 'projectProfitability.table.grossMargin' | translate }}</th>
+          <th class="text-right p-3">{{ 'projectProfitability.table.marginPercent' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (loading()) {
+          <tr><td colspan="5" class="p-6 text-center text-gray-500">{{ 'projectProfitability.loading' | translate }}</td></tr>
+        } @else if (filteredRows().length === 0) {
+          <td> colspan="5" class="p-6 text-center text-gray-500">{{ 'projectProfitability.noData' | translate }}</td>
+        } @else {
+          @for (row of filteredRows(); track row.project_id) {
+            <tr class="border-t">
+              <td class="p-3 font-medium">{{ row.project_name }}</td>
+              <td class="p-3 text-right">{{ formatCurrency(row.material_spend) }}</td>
+              <td class="p-3 text-right">{{ formatCurrency(row.invoiced_amount) }}</td>
+              <td class="p-3 text-right" [class.text-red-600]="row.gross_margin < 0" [class.text-green-700]="row.gross_margin >= 0">
+                {{ formatCurrency(row.gross_margin) }}
+              </td>
+              <td class="p-3 text-right" [class.text-red-600]="marginPercent(row) < 0" [class.text-green-700]="marginPercent(row) >= 0">
+                {{ marginPercent(row) | number:'1.2-2' }}%
+              </td>
+            </tr>
+          }
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

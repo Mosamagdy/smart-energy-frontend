@@ -1,0 +1,84 @@
+<div class="statements-list-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1>{{ 'suppliers.supplierStatements.title' | translate }}</h1>
+      <p>{{ 'suppliers.supplierStatements.subtitle' | translate }}</p>
+    </div>
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        [placeholder]="'suppliers.supplierStatements.search' | translate"
+        [value]="searchTerm()"
+        (input)="searchTerm.set($event.target.value)">
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-container" *ngIf="isLoading()">
+    <div class="spinner"></div>
+    <p>{{ 'suppliers.supplierStatements.loading' | translate }}</p>
+  </div>
+
+  <!-- Suppliers Grid -->
+  <div class="suppliers-grid" *ngIf="!isLoading()">
+    <div 
+      class="supplier-card" 
+      *ngFor="let supplier of getFilteredSuppliers()"
+      (click)="viewStatement(supplier.id)">
+      
+      <div class="card-header">
+        <div class="supplier-icon">
+          <i class="fas fa-building"></i>
+        </div>
+        <div class="supplier-info">
+          <h3>{{ supplier.name }}</h3>
+          <div class="contact-info">
+            <span *ngIf="supplier.phone">
+              <i class="fas fa-phone"></i> {{ supplier.phone }}
+            </span>
+            <span *ngIf="supplier.email">
+              <i class="fas fa-envelope"></i> {{ supplier.email }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-stats">
+        <div class="stat-item">
+          <label>{{ 'suppliers.supplierStatements.invoices' | translate }}</label>
+          <div class="value">{{ supplier.invoice_count }}</div>
+        </div>
+        <div class="stat-item">
+          <label>{{ 'suppliers.supplierStatements.totalPurchases' | translate }}</label>
+          <div class="value amount">{{ formatCurrency(supplier.total_invoices) }}</div>
+        </div>
+        <div class="stat-item">
+          <label>{{ 'suppliers.supplierStatements.totalPaid' | translate }}</label>
+          <div class="value amount paid">{{ formatCurrency(supplier.total_paid) }}</div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <div class="balance-info">
+          <label>{{ 'suppliers.supplierStatements.balanceDue' | translate }}</label>
+          <div class="balance-amount" [class]="getBalanceClass(supplier.balance_due)">
+            {{ formatCurrency(supplier.balance_due) }}
+            <span class="badge">{{ getBalanceLabel(supplier.balance_due) }}</span>
+          </div>
+        </div>
+        <button class="btn-view">
+          <i class="fas fa-file-alt"></i>
+          {{ 'suppliers.supplierStatements.viewStatement' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div class="empty-state" *ngIf="!isLoading() && getFilteredSuppliers().length === 0">
+    <i class="fas fa-inbox"></i>
+    <p>{{ 'suppliers.supplierStatements.noSuppliers' | translate }}</p>
+  </div>
+</div>

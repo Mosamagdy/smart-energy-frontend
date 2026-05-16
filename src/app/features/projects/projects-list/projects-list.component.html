@@ -1,0 +1,294 @@
+<div [dir]="translateService.currentLang === 'ar' ? 'rtl' : 'ltr'" class="space-y-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-900">{{ 'projects.title' | translate }}</h1>
+      <p class="text-gray-600 mt-2">{{ 'projects.subtitle' | translate }}</p>
+    </div>
+    @if (canCreateProject()) {
+      <button 
+        (click)="openCreateModal()"
+        class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        <span>{{ 'projects.createProject' | translate }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-linear-to-r from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm font-medium">{{ 'projects.stats.total' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().total }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">📊</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-indigo-500 to-indigo-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-indigo-100 text-sm font-medium">{{ 'projects.stats.planning' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().planning }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">📋</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-yellow-500 to-yellow-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-yellow-100 text-sm font-medium">{{ 'projects.stats.inProgress' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().inProgress }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">⚙️</div>
+      </div>
+    </div>
+    
+    <div class="bg-linear-to-r from-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm font-medium">{{ 'projects.stats.completed' | translate }}</p>
+          <p class="text-4xl font-bold mt-2">{{ stats().completed }}</p>
+        </div>
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">✅</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <select 
+        [(ngModel)]="filterStatus"
+        class="px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+        <option value="">{{ 'projects.filters.allStatuses' | translate }}</option>
+        <option value="planning">{{ 'projects.status.planning' | translate }}</option>
+        <option value="in_progress">{{ 'projects.status.in_progress' | translate }}</option>
+        <option value="completed">{{ 'projects.status.completed' | translate }}</option>
+        <option value="on_hold">{{ 'projects.status.on_hold' | translate }}</option>
+        <option value="cancelled">{{ 'projects.status.cancelled' | translate }}</option>
+      </select>
+
+      <button 
+        (click)="resetFilters()"
+        class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-semibold">
+{{ 'projects.filters.resetFilters' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+      <p class="text-red-700 font-medium">{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Projects Grid -->
+  @if (!loading() && filteredProjects().length === 0) {
+    <div class="text-center py-20">
+      <div class="text-8xl mb-4">🏗️</div>
+      <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ 'projects.empty.noProjects' | translate }}</h3>
+      <p class="text-gray-600">{{ 'projects.empty.noProjectsDesc' | translate }}</p>
+    </div>
+  }
+
+  @if (!loading() && filteredProjects().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (project of filteredProjects(); track project.id) {
+        <div 
+          (click)="goToProject(project.id)"
+          class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden cursor-pointer group">
+          
+          <!-- Card Header -->
+          <div class="relative bg-linear-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ project.name }}</h3>
+                @if (project.technical_dept_name) {
+                  <p class="text-sm text-company-primary font-semibold">🏢 {{ project.technical_dept_name }}</p>
+                }
+              </div>
+              <!-- Status Badge -->
+              <span class="px-3 py-1 text-xs font-bold rounded-full shadow-sm"
+                    [ngClass]="getStatusColor(project.status)">
+                {{ getStatusText(project.status) }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="p-4 space-y-2 text-sm">
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">القسم</span>
+              <span class="text-gray-800 font-medium">{{ project.technical_dept_name || project.department_name || '-' }}</span>
+            </div>
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">مدير المشروع</span>
+              <span class="text-gray-800 font-medium">{{ project.project_manager_name || '-' }}</span>
+            </div>
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">الميزانية</span>
+              <span class="text-gray-800 font-medium">
+                @if (project.budget) {
+                  {{ project.budget | number:'1.0-0' }} {{ 'projects.currency' | translate }}
+                } @else {
+                  -
+                }
+              </span>
+            </div>
+            <div class="flex justify-between gap-3">
+              <span class="text-gray-500">تاريخ الإنشاء</span>
+              <span class="text-gray-800 font-medium">{{ project.created_at | date:'yyyy-MM-dd' }}</span>
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="px-4 py-3 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+            <span class="text-xs text-gray-500">
+              {{ 'projects.card.createdAt' | translate }}: {{ project.created_at | date:'yyyy-MM-dd' }}
+            </span>
+            <span class="text-company-primary font-semibold text-sm group-hover:translate-x-1 transition-transform rtl:group-hover:-translate-x-1">
+              {{ 'projects.card.viewDetails' | translate }} ←
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create Project Modal -->
+@if (showCreateModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeCreateModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-gray-200 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-t-2xl">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold">{{ 'projects.createProject' | translate }}</h2>
+          <button (click)="closeCreateModal()" class="text-white/80 hover:text-white text-3xl transition">&times;</button>
+        </div>
+        <p class="text-white/90 mt-2">{{ 'projects.form.enterProjectData' | translate }}</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- Error Message -->
+        @if (createFormError()) {
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p class="text-red-700 font-medium">{{ createFormError() }}</p>
+          </div>
+        }
+
+        <!-- Project Name -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.name' | translate }} *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="createForm().name"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="{{ 'projects.form.namePlaceholder' | translate }}">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.description' | translate }}</label>
+          <textarea 
+            [(ngModel)]="createForm().description"
+            rows="3"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="{{ 'projects.form.descriptionPlaceholder' | translate }}"></textarea>
+        </div>
+
+        <!-- Department & Status -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.department' | translate }}</label>
+            <select 
+              [(ngModel)]="createForm().department_id"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+              <option [value]="undefined">{{ 'projects.form.selectDepartment' | translate }}</option>
+              @for (dept of departments(); track dept.id) {
+                <option [value]="dept.id">{{ dept.name }}</option>
+              }
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.status' | translate }}</label>
+            <select 
+              [(ngModel)]="createForm().status"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+              <option value="planning">{{ 'projects.status.planning' | translate }}</option>
+              <option value="in_progress">{{ 'projects.status.in_progress' | translate }}</option>
+              <option value="on_hold">{{ 'projects.status.on_hold' | translate }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Budget -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.budget' | translate }}</label>
+          <input 
+            type="number" 
+            [(ngModel)]="createForm().budget"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="{{ 'projects.form.budgetPlaceholder' | translate }}">
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.startDate' | translate }} *</label>
+            <input 
+              type="date" 
+              [(ngModel)]="createForm().start_date"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'projects.form.endDate' | translate }}</label>
+            <input 
+              type="date" 
+              [(ngModel)]="createForm().end_date"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button 
+          (click)="closeCreateModal()"
+          [disabled]="createFormLoading()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-50">
+{{ 'projects.form.cancel' | translate }}
+        </button>
+        <button 
+          (click)="submitCreateProject()"
+          [disabled]="createFormLoading()"
+          class="flex-1 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (createFormLoading()) {
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ 'projects.form.creating' | translate }}
+          } @else {
+            {{ 'projects.form.create' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

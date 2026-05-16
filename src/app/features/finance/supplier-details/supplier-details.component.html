@@ -1,0 +1,258 @@
+<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
+  @if (loading()) {
+    <!-- Loading State -->
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  @if (!loading() && supplier()) {
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <button 
+            (click)="goBack()"
+            class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+          </button>
+          <div class="text-5xl">🏭</div>
+          <div>
+            <h1 class="text-3xl font-bold mb-2">{{ supplier()!.name }}</h1>
+            @if (supplier()!.name_ar) {
+              <p class="text-blue-100">{{ supplier()!.name_ar }}</p>
+            }
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <span class="px-4 py-2 rounded-full text-sm font-bold border bg-white/20">
+            {{ supplier()!.supplier_code }}
+          </span>
+          <span class="px-4 py-2 rounded-full text-sm font-bold border"
+                [ngClass]="getSupplierTypeColor(supplier()!.supplier_type)">
+            {{ getSupplierTypeLabel(supplier()!.supplier_type) }}
+          </span>
+          <span class="px-4 py-2 rounded-full text-sm font-bold border"
+                [ngClass]="getStatusColor(supplier()!.is_active)">
+            {{ getStatusLabel(supplier()!.is_active) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column - Main Information -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Basic Information -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-blue-50 to-purple-50 p-4 border-b border-blue-100">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'suppliers.supplierDetails.basicInfo' | translate }}
+            </h2>
+          </div>
+          <div class="p-6 grid grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.supplierName' | translate }}</label>
+              <p class="text-lg font-semibold text-gray-900">{{ supplier()!.name }}</p>
+            </div>
+            @if (supplier()!.name_ar) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.nameAr' | translate }}</label>
+                <p class="text-lg font-semibold text-gray-900">{{ supplier()!.name_ar }}</p>
+              </div>
+            }
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.supplierCode' | translate }}</label>
+              <p class="text-lg font-mono font-semibold text-blue-600">{{ supplier()!.supplier_code }}</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.type' | translate }}</label>
+              <p class="text-lg font-semibold">
+                <span class="px-3 py-1 rounded-full text-sm font-bold border"
+                      [ngClass]="getSupplierTypeColor(supplier()!.supplier_type)">
+                  {{ getSupplierTypeLabel(supplier()!.supplier_type) }}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax & Registration -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-green-50 to-blue-50 p-4 border-b border-green-100">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              {{ 'suppliers.supplierDetails.taxRegistration' | translate }}
+            </h2>
+          </div>
+          <div class="p-6 grid grid-cols-2 gap-6">
+            @if (supplier()!.vat_number) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.vatNumber' | translate }}</label>
+                <p class="text-lg font-mono font-semibold text-gray-900">{{ supplier()!.vat_number }}</p>
+              </div>
+            }
+            @if (supplier()!.cr_number) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.crNumber' | translate }}</label>
+                <p class="text-lg font-mono font-semibold text-gray-900">{{ supplier()!.cr_number }}</p>
+              </div>
+            }
+            @if (!supplier()!.vat_number && !supplier()!.cr_number) {
+              <div class="col-span-2 text-center py-4">
+                <p class="text-gray-500">{{ 'suppliers.supplierDetails.noTaxData' | translate }}</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-purple-50 to-pink-50 p-4 border-b border-purple-100">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+              {{ 'suppliers.supplierDetails.contactInfo' | translate }}
+            </h2>
+          </div>
+          <div class="p-6 grid grid-cols-2 gap-6">
+            @if (supplier()!.contact_person) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.contactPerson' | translate }}</label>
+                <p class="text-lg font-semibold text-gray-900">{{ supplier()!.contact_person }}</p>
+              </div>
+            }
+            @if (supplier()!.phone) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.phone' | translate }}</label>
+                <p class="text-lg font-semibold text-gray-900" dir="ltr">{{ supplier()!.phone }}</p>
+              </div>
+            }
+            @if (supplier()!.email) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.email' | translate }}</label>
+                <p class="text-lg font-semibold text-gray-900" dir="ltr">{{ supplier()!.email }}</p>
+              </div>
+            }
+            @if (supplier()!.payment_terms) {
+              <div>
+                <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.paymentTerms' | translate }}</label>
+                <p class="text-lg font-semibold text-gray-900">{{ supplier()!.payment_terms }}</p>
+              </div>
+            }
+            @if (!supplier()!.contact_person && !supplier()!.phone && !supplier()!.email) {
+              <div class="col-span-2 text-center py-4">
+                <p class="text-gray-500">{{ 'suppliers.supplierDetails.noContactData' | translate }}</p>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Address & Notes -->
+        @if (supplier()!.address || supplier()!.notes) {
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 border-b border-orange-100">
+              <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                {{ 'suppliers.supplierDetails.addressNotes' | translate }}
+              </h2>
+            </div>
+            <div class="p-6 space-y-4">
+              @if (supplier()!.address) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.address' | translate }}</label>
+                  <p class="text-base text-gray-900">{{ supplier()!.address }}</p>
+                </div>
+              }
+              @if (supplier()!.notes) {
+                <div>
+                  <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.notes' | translate }}</label>
+                  <p class="text-base text-gray-900 whitespace-pre-line">{{ supplier()!.notes }}</p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right Column - Financial & System Info -->
+      <div class="space-y-6">
+        <!-- Financial Information -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-indigo-50 to-blue-50 p-4 border-b border-indigo-100">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              {{ 'suppliers.supplierDetails.financialInfo' | translate }}
+            </h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.supplierDetails.coaAccountCode' | translate }}</label>
+              <p class="text-2xl font-mono font-bold text-indigo-600">
+                {{ supplier()!.coa_account_code || ('suppliers.supplierDetails.notSpecified' | translate) }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                {{ supplier()!.coa_account_code === '21301' ? ('suppliers.supplierDetails.localPayable' | translate) : 
+                   supplier()!.coa_account_code === '21302' ? ('suppliers.supplierDetails.foreignPayable' | translate) : ('suppliers.supplierDetails.customAccount' | translate) }}
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.addSupplierModal.paymentTerms' | translate }}</label>
+              <p class="text-lg font-semibold text-gray-900">
+                {{ supplier()!.payment_terms || ('suppliers.supplierDetails.notSpecified' | translate) }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Information -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="bg-gradient-to-r from-gray-50 to-slate-50 p-4 border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              {{ 'suppliers.supplierDetails.systemInfo' | translate }}
+            </h2>
+          </div>
+          <div class="p-6 space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.createdAt' | translate }}</label>
+              <p class="text-base font-semibold text-gray-900">
+                {{ supplier()!.created_at | date:'yyyy-MM-dd HH:mm' }}
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.supplierDetails.lastUpdated' | translate }}</label>
+              <p class="text-base font-semibold text-gray-900">
+                {{ supplier()!.updated_at | date:'yyyy-MM-dd HH:mm' }}
+              </p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-500 mb-2">{{ 'suppliers.status' | translate }}</label>
+              <span class="inline-block px-4 py-2 rounded-full text-sm font-bold border"
+                    [ngClass]="getStatusColor(supplier()!.is_active)">
+                {{ getStatusLabel(supplier()!.is_active) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,124 @@
+<div class="space-y-6">
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error() && !loading()" class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+    <p class="text-red-700 font-medium">{{ error() }}</p>
+    <button (click)="goBack()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+      العودة
+    </button>
+  </div>
+
+  <!-- Employee Details -->
+  <ng-container *ngIf="!loading() && employee() as emp">
+
+    <!-- Back Button -->
+    <button (click)="goBack()" class="flex items-center gap-2 text-gray-600 hover:text-company-primary transition-colors font-medium">
+      <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      <span>العودة للإدارة</span>
+    </button>
+
+    <!-- Header -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+      <div class="bg-gradient-to-r from-company-primary to-company-primary/80 p-8 text-white">
+        <div class="flex items-start gap-6">
+          <div class="w-24 h-24 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-5xl font-bold shadow-lg">
+            {{ emp.first_name.charAt(0) }}{{ emp.last_name.charAt(0) }}
+          </div>
+
+          <div class="flex-1">
+            <h1 class="text-4xl font-bold mb-2">{{ emp.first_name }} {{ emp.last_name }}</h1>
+
+            <p *ngIf="emp.arabic_name" class="text-white/90 text-xl mb-2">
+              {{ emp.arabic_name }}
+            </p>
+
+            <div class="flex items-center gap-4 flex-wrap">
+              <span class="px-4 py-2 bg-white/20 rounded-lg text-sm font-semibold">
+                {{ emp.employee_number }}
+              </span>
+
+              <span *ngIf="emp.job_title" class="px-4 py-2 bg-white/20 rounded-lg text-sm font-semibold">
+                {{ emp.job_title }}
+              </span>
+
+              <span class="px-4 py-2 rounded-lg text-sm font-semibold"
+                    [ngClass]="getStatusColor(emp.status)">
+                {{ getStatusText(emp.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Info -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+      <div class="p-6 border-b bg-gray-50">
+        <h2 class="text-2xl font-bold">المعلومات الشخصية</h2>
+      </div>
+
+      <div class="p-6 grid grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm text-gray-500">الاسم الأول</p>
+          <p class="text-lg font-semibold">{{ emp.first_name }}</p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500">اسم العائلة</p>
+          <p class="text-lg font-semibold">{{ emp.last_name }}</p>
+        </div>
+
+        <div *ngIf="emp.arabic_name">
+          <p class="text-sm text-gray-500">الاسم بالعربية</p>
+          <p class="text-lg font-semibold">{{ emp.arabic_name }}</p>
+        </div>
+
+        <div *ngIf="emp.nationality">
+          <p class="text-sm text-gray-500">الجنسية</p>
+          <p class="text-lg font-semibold">{{ emp.nationality }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Salary -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100">
+      <div class="p-6 border-b bg-gray-50">
+        <h2 class="text-2xl font-bold">الراتب</h2>
+      </div>
+
+      <div class="p-6 grid grid-cols-2 gap-6">
+        <div>
+          <p class="text-sm text-gray-500">الراتب الأساسي</p>
+          <p class="text-xl font-bold text-company-primary">
+            {{ emp.basic_salary | number:'1.2-2' }} {{ emp.currency }}
+          </p>
+        </div>
+
+        <div>
+          <p class="text-sm text-gray-500">بدل السكن</p>
+          <p class="text-lg font-semibold">
+            {{ emp.housing_allowance | number:'1.2-2' }} {{ emp.currency }}
+          </p>
+        </div>
+
+        <div class="col-span-2 bg-green-50 p-4 rounded-lg">
+          <p class="text-sm text-gray-600">الإجمالي</p>
+          <p class="text-2xl font-bold text-green-700">
+            {{
+              (emp.basic_salary + emp.housing_allowance + emp.transport_allowance + emp.other_allowances)
+              | number:'1.2-2'
+            }} {{ emp.currency }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

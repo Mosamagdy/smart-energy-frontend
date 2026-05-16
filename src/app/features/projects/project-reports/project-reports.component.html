@@ -1,0 +1,178 @@
+<div [dir]="translateService.currentLang === 'ar' ? 'rtl' : 'ltr'" class="space-y-6">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+      <p class="text-red-700 font-medium">{{ error() }}</p>
+      <button (click)="goBack()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+        {{ 'projectReports.backToProject' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && !error()) {
+    <!-- Back Button & Header -->
+    <button 
+      (click)="goBack()"
+      class="flex items-center gap-2 text-gray-600 hover:text-company-primary transition-colors font-medium">
+      <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      <span>{{ 'projectReports.backToProject' | translate }}</span>
+    </button>
+
+    <!-- Page Header -->
+    <div class="bg-linear-to-r from-company-primary to-company-primary/80 p-8 rounded-2xl shadow-lg text-white">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-4xl font-bold mb-3">{{ 'projectReports.title' | translate }}</h1>
+          <p class="text-white/90 text-lg">{{ 'projectReports.subtitle' | translate }}</p>
+        </div>
+        <div class="text-6xl">📁</div>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mt-6 pt-6 border-t border-white/20">
+        <div class="text-center">
+          <p class="text-3xl font-bold">{{ documents().length }}</p>
+          <p class="text-sm text-white/80">{{ 'projectReports.categories.all' | translate }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-bold">{{ documents().filter(d => d.category === 'technical').length }}</p>
+          <p class="text-sm text-white/80">{{ 'projectReports.categories.technical' | translate }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-bold">{{ documents().filter(d => d.category === 'financial').length }}</p>
+          <p class="text-sm text-white/80">{{ 'projectReports.categories.financial' | translate }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-bold">{{ documents().filter(d => d.category === 'contract').length }}</p>
+          <p class="text-sm text-white/80">{{ 'projectReports.categories.contract' | translate }}</p>
+        </div>
+        <div class="text-center">
+          <p class="text-3xl font-bold">{{ documents().filter(d => d.category === 'delivery').length }}</p>
+          <p class="text-sm text-white/80">{{ 'projectReports.categories.delivery' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+      <div class="flex flex-wrap gap-3">
+        @for (cat of categories; track cat.value) {
+          <button 
+            (click)="filterByCategory(cat.value)"
+            [ngClass]="selectedCategory() === cat.value ? 'bg-company-primary text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+            class="px-6 py-3 rounded-xl font-semibold transition flex items-center gap-2">
+            <span class="text-xl">{{ cat.icon }}</span>
+            <span>{{ cat.label }}</span>
+            @if (cat.value !== 'all') {
+              <span class="px-2 py-0.5 bg-white/20 rounded-lg text-sm">
+                {{ documents().filter(d => d.category === cat.value).length }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Documents Grid -->
+    @if (filteredDocuments().length === 0) {
+      <div class="text-center py-20 bg-white rounded-2xl shadow-lg border-2 border-dashed border-gray-300">
+        <div class="text-8xl mb-4">📭</div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ 'projectReports.noDocuments' | translate }}</h3>
+        <p class="text-gray-600">{{ 'projectReports.noDocumentsInCategory' | translate }}</p>
+      </div>
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (doc of filteredDocuments(); track doc.id) {
+          <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 hover:border-company-primary/30 hover:shadow-xl transition-all duration-300 overflow-hidden group">
+            <!-- File Header -->
+            <div class="p-6 border-b border-gray-100 bg-linear-to-r from-gray-50 to-white">
+              <div class="flex items-start justify-between mb-4">
+                <!-- File Icon -->
+                <div class="text-5xl">
+                  {{ getFileIcon(doc.file_type) }}
+                </div>
+                
+                <!-- Category Badge -->
+                <span class="px-3 py-1 rounded-full text-xs font-bold border"
+                      [ngClass]="getCategoryColor(doc.category)">
+                  {{ doc.category_label }}
+                </span>
+              </div>
+
+              <!-- File Name -->
+              <h3 class="text-lg font-bold text-gray-900 mb-2 line-clamp-2" title="{{ doc.file_name }}">
+                {{ doc.file_name }}
+              </h3>
+
+              <!-- Description -->
+              @if (doc.description) {
+                <p class="text-sm text-gray-600 line-clamp-1">{{ doc.description }}</p>
+              }
+            </div>
+
+            <!-- File Info -->
+            <div class="p-4 space-y-3 bg-gray-50">
+              <!-- Upload Date -->
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+                <span>{{ doc.upload_date | date:'yyyy-MM-dd HH:mm' }}</span>
+              </div>
+
+              <!-- Uploader -->
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span>{{ doc.uploader_name }}</span>
+              </div>
+
+              <!-- File Type -->
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                </svg>
+                <span class="uppercase">{{ doc.file_type }}</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="p-4 border-t border-gray-200 bg-white flex gap-2 group-hover:bg-gray-50 transition">
+              <!-- View Button -->
+              <button 
+                (click)="viewDocument(doc)"
+                class="flex-1 py-2 px-4 bg-company-primary text-white rounded-lg hover:bg-company-primary/90 transition font-semibold text-sm flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+                {{ 'projectReports.view' | translate }}
+              </button>
+
+              <!-- Download Button -->
+              <button 
+                (click)="downloadDocument(doc)"
+                class="flex-1 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-sm flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                </svg>
+                {{ 'projectReports.download' | translate }}
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

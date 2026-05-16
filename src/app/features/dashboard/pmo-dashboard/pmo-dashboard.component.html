@@ -1,0 +1,227 @@
+<div class="space-y-6">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">{{ 'pmo.title' | translate }}</h1>
+        <p class="text-gray-600 mt-1">{{ 'pmo.subtitle' | translate }}</p>
+      </div>
+      <button 
+        (click)="loadDashboard()"
+        class="px-4 py-2 bg-company-primary text-white rounded-lg hover:bg-company-primary/90 transition">
+        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        {{ 'pmo.refresh' | translate }}
+      </button>
+    </div>
+
+    <!-- 4 Main Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Card 1: Total Active Projects -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.totalActiveProjects' | translate }}</p>
+            <p class="text-4xl font-bold text-gray-900 mt-2">{{ stats().total_active_projects }}</p>
+          </div>
+          <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Delayed Tasks -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.delayedTasks' | translate }}</p>
+            <p class="text-4xl font-bold text-red-600 mt-2">{{ stats().delayed_tasks }}</p>
+          </div>
+          <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Resource Utilization -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.resourceUtilization' | translate }}</p>
+            <p class="text-4xl font-bold mt-2" [ngClass]="utilizationColor()">
+              {{ stats().resource_utilization }}%
+            </p>
+          </div>
+          <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Awaiting PM Assignment -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.awaitingPMAssignment' | translate }}</p>
+            <p class="text-4xl font-bold text-yellow-600 mt-2">{{ stats().awaiting_pm_assignment }}</p>
+          </div>
+          <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left Column: Project Progress Chart (2/3 width) -->
+      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">{{ 'pmo.projectProgress.title' | translate }}</h2>
+        
+        @if (projectProgress().length > 0) {
+          <div class="space-y-4">
+            @for (project of projectProgress(); track project.id) {
+              <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                <div class="flex items-center justify-between mb-2">
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900">{{ project.name }}</h3>
+                    <p class="text-sm text-gray-600">{{ project.department_name }}</p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                        [ngClass]="getStatusBadgeClass(project.status)">
+                    {{ getStatusText(project.status) }}
+                  </span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="mt-3">
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="text-sm text-gray-600">{{ 'pmo.projectProgress.progress' | translate }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ project.progress }}%</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="h-3 rounded-full transition-all duration-500"
+                         [ngClass]="getProgressColor(project.progress)"
+                         [style.width.%]="project.progress">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-12 text-gray-500">
+            <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+            <p>{{ 'pmo.projectProgress.noProjects' | translate }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Right Column: Delayed Tasks (1/3 width) -->
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">{{ 'pmo.delayedTasks.title' | translate }}</h2>
+        
+        @if (delayedTasks().length > 0) {
+          <div class="space-y-3 max-h-96 overflow-y-auto">
+            @for (task of delayedTasks(); track task.id) {
+              <div class="border-l-4 border-red-500 bg-red-50 p-4 rounded-r-lg">
+                <h3 class="font-semibold text-gray-900 text-sm">{{ task.title }}</h3>
+                <p class="text-xs text-gray-600 mt-1">{{ task.project_name }}</p>
+                <div class="flex items-center justify-between mt-2">
+                  <span class="text-xs text-gray-500">{{ task.assigned_to_name || ('pmo.delayedTasks.unassigned' | translate) }}</span>
+                  <span class="text-xs font-bold text-red-600">{{ task.days_overdue }} {{ 'pmo.delayedTasks.daysOverdue' | translate }}</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">{{ 'pmo.delayedTasks.dueDate' | translate }}: {{ formatDate(task.due_date) }}</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center py-12 text-green-600">
+            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="font-semibold">{{ 'pmo.delayedTasks.noDelayedTasks' | translate }}</p>
+            <p class="text-sm text-gray-600 mt-1">{{ 'pmo.delayedTasks.excellentWork' | translate }}</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Projects Table -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-200">
+        <h2 class="text-xl font-bold text-gray-900">{{ 'pmo.recentProjects.title' | translate }}</h2>
+      </div>
+      
+      @if (recentProjects().length > 0) {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.project' | translate }}</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.department' | translate }}</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.status' | translate }}</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.budget' | translate }}</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.createdAt' | translate }}</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.actions' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (project of recentProjects(); track project.id) {
+                <tr class="hover:bg-gray-50 transition">
+                  <td class="px-6 py-4">
+                    <div class="font-semibold text-gray-900">{{ project.name }}</div>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">{{ project.department_name || '-' }}</td>
+                  <td class="px-6 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold"
+                          [ngClass]="getStatusBadgeClass(project.status)">
+                      {{ getStatusText(project.status) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                    {{ project.budget ? (project.budget | number:'1.0-0') + ' ' + ('pmo.budgetAmount' | translate) : '-' }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(project.created_at) }}</td>
+                  <td class="px-6 py-4">
+                    <button 
+                      (click)="viewProjectDetails(project.id)"
+                      class="px-4 py-2 bg-company-primary text-white rounded-lg hover:bg-company-primary/90 transition text-sm font-semibold flex items-center gap-2">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                      <span>{{ 'projects.viewDetails' | translate }}</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <div class="text-center py-12 text-gray-500">
+          <p>{{ 'pmo.recentProjects.noRecentProjects' | translate }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

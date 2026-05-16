@@ -1,0 +1,101 @@
+<div class="p-6" dir="rtl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">الصيانة</h1>
+    <p class="text-gray-600 mt-2">إدارة الأصول وزيارات الصيانة والعقود</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+    </div>
+  }
+
+  @if (!loading()) {
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="border-b">
+        <nav class="flex gap-4 p-4">
+          <button (click)="activeTab.set('assets')" class="px-6 py-2 rounded-lg font-medium transition-colors"
+            [class]="activeTab() === 'assets' ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+            الأصول ({{ assets().length }})
+          </button>
+          <button (click)="activeTab.set('visits')" class="px-6 py-2 rounded-lg font-medium transition-colors"
+            [class]="activeTab() === 'visits' ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+            الزيارات ({{ visits().length }})
+          </button>
+          <button (click)="activeTab.set('contracts')" class="px-6 py-2 rounded-lg font-medium transition-colors"
+            [class]="activeTab() === 'contracts' ? 'bg-purple-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+            العقود ({{ contracts().length }})
+          </button>
+        </nav>
+      </div>
+
+      <div class="p-6">
+        @if (activeTab() === 'assets') {
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (asset of assets(); track asset.id) {
+              <div class="border rounded-lg p-4">
+                <h3 class="font-bold text-lg mb-2">{{ asset.asset_name }}</h3>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-medium mb-3 {{ getStatusClass(asset.status) }}">
+                  {{ getStatusText(asset.status) }}
+                </span>
+                <div class="text-sm text-gray-600 space-y-1">
+                  <p>النوع: {{ asset.asset_type }}</p>
+                  <p>الموقع: {{ asset.location }}</p>
+                  <p>تاريخ التركيب: {{ formatDate(asset.installation_date) }}</p>
+                  @if (asset.warranty_until) {
+                    <p>الضمان حتى: {{ formatDate(asset.warranty_until) }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (activeTab() === 'visits') {
+          <div class="space-y-4">
+            @for (visit of visits(); track visit.id) {
+              <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <h3 class="font-bold">{{ visit.asset_name }}</h3>
+                  <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusClass(visit.status) }}">
+                    {{ getStatusText(visit.status) }}
+                  </span>
+                </div>
+                <div class="text-sm text-gray-600">
+                  <p>التاريخ: {{ formatDate(visit.visit_date) }}</p>
+                  <p>الفني: {{ visit.technician_name }}</p>
+                  @if (visit.notes) {
+                    <p class="mt-2">{{ visit.notes }}</p>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (activeTab() === 'contracts') {
+          <div class="space-y-4">
+            @for (contract of contracts(); track contract.id) {
+              <div class="border rounded-lg p-4">
+                <div class="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 class="font-bold">عقد #{{ contract.contract_number }}</h3>
+                    <p class="text-sm text-gray-500">{{ contract.asset_name }}</p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusClass(contract.status) }}">
+                    {{ getStatusText(contract.status) }}
+                  </span>
+                </div>
+                <div class="grid grid-cols-3 gap-3 text-sm mt-3">
+                  <div><p class="text-gray-500">البداية</p><p class="font-semibold">{{ formatDate(contract.start_date) }}</p></div>
+                  <div><p class="text-gray-500">النهاية</p><p class="font-semibold">{{ formatDate(contract.end_date) }}</p></div>
+                  <div><p class="text-gray-500">القيمة</p><p class="font-semibold">{{ contract.value | currency:'EGP':'symbol':'1.0-0' }}</p></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

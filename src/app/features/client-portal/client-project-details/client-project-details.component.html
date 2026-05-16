@@ -1,0 +1,137 @@
+<div class="p-6" dir="rtl">
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  @if (!loading() && project()) {
+    <!-- Header -->
+    <div class="mb-6">
+      <button (click)="router.navigate(['/client/projects'])" class="mb-4 text-blue-600 hover:text-blue-700">
+        ← العودة للمشاريع
+      </button>
+      <div class="flex justify-between items-start">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">{{ project()!.name }}</h1>
+          <p class="text-gray-600 mt-2">{{ project()!.description }}</p>
+        </div>
+        <span class="px-4 py-2 rounded-full text-sm font-medium {{ getStatusBadgeClass(project()!.status) }}">
+          {{ getStatusText(project()!.status) }}
+        </span>
+      </div>
+
+      <!-- Progress -->
+      <div class="mt-6 bg-white rounded-xl shadow-md p-4">
+        <div class="flex justify-between text-sm mb-2">
+          <span class="font-semibold">نسبة الإنجاز الكلية</span>
+          <span class="text-blue-600 font-bold">{{ getProgress() }}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-3">
+          <div class="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all" [style.width.%]="getProgress()"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+      <div class="border-b">
+        <nav class="flex gap-4 p-4">
+          <button
+            (click)="activeTab.set('tasks')"
+            class="px-6 py-2 rounded-lg font-medium transition-colors"
+            [class]="activeTab() === 'tasks' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+            المهام ({{ project()!.tasks.length || 0 }})
+          </button>
+          <button
+            (click)="activeTab.set('messages')"
+            class="px-6 py-2 rounded-lg font-medium transition-colors"
+            [class]="activeTab() === 'messages' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'">
+            الرسائل والدعم
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tasks Tab -->
+      @if (activeTab() === 'tasks') {
+        <div class="p-6">
+          @if (project()!.tasks && project()!.tasks.length > 0) {
+            <div class="space-y-4">
+              @for (task of project()!.tasks; track task.id) {
+                <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-semibold text-lg">{{ task.title }}</h3>
+                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ getTaskStatusClass(task.status) }}">
+                      {{ getTaskStatusText(task.status) }}
+                    </span>
+                  </div>
+                  @if (task.description) {
+                    <p class="text-sm text-gray-600 mb-3">{{ task.description }}</p>
+                  }
+                  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs text-gray-500">
+                    <div>
+                      <span class="block">الأولوية:</span>
+                      <span class="font-medium">{{ task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة' }}</span>
+                    </div>
+                    <div>
+                      <span class="block">المسؤول:</span>
+                      <span class="font-medium">{{ task.assigned_to_name || 'غير محدد' }}</span>
+                    </div>
+                    <div>
+                      <span class="block">تاريخ البدء:</span>
+                      <span class="font-medium">{{ task.start_date | date:'yyyy/MM/dd' }}</span>
+                    </div>
+                    <div>
+                      <span class="block">الموعد النهائي:</span>
+                      <span class="font-medium">{{ task.due_date | date:'yyyy/MM/dd' }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="text-center py-12 text-gray-500">
+              <p>لا توجد مهام بعد</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Messages Tab -->
+      @if (activeTab() === 'messages') {
+        <div class="flex flex-col h-[600px]">
+          <!-- Messages List -->
+          <div id="messages-container" class="flex-1 overflow-y-auto p-4 space-y-4">
+            @for (msg of messages(); track msg.id) {
+              <div class="flex" [class.justify-end]="msg.sender_role === 'client'">
+                <div class="max-w-[70%] rounded-lg p-3" [class]="msg.sender_role === 'client' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-900'">
+                  <div class="text-xs mb-1 opacity-75">{{ msg.sender_name }}</div>
+                  <p class="text-sm">{{ msg.message }}</p>
+                  <div class="text-xs mt-1 opacity-75 text-left">{{ formatMessageDate(msg.created_at) }}</div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Message Input -->
+          <div class="border-t p-4 bg-gray-50">
+            <div class="flex gap-3">
+              <input
+                [(ngModel)]="newMessage"
+                (keyup.enter)="sendMessage()"
+                placeholder="اكتب رسالتك هنا..."
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                [disabled]="sendingMessage()">
+              <button
+                (click)="sendMessage()"
+                [disabled]="sendingMessage() || !newMessage.trim()"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50">
+                {{ sendingMessage() ? 'جاري الإرسال...' : 'إرسال' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

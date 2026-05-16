@@ -1,3 +1,36 @@
 /* You can add global styles to this file, and also import other style files */
 
 @import 'tailwindcss';
+
+@theme {
+  --color-company-primary: #0055aa;
+  --color-company-secondary: #f1c40f;
+  --color-company-accent: #e67e22;
+  --color-company-surface: #ffffff;
+  --color-company-text: #1a1a1a;
+  
+  --font-family-brand: 'Cairo', sans-serif;
+}
+
+/* Global Font Size - Professional Dashboard Standard */
+html {
+  font-size: 14px;
+}
+
+/* Global Styles */
+* {
+  font-family: 'Cairo', sans-serif;
+}
+
+body {
+  @apply bg-gray-50 text-company-text;
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}

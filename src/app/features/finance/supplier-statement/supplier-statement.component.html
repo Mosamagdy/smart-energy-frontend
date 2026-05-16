@@ -1,0 +1,135 @@
+<div class="statement-container" *ngIf="!isLoading(); else loadingTemplate">
+  <!-- Header Actions -->
+  <div class="header-actions">
+    <button class="btn-export" (click)="exportToPDF()">
+      <i class="fas fa-file-pdf"></i>
+      {{ 'supplierStatement.exportPDF' | translate }}
+    </button>
+  </div>
+
+  <!-- Supplier Info Header -->
+  <div class="supplier-header" *ngIf="supplier()">
+    <h1>{{ 'supplierStatement.title' | translate }}</h1>
+    <div class="supplier-info">
+      <h2>{{ supplier().name }}</h2>
+      <div class="info-details">
+        <span *ngIf="supplier().phone"><i class="fas fa-phone"></i> {{ supplier().phone }}</span>
+        <span *ngIf="supplier().email"><i class="fas fa-envelope"></i> {{ supplier().email }}</span>
+        <span *ngIf="supplier().vat_number"><i class="fas fa-id-card"></i> {{ 'supplierStatement.vat' | translate }}: {{ supplier().vat_number }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="filter-section">
+    <div class="filter-group">
+      <label>{{ 'supplierStatement.fromDate' | translate }}</label>
+      <input type="date" [value]="startDate()" (change)="startDate.set($event.target.value)" class="date-input">
+    </div>
+    <div class="filter-group">
+      <label>{{ 'supplierStatement.toDate' | translate }}</label>
+      <input type="date" [value]="endDate()" (change)="endDate.set($event.target.value)" class="date-input">
+    </div>
+    <button class="btn-filter" (click)="applyFilters()">
+      <i class="fas fa-filter"></i>
+      {{ 'supplierStatement.applyFilter' | translate }}
+    </button>
+    <button class="btn-clear" (click)="clearFilters()">
+      <i class="fas fa-times"></i>
+      {{ 'supplierStatement.clear' | translate }}
+    </button>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards" *ngIf="summary()">
+    <div class="card card-purchases">
+      <div class="card-icon">
+        <i class="fas fa-file-invoice"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ 'supplierStatement.totalPurchases' | translate }}</h3>
+        <p class="amount">{{ formatCurrency(summary().total_invoices_amount) }}</p>
+        <span class="count">{{ summary().total_invoices }} {{ 'supplierStatement.invoices' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="card card-paid">
+      <div class="card-icon">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ 'supplierStatement.totalPaid' | translate }}</h3>
+        <p class="amount">{{ formatCurrency(summary().total_paid_amount) }}</p>
+        <span class="count">{{ summary().total_payments }} {{ 'supplierStatement.payments' | translate }}</span>
+      </div>
+    </div>
+
+    <div class="card card-balance" [class.balance-positive]="summary().balance_due > 0" [class.balance-zero]="summary().balance_due === 0">
+      <div class="card-icon">
+        <i class="fas fa-balance-scale"></i>
+      </div>
+      <div class="card-content">
+        <h3>{{ 'supplierStatement.balanceDue' | translate }}</h3>
+        <p class="amount">{{ formatCurrency(summary().balance_due) }}</p>
+        <span class="status" *ngIf="summary().balance_due > 0">{{ 'supplierStatement.debit' | translate }}</span>
+        <span class="status status-paid" *ngIf="summary().balance_due === 0">{{ 'supplierStatement.paidStatus' | translate }} ✓</span>
+        <span class="status status-credit" *ngIf="summary().balance_due < 0">{{ 'supplierStatement.creditStatus' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statement Table -->
+  <div class="statement-table-section">
+    <h2>{{ 'supplierStatement.transactionHistory' | translate }}</h2>
+    
+    <table class="statement-table">
+      <thead>
+        <tr>
+          <th>{{ 'supplierStatement.date' | translate }}</th>
+          <th>{{ 'supplierStatement.transactionType' | translate }}</th>
+          <th>{{ 'supplierStatement.referenceNumber' | translate }}</th>
+          <th>{{ 'supplierStatement.debit' | translate }} ({{ 'supplierStatement.invoice' | translate }})</th>
+          <th>{{ 'supplierStatement.credit' | translate }} ({{ 'supplierStatement.payment' | translate }})</th>
+          <th>{{ 'supplierStatement.runningBalance' | translate }}</th>
+          <th>{{ 'supplierStatement.description' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transactions()">
+          <td>{{ formatDate(tx.transaction_date) }}</td>
+          <td>
+            <span [class]="getTransactionTypeClass(tx.transaction_type)">
+              {{ getTransactionTypeLabel(tx.transaction_type) }}
+            </span>
+          </td>
+          <td class="reference">{{ tx.reference_number }}</td>
+          <td class="amount debit" *ngIf="tx.debit_amount > 0">
+            {{ formatCurrency(tx.debit_amount) }}
+          </td>
+          <td class="amount" *ngIf="tx.debit_amount === 0">-</td>
+          <td class="amount credit" *ngIf="tx.credit_amount > 0">
+            {{ formatCurrency(tx.credit_amount) }}
+          </td>
+          <td class="amount" *ngIf="tx.credit_amount === 0">-</td>
+          <td class="amount running-balance" [class.balance-positive]="tx.running_balance > 0" [class.balance-zero]="tx.running_balance === 0">
+            {{ formatCurrency(tx.running_balance) }}
+          </td>
+          <td class="description">{{ tx.description || '-' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="no-data" *ngIf="transactions().length === 0">
+      <i class="fas fa-inbox"></i>
+      <p>{{ 'supplierStatement.noTransactions' | translate }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- Loading Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <div class="spinner"></div>
+    <p>{{ 'supplierStatement.loading' | translate }}</p>
+  </div>
+</ng-template>

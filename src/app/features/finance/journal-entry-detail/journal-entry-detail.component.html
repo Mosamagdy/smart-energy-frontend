@@ -1,0 +1,127 @@
+<div class="container mx-auto p-6 max-w-6xl">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+    </div>
+  } @else if (journalEntry()) {
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">{{ 'journalEntry.detail.title' | translate }}</h1>
+        <p class="text-gray-600 mt-1 font-mono text-lg">{{ getEntryNumber() }}</p>
+      </div>
+      <button (click)="goBack()"
+              class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-colors">
+        <i class="fas fa-arrow-right ml-2"></i> {{ 'journalEntry.detail.back' | translate }}
+      </button>
+    </div>
+
+    <!-- Entry Info Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{{ 'journalEntry.detail.entryInfo' | translate }}</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'journalEntry.detail.entryNumber' | translate }}</span>
+          <p class="font-bold text-lg text-blue-600 font-mono">{{ getEntryNumber() }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'journalEntry.detail.entryDate' | translate }}</span>
+          <p class="font-bold text-lg text-gray-800">{{ formatDate(getEntryDate()) }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'journalEntry.detail.type' | translate }}</span>
+          <p class="font-bold text-lg text-gray-800">{{ getTypeLabel(getEntryType()) }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'journalEntry.detail.status' | translate }}</span>
+          <p>
+            <span class="px-3 py-1 rounded-full text-sm font-bold {{ getStatusBadge(getEntryStatus()) }}">
+              {{ getStatusLabel(getEntryStatus()) }}
+            </span>
+          </p>
+        </div>
+      </div>
+      @if (hasDescription()) {
+        <div class="mt-6 pt-4 border-t">
+          <span class="text-gray-600 text-sm">{{ 'journalEntry.detail.description' | translate }}</span>
+          <p class="text-gray-800 mt-1">{{ getDescription() }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Lines Table -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{{ 'journalEntry.detail.lines' | translate }}</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'journalEntry.detail.accountCode' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'journalEntry.detail.accountName' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'journalEntry.detail.description' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'journalEntry.detail.debit' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'journalEntry.detail.credit' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (line of lines(); track line.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-mono font-bold text-blue-600">{{ line.account_code }}</td>
+                <td class="px-4 py-3 font-medium text-gray-800">{{ line.account_name_ar || line.account_name }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ line.description || '-' }}</td>
+                <td class="px-4 py-3 font-bold text-green-600">
+                  @if (line.debit_amount > 0) {
+                    {{ formatCurrency(line.debit_amount) }}
+                  } @else {
+                    -
+                  }
+                </td>
+                <td class="px-4 py-3 font-bold text-red-600">
+                  @if (line.credit_amount > 0) {
+                    {{ formatCurrency(line.credit_amount) }}
+                  } @else {
+                    -
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+          <tfoot class="bg-gray-50 border-t-2 border-gray-200">
+            <tr>
+              <td class="px-4 py-4 font-bold text-lg" colspan="3">{{ 'journalEntry.detail.total' | translate }}</td>
+              <td class="px-4 py-4 font-bold text-xl text-green-600">{{ formatCurrency(totalDebit()) }}</td>
+              <td class="px-4 py-4 font-bold text-xl text-red-600">{{ formatCurrency(totalCredit()) }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Reference Documents (if applicable) -->
+    @if (referenceDocuments().length > 0) {
+      <div class="bg-white rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{{ 'journalEntry.detail.referenceDocuments' | translate }}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          @for (doc of referenceDocuments(); track doc.id) {
+            <button (click)="viewReference(doc)"
+                    class="flex items-center gap-4 p-4 border-2 border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all text-right">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-bold text-gray-800">{{ doc.type_label || 'مستند' }}</p>
+                <p class="text-sm text-gray-600">{{ doc.number || doc.name || '' }}</p>
+              </div>
+              <i class="fas fa-arrow-left text-gray-400"></i>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="text-center py-20">
+      <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+      <p class="text-xl text-gray-700">{{ 'journalEntry.detail.entryNotFound' | translate }}</p>
+    </div>
+  }
+</div>

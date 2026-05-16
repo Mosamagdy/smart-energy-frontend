@@ -1,0 +1,103 @@
+<div class="p-6" dir="rtl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">التقييمات</h1>
+    <p class="text-gray-600 mt-2">تقييم المشاريع المكتملة</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-600"></div>
+    </div>
+  }
+
+  @if (!loading()) {
+    <!-- Projects to Rate -->
+    <div class="mb-8">
+      <h2 class="text-xl font-bold mb-4">المشاريع المتاحة للتقييم</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (project of projects(); track project.id) {
+          @if (project.status === 'completed') {
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <h3 class="font-bold text-lg mb-3">{{ project.name }}</h3>
+              <button (click)="openRatingModal(project)" class="w-full px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors">
+                تقييم المشروع
+              </button>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <!-- My Ratings -->
+    <div>
+      <h2 class="text-xl font-bold mb-4">تقييماتي السابقة</h2>
+      @if (ratings().length > 0) {
+        <div class="space-y-4">
+          @for (rating of ratings(); track rating.id) {
+            <div class="bg-white rounded-xl shadow-md p-6">
+              <div class="flex justify-between items-start mb-3">
+                <h3 class="font-bold">{{ rating.project_name }}</h3>
+                <span class="text-sm text-gray-500">{{ formatDate(rating.created_at) }}</span>
+              </div>
+              <div class="flex gap-1 mb-2">
+                @for (star of getStars(rating.rating); track $index) {
+                  <svg class="w-6 h-6 {{ star ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                }
+              </div>
+              @if (rating.comment) {
+                <p class="text-gray-600">{{ rating.comment }}</p>
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-12 bg-white rounded-xl shadow-md">
+          <p class="text-gray-500">لم تقم بتقديم أي تقييمات بعد</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Rating Modal -->
+  @if (showRatingModal()) {
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <h3 class="text-xl font-bold mb-4">تقييم: {{ selectedProject()?.name }}</h3>
+
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">التقييم</label>
+          <div class="flex gap-2 justify-center">
+            @for (star of [1,2,3,4,5]; track star) {
+              <button (click)="ratingValue = star" class="focus:outline-none">
+                <svg class="w-12 h-12 {{ star <= ratingValue ? 'text-yellow-400' : 'text-gray-300' }}" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                </svg>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-medium text-gray-700 mb-2">تعليق (اختياري)</label>
+          <textarea [(ngModel)]="ratingComment" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" placeholder="اكتب تعليقك هنا..."></textarea>
+        </div>
+
+        <div class="mb-6">
+          <label class="flex items-center gap-2">
+            <input type="checkbox" [(ngModel)]="isAnonymous" class="rounded">
+            <span class="text-sm text-gray-700">تقييم مجهول</span>
+          </label>
+        </div>
+
+        <div class="flex gap-3">
+          <button (click)="submitRating()" [disabled]="submitting()" class="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50">
+            {{ submitting() ? 'جاري الإرسال...' : 'إرسال التقييم' }}
+          </button>
+          <button (click)="showRatingModal.set(false)" class="flex-1 px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

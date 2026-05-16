@@ -1,0 +1,318 @@
+<div class="container mx-auto p-6 max-w-6xl">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-bold text-gray-800">إنشاء فاتورة شراء</h1>
+    <p class="text-gray-600 mt-1">إنشاء فاتورة شراء مع زيادة المخزون وقيد يومية تلقائي</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left: Form -->
+    <div class="lg:col-span-2">
+      <form (ngSubmit)="submitForm()" class="bg-white rounded-lg shadow-md p-6">
+        <!-- Supplier Selection -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            المورد <span class="text-red-500">*</span>
+          </label>
+          <select
+            [(ngModel)]="selectedSupplierId"
+            name="supplier"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            required>
+            <option value="">اختر مورد...</option>
+            @for (supplier of suppliers(); track supplier.id) {
+              <option [value]="supplier.id">
+                {{ supplier.name }} ({{ supplier.supplier_code }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              تاريخ الفاتورة
+            </label>
+            <input
+              type="date"
+              [(ngModel)]="invoiceDate"
+              name="invoiceDate"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              تاريخ الاستحقاق
+            </label>
+            <input
+              type="date"
+              [(ngModel)]="dueDate"
+              name="dueDate"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+          </div>
+        </div>
+
+        <!-- Line Items Table -->
+        <div class="mb-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-semibold text-blue-800">أصناف الفاتورة</h3>
+            <button
+              type="button"
+              (click)="addLineItem()"
+              class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2">
+              <i class="fas fa-plus"></i>
+              <span>إضافة صنف</span>
+            </button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+              <thead>
+                <tr class="bg-blue-50">
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">#</th>
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">الصنف</th>
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">المستودع</th>
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">الكمية</th>
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">سعر التكلفة</th>
+                  <th class="border border-blue-200 px-4 py-3 text-right text-sm font-semibold text-blue-800">الإجمالي</th>
+                  <th class="border border-blue-200 px-4 py-3 text-center text-sm font-semibold text-blue-800">إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (item of lineItems(); track $index) {
+                  <tr class="hover:bg-gray-50">
+                    <td class="border border-gray-200 px-4 py-3 text-center">
+                      {{ $index + 1 }}
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                      <select
+                        [ngModel]="item.inventory_item_id"
+                        (ngModelChange)="updateLineItem($index, 'inventory_item_id', $event)"
+                        [ngModelOptions]="{standalone: true}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required>
+                        <option [value]="null">اختر الصنف</option>
+                        @for (invItem of inventoryItems(); track invItem.id) {
+                          <option [value]="invItem.id">
+                            {{ invItem.item_name_ar || invItem.item_name }} ({{ invItem.item_code }})
+                          </option>
+                        }
+                      </select>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                      <select
+                        [ngModel]="item.warehouse_id"
+                        (ngModelChange)="updateLineItem($index, 'warehouse_id', $event)"
+                        [ngModelOptions]="{standalone: true}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        required>
+                        <option [value]="null">اختر المستودع</option>
+                        @for (warehouse of warehouses(); track warehouse.id) {
+                          <option [value]="warehouse.id">
+                            {{ warehouse.warehouse_name_ar || warehouse.warehouse_name }}
+                          </option>
+                        }
+                      </select>
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                      <input
+                        type="number"
+                        [ngModel]="item.quantity"
+                        (ngModelChange)="updateLineItem($index, 'quantity', $event)"
+                        [ngModelOptions]="{standalone: true}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        min="1"
+                        step="1"
+                        required />
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                      <input
+                        type="number"
+                        [ngModel]="item.unit_cost"
+                        (ngModelChange)="updateLineItem($index, 'unit_cost', $event)"
+                        [ngModelOptions]="{standalone: true}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        step="0.01"
+                        placeholder="0.00"
+                        required />
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3">
+                      <input
+                        type="text"
+                        [value]="item.total_amount | number:'1.2-2'"
+                        disabled
+                        class="w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-gray-700 font-semibold" />
+                    </td>
+                    <td class="border border-gray-200 px-4 py-3 text-center">
+                      <button
+                        type="button"
+                        (click)="removeLineItem($index)"
+                        class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                        title="حذف">
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Line Items Summary -->
+          <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-sm text-gray-600">عدد الأصناف:</span>
+              <span class="text-sm font-semibold text-gray-700">{{ lineItems().length }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+              <span class="text-lg font-bold text-blue-800">المبلغ الفرعي:</span>
+              <span class="text-2xl font-bold text-blue-800">{{ subtotal() | number:'1.2-2' }} SAR</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tax Section -->
+        <div class="mb-6 p-4 bg-orange-50 rounded-lg">
+          <h3 class="font-semibold text-orange-800 mb-4">الضريبة</h3>
+          
+          <div class="space-y-4">
+            <div class="flex items-center gap-4">
+              <label class="text-sm font-semibold text-gray-700">تطبيق الضريبة:</label>
+              <input
+                type="checkbox"
+                [(ngModel)]="isTaxApplied"
+                name="isTaxApplied"
+                class="w-5 h-5" />
+            </div>
+
+            @if (isTaxApplied()) {
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    نسبة الضريبة (%)
+                  </label>
+                  <input
+                    type="number"
+                    [(ngModel)]="taxRate"
+                    name="taxRate"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    مبلغ الضريبة (SAR)
+                  </label>
+                  <input
+                    type="text"
+                    [value]="taxAmount() | number:'1.2-2'"
+                    disabled
+                    class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-lg text-gray-600" />
+                </div>
+              </div>
+            }
+
+            <div class="pt-4 border-t border-blue-200">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-sm text-gray-600">المبلغ الفرعي:</span>
+                <span class="text-sm font-semibold text-gray-700">{{ subtotal() | number:'1.2-2' }} SAR</span>
+              </div>
+              @if (isTaxApplied()) {
+                <div class="flex justify-between items-center mb-2 text-orange-600">
+                  <span class="text-sm font-semibold">الضريبة ({{ taxRate() }}%):</span>
+                  <span class="text-sm font-bold">{{ taxAmount() | number:'1.2-2' }} SAR</span>
+                </div>
+              }
+              <div class="flex justify-between items-center pt-2 border-t border-blue-200">
+                <span class="text-lg font-bold text-blue-800">الإجمالي:</span>
+                <span class="text-2xl font-bold text-blue-800">{{ totalAmount() | number:'1.2-2' }} SAR</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            ملاحظات
+          </label>
+          <textarea
+            [(ngModel)]="notes"
+            name="notes"
+            rows="2"
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            placeholder="ملاحظات إضافية..."></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          [disabled]="submitting()"
+          class="w-full px-6 py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white rounded-lg font-semibold text-lg transition-colors flex items-center justify-center gap-3">
+          @if (submitting()) {
+            <i class="fas fa-spinner fa-spin"></i>
+            <span>جاري الإنشاء...</span>
+          } @else {
+            <i class="fas fa-file-invoice"></i>
+            <span>إنشاء فاتورة الشراء</span>
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Right: Summary -->
+    <div class="lg:col-span-1">
+      <div class="bg-white rounded-lg shadow-md p-6 sticky top-6">
+        <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <i class="fas fa-info-circle text-blue-600"></i>
+          ملخص الفاتورة
+        </h3>
+
+        <div class="space-y-3">
+          <div class="p-3 bg-gray-50 rounded">
+            <p class="text-xs text-gray-600">المورد</p>
+            <p class="text-sm font-semibold text-gray-800 mt-1">
+              @if (selectedSupplierId()) {
+                {{ suppliers().find(s => s.id === selectedSupplierId())?.name || 'غير محدد' }}
+              } @else {
+                غير محدد
+              }
+            </p>
+          </div>
+
+          <div class="p-3 bg-gray-50 rounded">
+            <p class="text-xs text-gray-600">عدد الأصناف</p>
+            <p class="text-sm font-semibold text-gray-800 mt-1">{{ lineItems().length }}</p>
+          </div>
+
+          <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded">
+            <p class="text-xs text-red-600">المبلغ الفرعي</p>
+            <p class="text-lg font-bold text-red-600 mt-1">{{ subtotal() | number:'1.2-2' }} SAR</p>
+          </div>
+
+          @if (isTaxApplied()) {
+            <div class="p-3 bg-orange-50 border-l-4 border-orange-500 rounded">
+              <p class="text-xs text-orange-600">الضريبة ({{ taxRate() }}%)</p>
+              <p class="text-lg font-bold text-orange-600 mt-1">{{ taxAmount() | number:'1.2-2' }} SAR</p>
+            </div>
+          }
+
+          <div class="p-3 bg-green-50 border-l-4 border-green-500 rounded">
+            <p class="text-xs text-green-600">الإجمالي</p>
+            <p class="text-xl font-bold text-green-600 mt-1">{{ totalAmount() | number:'1.2-2' }} SAR</p>
+          </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+          <p class="text-xs text-yellow-800">
+            <i class="fas fa-info-circle mr-1"></i>
+            عند الاعتماد، سيتم زيادة المخزون وإنشاء قيد يومية تلقائي
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

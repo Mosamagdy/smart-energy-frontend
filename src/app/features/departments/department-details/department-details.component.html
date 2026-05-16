@@ -1,0 +1,568 @@
+<div class="space-y-6">
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error() && !loading()) {
+    <div class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm">
+      <p class="text-red-700 font-medium">{{ error() }}</p>
+      <button (click)="goBack()" class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+        {{ 'departments.backToList' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!loading() && department()) {
+    <!-- Back Button -->
+    <button 
+      (click)="goBack()"
+      class="flex items-center gap-2 text-gray-600 hover:text-company-primary transition-colors font-medium">
+      <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      <span>{{ 'departments.backToList' | translate }}</span>
+    </button>
+
+    <!-- Department Header Card -->
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+      <!-- Gradient Header -->
+      <div class="bg-linear-to-r from-company-primary to-company-primary/80 p-8 text-white">
+        <div class="flex items-start justify-between">
+          <div class="flex items-start gap-6 flex-1">
+            <!-- Icon -->
+            <div class="w-24 h-24 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-6xl shadow-lg">
+              {{ getDeptIcon() }}
+            </div>
+            
+            <!-- Department Info -->
+            <div class="flex-1">
+              <h1 class="text-4xl font-bold mb-2">{{ department()!.name }}</h1>
+              @if (department()!.description) {
+                <p class="text-white/90 text-lg">{{ department()!.description }}</p>
+              }
+              <div class="flex items-center gap-4 mt-4">
+                <span class="px-4 py-2 bg-white/20 rounded-lg text-sm font-semibold">
+                  {{ department()!.is_active ? ('departments.active' | translate) : ('departments.inactive' | translate) }}
+                </span>
+                <span class="text-white/80 text-sm">
+                  {{ 'departments.created' | translate }}: {{ department()!.created_at | date:'yyyy-MM-dd' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3">
+            <!-- Edit Button -->
+            <button 
+              (click)="openEditModal()"
+              class="px-4 py-2 bg-white/20 hover:bg-white/30 backdrop-blur rounded-lg transition flex items-center gap-2 font-semibold">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
+              <span>{{ 'departments.edit' | translate }}</span>
+            </button>
+            
+            <!-- Delete Button -->
+            <button 
+              (click)="openDeleteConfirm()"
+              class="px-4 py-2 bg-red-600/80 hover:bg-red-600 backdrop-blur rounded-lg transition flex items-center gap-2 font-semibold">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+              <span>{{ 'departments.delete' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Manager Info Section -->
+      @if (getHeadName()) {
+        <div class="p-6 bg-linear-to-r from-blue-50 to-blue-100/50 border-b border-blue-200">
+          <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-company-primary rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-md">
+              {{ getHeadName()!.charAt(0) }}
+            </div>
+            <div class="flex-1">
+              <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">{{ 'departments.departmentHead' | translate }}</p>
+              <h3 class="text-2xl font-bold text-gray-900">{{ getHeadName() }}</h3>
+              <p class="text-company-primary font-semibold">{{ getHeadRole() }}</p>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- No Manager - Show Assign Button -->
+        <div class="p-6 bg-linear-to-r from-yellow-50 to-orange-50 border-b border-yellow-200">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-lg font-bold text-gray-900 mb-1">{{ 'departments.noManagerWarning' | translate }}</p>
+              <p class="text-sm text-gray-600">{{ 'departments.noManagerDesc' | translate }}</p>
+            </div>
+            <button 
+              (click)="openAssignManagerModal()"
+              class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              <span>{{ 'departments.assignManager' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Employees Section -->
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+      <!-- Section Header -->
+      <div class="p-6 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+        <div>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'departments.employees' | translate }}</h2>
+          <p class="text-sm text-gray-600 mt-1">{{ employees().length }} {{ 'departments.employeeCountInDept' | translate }}</p>
+        </div>
+        <button 
+          (click)="openAddModal()"
+          class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+          </svg>
+          <span>{{ 'departments.addEmployee' | translate }}</span>
+        </button>
+      </div>
+
+      <!-- Employees List -->
+      @if (employees().length === 0) {
+        <div class="text-center py-16">
+          <div class="text-7xl mb-4">👥</div>
+          <h3 class="text-xl font-bold text-gray-900 mb-2">{{ 'departments.noEmployees' | translate }}</h3>
+          <p class="text-gray-600">{{ 'departments.noEmployeesDesc' | translate }}</p>
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-200">
+          @for (employee of employees(); track employee.id) {
+            <div 
+              (click)="goToEmployee(employee.id)"
+              class="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+              <div class="flex items-center gap-4">
+                <!-- Employee Avatar -->
+                <div class="w-14 h-14 bg-linear-to-r from-company-primary to-company-primary/70 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-md">
+                  {{ employee.first_name.charAt(0) }}{{ employee.last_name.charAt(0) }}
+                </div>
+                
+                <!-- Employee Info -->
+                <div class="flex-1">
+                  <h3 class="text-lg font-bold text-gray-900">{{ employee.first_name }} {{ employee.last_name }}</h3>
+                  @if (employee.job_title) {
+                    <p class="text-sm text-company-primary font-semibold">{{ employee.job_title }}</p>
+                  }
+                  <div class="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                    @if (employee.national_id) {
+                      <span>🆔 {{ employee.national_id }}</span>
+                    }
+                    <span>📅 {{ employee.contract_start_date | date:'yyyy-MM-dd' }}</span>
+                  </div>
+                </div>
+
+                <!-- Salary Badge -->
+                <div class="text-right">
+                  <p class="text-xs text-gray-500 mb-1">{{ 'departments.salary' | translate }}</p>
+                  <p class="text-lg font-bold text-gray-900">{{ employee.basic_salary | number:'1.0-0' }} {{ employee.currency }}</p>
+                </div>
+
+                <!-- Status Badge -->
+                <span class="px-3 py-1 text-xs font-semibold rounded-full"
+                      [ngClass]="employee.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                  {{ employee.status === 'active' ? ('departments.active' | translate) : employee.status }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Add Employee Modal -->
+@if (showAddModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeAddModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto modal-scroll" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="bg-linear-to-r from-company-primary to-company-primary/90 text-white p-6 rounded-t-2xl">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold">{{ 'departments.addEmployee' | translate }}</h2>
+          <button (click)="closeAddModal()" class="text-white hover:text-gray-200 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-6">
+        <!-- Required Fields -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.firstName' | translate }} *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formFullName" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.lastName' | translate }}</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formFullNameAr" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.jobTitle' | translate }}</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formJobTitle" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.hireDate' | translate }} *</label>
+            <input 
+              type="date" 
+              [(ngModel)]="formHireDate" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.basicSalary' | translate }} *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="formBasicSalary" 
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.nationalId' | translate }}</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formNationalId" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.nationality' | translate }}</label>
+            <input 
+              type="text" 
+              [(ngModel)]="formNationality" 
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.notes' | translate }}</label>
+          <textarea 
+            [(ngModel)]="formNotes" 
+            rows="3"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"></textarea>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button 
+          (click)="closeAddModal()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button 
+          (click)="submitEmployeeForm()"
+          class="flex-1 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200">
+          {{ 'common.create' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Assign Manager Modal -->
+@if (showAssignManagerModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeAssignManagerModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-gray-200 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-t-2xl">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold">{{ 'departments.assignManagerTitle' | translate }}</h2>
+          <button (click)="closeAssignManagerModal()" class="text-white/80 hover:text-white text-3xl transition">&times;</button>
+        </div>
+        <p class="text-white/90 mt-2">{{ 'departments.assignManagerDesc' | translate }}</p>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- Error Message -->
+        @if (managerFormError()) {
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p class="text-red-700 font-medium">{{ managerFormError() }}</p>
+          </div>
+        }
+
+        <!-- Name Fields -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.firstName' | translate }} *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="managerForm().first_name"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="أحمد">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.lastName' | translate }} *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="managerForm().last_name"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="محمد">
+          </div>
+        </div>
+
+        <!-- Email & Username -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.email' | translate }} *</label>
+            <input 
+              type="email" 
+              [(ngModel)]="managerForm().email"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="manager@example.com">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.username' | translate }} *</label>
+            <input 
+              type="text" 
+              [(ngModel)]="managerForm().username"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="ahmed.manager">
+          </div>
+        </div>
+
+        <!-- Password & Phone -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.password' | translate }} *</label>
+            <input 
+              type="password" 
+              [(ngModel)]="managerForm().password"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="••••••••">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.phone' | translate }}</label>
+            <input 
+              type="tel" 
+              [(ngModel)]="managerForm().phone"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="+966501234567">
+          </div>
+        </div>
+
+        <!-- Role Dropdown -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.managerRole' | translate }} *</label>
+          <select 
+            [(ngModel)]="managerForm().role_id"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition">
+            <option value="0">{{ 'departments.managerRole' | translate }}</option>
+            @for (role of roles(); track role.id) {
+              <option [value]="role.id">{{ role.name }} - {{ role.description }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button 
+          (click)="closeAssignManagerModal()"
+          [disabled]="managerFormLoading()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-50">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button 
+          (click)="submitAssignManager()"
+          [disabled]="managerFormLoading()"
+          class="flex-1 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (managerFormLoading()) {
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ 'departments.assigning' | translate }}
+          } @else {
+            {{ 'departments.assignManagerBtn' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Department Modal -->
+@if (showEditModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeEditModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-gray-200 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-t-2xl">
+        <div class="flex justify-between items-center">
+          <h2 class="text-2xl font-bold">{{ 'departments.editDepartmentTitle' | translate }}</h2>
+          <button (click)="closeEditModal()" class="text-white/80 hover:text-white text-3xl transition">&times;</button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- Error Message -->
+        @if (editFormError()) {
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p class="text-red-700 font-medium">{{ editFormError() }}</p>
+          </div>
+        }
+
+        <!-- Department Name -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.departmentName' | translate }} *</label>
+          <input 
+            type="text" 
+            [(ngModel)]="editFormName"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="مثال: قسم المبيعات">
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.description' | translate }}</label>
+          <textarea 
+            [(ngModel)]="editFormDescription"
+            rows="3"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="وصف مختصر للإدارة..."></textarea>
+        </div>
+
+        <!-- Icon -->
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.icon' | translate }} (Emoji)</label>
+          <input 
+            type="text" 
+            [(ngModel)]="editFormIcon"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+            placeholder="💼">
+          <p class="text-xs text-gray-500 mt-1">{{ 'departments.iconPlaceholder' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button 
+          (click)="closeEditModal()"
+          [disabled]="editFormLoading()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-50">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button 
+          (click)="submitEditDepartment()"
+          [disabled]="editFormLoading()"
+          class="flex-1 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (editFormLoading()) {
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ 'departments.saving' | translate }}
+          } @else {
+            {{ 'departments.saveChanges' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Dialog -->
+@if (showDeleteConfirm()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeDeleteConfirm()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="p-6 border-b border-red-200 bg-linear-to-r from-red-600 to-red-500 text-white rounded-t-2xl">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-2xl font-bold">{{ 'departments.deleteConfirmTitle' | translate }}</h2>
+            <p class="text-white/90 text-sm mt-1">{{ 'departments.deleteConfirmDesc' | translate }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 space-y-4">
+        <!-- Warning Message -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+          <p class="text-yellow-800 font-medium">{{ 'departments.deleteWarning' | translate }}</p>
+          <p class="text-yellow-700 text-sm mt-1">{{ 'departments.deleteWarningDesc' | translate }}</p>
+        </div>
+
+        <!-- Error Message (if department has employees) -->
+        @if (deleteError()) {
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p class="text-red-700 font-medium">{{ deleteError() }}</p>
+          </div>
+        }
+
+        <!-- Department Info -->
+        @if (department()) {
+          <div class="bg-gray-50 p-4 rounded-lg">
+            <p class="text-sm text-gray-600 mb-1">{{ 'departments.deleteDeptLabel' | translate }}</p>
+            <p class="font-bold text-gray-900">{{ department()!.name }}</p>
+            @if (department()!.description) {
+              <p class="text-sm text-gray-600 mt-1">{{ department()!.description }}</p>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button 
+          (click)="closeDeleteConfirm()"
+          [disabled]="deleteLoading()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition disabled:opacity-50">
+          {{ 'departments.cancel' | translate }}
+        </button>
+        <button 
+          (click)="confirmDelete()"
+          [disabled]="deleteLoading()"
+          class="flex-1 py-3 bg-linear-to-r from-red-600 to-red-500 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (deleteLoading()) {
+            <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            {{ 'departments.deleting' | translate }}
+          } @else {
+            {{ 'departments.yesDelete' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}

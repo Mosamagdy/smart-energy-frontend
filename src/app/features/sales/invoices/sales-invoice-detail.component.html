@@ -1,0 +1,289 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Header with Back Button -->
+  <div class="mb-6 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <button 
+        (click)="goBack()"
+        class="text-gray-600 hover:text-gray-900 transition-colors">
+        <i class="fas fa-arrow-right text-xl"></i>
+      </button>
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">
+          {{ 'invoiceDetail.title' | translate }}: {{ invoice()?.invoice_number }}
+        </h1>
+        <p class="text-sm text-gray-600 mt-1">{{ 'invoiceDetail.subtitle' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex gap-3">
+      <!-- Finalize Button (Only for Draft) -->
+      @if (invoice()?.status === 'draft') {
+        <button 
+          (click)="finalizeInvoice()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+          <i class="fas fa-check-circle"></i>
+          <span>اعتماد الفاتورة</span>
+        </button>
+      }
+      
+      @if (invoice()?.pdf_path) {
+        <button 
+          (click)="downloadPDF()"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+          <i class="fas fa-download"></i>
+          <span>{{ 'invoiceDetail.downloadPDF' | translate }}</span>
+        </button>
+      }
+      @if (invoice()?.journal_entry_number) {
+        <button 
+          (click)="viewJournalEntry()"
+          class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2">
+          <i class="fas fa-book"></i>
+          <span>{{ 'invoiceDetail.viewJournal' | translate }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="mt-4 text-gray-600">{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <p class="text-red-800">{{ error() }}</p>
+      <button 
+        (click)="goBack()"
+        class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+        {{ 'common.goBack' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Invoice Details -->
+  @if (!isLoading() && invoice()) {
+    <div class="space-y-6">
+      <!-- Invoice Header Card -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900">{{ invoice()!.invoice_number }}</h2>
+            <p class="text-sm text-gray-600 mt-1">{{ invoice()!.client_name }}</p>
+          </div>
+          <span class="px-3 py-1 text-sm font-semibold rounded-full {{ getStatusColor(invoice()!.status) }}">
+            {{ getStatusLabel(invoice()!.status) }}
+          </span>
+        </div>
+
+        @if (invoice()!.pdf_path) {
+          <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-file-pdf text-red-600 text-2xl"></i>
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-blue-900">{{ 'invoiceDetail.pdfGenerated' | translate }}</p>
+                <p class="text-xs text-blue-700">{{ invoice()!.pdf_path }}</p>
+              </div>
+              <button 
+                (click)="downloadPDF()"
+                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                {{ 'invoiceDetail.viewPDF' | translate }}
+              </button>
+            </div>
+          </div>
+        } @else {
+          <div class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+            <div class="flex items-center gap-3">
+              <i class="fas fa-exclamation-triangle text-gray-500 text-2xl"></i>
+              <div>
+                <p class="text-sm font-semibold text-gray-700">{{ 'invoiceDetail.noPdf' | translate }}</p>
+                <p class="text-xs text-gray-500">{{ 'invoiceDetail.pdfWillBeGenerated' | translate }}</p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Invoice Information Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Invoice Details -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-file-invoice text-blue-600"></i>
+            {{ 'invoiceDetail.invoiceInfo' | translate }}
+          </h3>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ 'invoiceDetail.invoiceNumber' | translate }}</span>
+              <span class="text-sm font-semibold text-gray-900">{{ invoice()!.invoice_number }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ 'invoiceDetail.invoiceDate' | translate }}</span>
+              <span class="text-sm text-gray-900">{{ formatDate(invoice()!.issue_date) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ 'invoiceDetail.dueDate' | translate }}</span>
+              <span class="text-sm text-gray-900">{{ formatDate(invoice()!.due_date) }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ 'invoiceDetail.status' | translate }}</span>
+              <span class="px-2 py-1 text-xs font-semibold rounded-full {{ getStatusColor(invoice()!.status) }}">
+                {{ getStatusLabel(invoice()!.status) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Client Information -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-user text-green-600"></i>
+            {{ 'invoiceDetail.clientInfo' | translate }}
+          </h3>
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-sm text-gray-600">{{ 'invoiceDetail.clientName' | translate }}</span>
+              <span class="text-sm font-semibold text-gray-900">{{ invoice()!.client_name }}</span>
+            </div>
+            @if (invoice()!.contact_email) {
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">{{ 'invoiceDetail.email' | translate }}</span>
+                <span class="text-sm text-gray-900">{{ invoice()!.contact_email }}</span>
+              </div>
+            }
+            @if (invoice()!.contact_phone) {
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">{{ 'invoiceDetail.phone' | translate }}</span>
+                <span class="text-sm text-gray-900">{{ invoice()!.contact_phone }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Project Information -->
+        <div class="bg-white rounded-lg shadow p-6">
+          <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <i class="fas fa-project-diagram text-purple-600"></i>
+            {{ 'invoiceDetail.projectInfo' | translate }}
+          </h3>
+          <div class="space-y-3">
+            @if (invoice()!.project_name) {
+              <div class="flex justify-between">
+                <span class="text-sm text-gray-600">{{ 'invoiceDetail.project' | translate }}</span>
+                <span class="text-sm text-gray-900">{{ invoice()!.project_name }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Notes -->
+        @if (invoice()!.notes) {
+          <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <i class="fas fa-sticky-note text-yellow-600"></i>
+              {{ 'invoiceDetail.notes' | translate }}
+            </h3>
+            <p class="text-sm text-gray-700">{{ invoice()!.notes }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Invoice Items Table -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="fas fa-list text-purple-600"></i>
+          أصناف الفاتورة
+        </h3>
+        
+        @if (invoice()!.items && invoice()!.items.length > 0) {
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">#</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الصنف</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">المستودع</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الكمية</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">سعر الوحدة</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">ضريبة القيمة المضافة (15%)</th>
+                  <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase">الإجمالي</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                @for (item of invoice()!.items; track item.id) {
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-4 py-3 text-sm text-gray-900">{{ $index + 1 }}</td>
+                    <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                      {{ item.item_name_ar || item.item_name }}
+                      @if (item.item_code) {
+                        <span class="text-xs text-gray-500 block">{{ item.item_code }}</span>
+                      }
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-600">
+                      {{ item.warehouse_name_ar || item.warehouse_name }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900 font-semibold">
+                      {{ item.quantity }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                      {{ formatCurrency(item.unit_price) }} {{ 'common.currency' | translate }}
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                      {{ formatCurrency(item.vat_amount) }} {{ 'common.currency' | translate }}
+                    </td>
+                    <td class="px-4 py-3 text-sm font-semibold text-gray-900">
+                      {{ formatCurrency(item.total_amount) }} {{ 'common.currency' | translate }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="text-center py-8 text-gray-500">
+            <i class="fas fa-box-open text-4xl mb-2"></i>
+            <p>لا توجد أصناف في هذه الفاتورة</p>
+          </div>
+        }
+      </div>
+
+      <!-- Financial Summary -->
+      <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <i class="fas fa-calculator text-red-600"></i>
+          {{ 'invoiceDetail.financialSummary' | translate }}
+        </h3>
+        
+        <div class="space-y-3">
+          <div class="flex justify-between py-2 border-b border-gray-200">
+            <span class="text-sm text-gray-600">{{ 'invoiceDetail.subtotal' | translate }}</span>
+            <span class="text-sm font-semibold text-gray-900">{{ formatCurrency(invoice()!.subtotal) }} {{ 'common.currency' | translate }}</span>
+          </div>
+          <div class="flex justify-between py-2 border-b border-gray-200">
+            <span class="text-sm text-gray-600">{{ 'invoiceDetail.vat' | translate }} ({{ invoice()!.vat_rate }}%)</span>
+            <span class="text-sm text-gray-900">{{ formatCurrency(invoice()!.vat_amount) }} {{ 'common.currency' | translate }}</span>
+          </div>
+          <div class="flex justify-between py-3 bg-blue-50 px-4 rounded-lg">
+            <span class="text-base font-bold text-blue-900">{{ 'invoiceDetail.total' | translate }}</span>
+            <span class="text-xl font-bold text-blue-900">{{ formatCurrency(invoice()!.total_amount) }} {{ 'common.currency' | translate }}</span>
+          </div>
+          <div class="flex justify-between py-2">
+            <span class="text-sm text-gray-600">{{ 'invoiceDetail.paid' | translate }}</span>
+            <span class="text-sm font-semibold text-green-600">{{ formatCurrency(invoice()!.paid_amount) }} {{ 'common.currency' | translate }}</span>
+          </div>
+          <div class="flex justify-between py-2">
+            <span class="text-sm text-gray-600">{{ 'invoiceDetail.balance' | translate }}</span>
+            <span class="text-sm font-bold text-red-600">
+            {{ formatCurrency(getBalance(invoice()!.total_amount, invoice()!.paid_amount)) }} {{ 'common.currency' | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

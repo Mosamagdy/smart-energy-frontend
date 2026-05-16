@@ -1,0 +1,100 @@
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">{{ 'paymentVouchers.list.title' | translate }}</h1>
+      <p class="text-gray-600 mt-1">{{ 'paymentVouchers.list.subtitle' | translate }}</p>
+    </div>
+    <button 
+      (click)="router.navigate(['/finance/payment-vouchers/create'])"
+      class="btn-primary px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
+      <i class="fas fa-plus ml-2"></i>
+      {{ 'paymentVouchers.list.create' | translate }}
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+    <div class="flex items-center gap-4">
+      <label class="font-semibold text-gray-700">{{ 'paymentVouchers.list.status' | translate }}:</label>
+      <select 
+        [(ngModel)]="selectedStatus"
+        (change)="applyFilters()"
+        class="form-select px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+        <option value="all">{{ 'paymentVouchers.list.all' | translate }}</option>
+        <option value="completed">{{ 'paymentVouchers.list.completed' | translate }}</option>
+        <option value="draft">{{ 'paymentVouchers.list.draft' | translate }}</option>
+        <option value="cancelled">{{ 'paymentVouchers.list.cancelled' | translate }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600"></div>
+    </div>
+  } @else {
+    <!-- Vouchers Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.voucherNumber' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.invoiceNumber' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.supplierName' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.amount' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.paymentMethodLabel' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.date' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.status' | translate }}</th>
+            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'paymentVouchers.list.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (voucher of filteredVouchers(); track voucher.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="font-mono font-bold text-blue-600">{{ voucher.voucher_number }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="font-mono text-gray-700">{{ voucher.invoice_number }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-gray-800 font-medium">{{ voucher.supplier_name }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="font-bold text-green-600">{{ formatCurrency(voucher.payment_amount) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-gray-700">{{ getMethodLabel(voucher.payment_method) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-gray-700">{{ formatDate(voucher.payment_date) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-3 py-1 rounded-full text-xs font-bold {{ getStatusBadge(voucher.status) }}">
+                  {{ getStatusLabel(voucher.status) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <button 
+                  (click)="viewVoucher(voucher.id)"
+                  class="text-blue-600 hover:text-blue-800 font-medium transition-colors">
+                  <i class="fas fa-eye ml-1"></i>
+                  {{ 'paymentVouchers.list.view' | translate }}
+                </button>
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                <i class="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
+                <p class="text-lg">{{ 'paymentVouchers.list.noVouchers' | translate }}</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

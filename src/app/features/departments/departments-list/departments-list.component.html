@@ -1,0 +1,368 @@
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div>
+      <h1 class="text-3xl font-bold text-company-primary">{{ 'departments.title' | translate }}</h1>
+      <p class="text-gray-600 mt-1">{{ 'departments.subtitle' | translate }}</p>
+    </div>
+    <button *ngIf="canManageDepts()" (click)="openAddModal()"
+      class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/80 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      {{ 'departments.addDepartment' | translate }}
+    </button>
+  </div>
+
+  <!-- Error Banner -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-xl flex items-center gap-3">
+      <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span class="font-medium">{{ error() }}</span>
+      <button class="mr-auto text-red-500 hover:text-red-700" (click)="error.set(null)">✕</button>
+    </div>
+  }
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="flex justify-center items-center py-20">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-company-primary"></div>
+  </div>
+
+  <!-- Cards Grid -->
+  @if (!loading()) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (dept of departments(); track dept.id) {
+        <div class="bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100 overflow-hidden group">
+
+          <!-- Card Header -->
+          <div class="bg-linear-to-r from-company-primary/10 to-company-primary/5 p-6 border-b border-gray-100">
+            <div class="flex items-start justify-between gap-3">
+
+              <!-- Icon -->
+              <div class="w-14 h-14 shrink-0 bg-white rounded-xl shadow-md flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300">
+                {{ getDeptIcon(dept) }}
+              </div>
+
+              <!-- Name + Toggle -->
+              <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-bold text-gray-900 mb-2 truncate">{{ dept.name }}</h3>
+
+                @if (canManageDepts()) {
+                  <!-- ── Compact Toggle ── -->
+                  <button
+                    type="button"
+                    (click)="requestToggle(dept)"
+                    [title]="dept.is_active ? ('departments.toggleDeactivateTitle' | translate) + ' ' + dept.name : ('departments.toggleActivateTitle' | translate) + ' ' + dept.name"
+                    class="group/toggle flex items-center gap-2 focus:outline-none">
+
+                    <!-- Track -->
+                    <span
+                      class="relative inline-flex items-center w-10 h-5 rounded-full transition-colors duration-300 shadow-inner shrink-0"
+                      [class.bg-emerald-500]="dept.is_active"
+                      [class.bg-gray-300]="!dept.is_active">
+
+                      <!-- Thumb -->
+                      <span
+                        class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform duration-300"
+                        [class.translate-x-5]="dept.is_active"
+                        [class.translate-x-0]="!dept.is_active">
+                      </span>
+                    </span>
+
+                    <!-- Label -->
+                    <span class="text-xs font-semibold select-none"
+                      [class.text-emerald-600]="dept.is_active"
+                      [class.text-gray-400]="!dept.is_active">
+                      {{ dept.is_active ? ('departments.active' | translate) : ('departments.inactive' | translate) }}
+                    </span>
+                  </button>
+
+                } @else {
+                  <span class="inline-block px-2.5 py-0.5 text-xs font-semibold rounded-full"
+                    [class.bg-emerald-100]="dept.is_active" [class.text-emerald-700]="dept.is_active"
+                    [class.bg-red-100]="!dept.is_active"    [class.text-red-700]="!dept.is_active">
+                    {{ dept.is_active ? ('departments.active' | translate) : ('departments.inactive' | translate) }}
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="p-6 space-y-4">
+            @if (dept.description) {
+              <p class="text-sm text-gray-600 line-clamp-2">{{ dept.description }}</p>
+            }
+
+            <!-- Department Head -->
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div class="flex items-center gap-2 mb-2">
+                <svg class="w-4 h-4 text-company-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide">{{ 'departments.departmentHead' | translate }}</span>
+              </div>
+              @if (getHeadName(dept)) {
+                <p class="font-semibold text-gray-900">{{ getHeadName(dept) }}</p>
+                <p class="text-sm text-company-primary font-medium">{{ getHeadRole(dept) }}</p>
+              } @else {
+                <p class="text-sm text-gray-500 italic">{{ 'departments.noHeadAssigned' | translate }}</p>
+              }
+            </div>
+
+            <div class="text-xs text-gray-400 pt-2 border-t border-gray-100">
+              {{ 'departments.created' | translate }}: {{ dept.created_at | date:'yyyy-MM-dd' }}
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="px-6 pb-6">
+            <button (click)="goToDepartment(dept.id)"
+              class="w-full py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2">
+              <span>{{ 'departments.goToDepartment' | translate }}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-full text-center py-20">
+          <div class="text-8xl mb-4">🏢</div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-2">{{ 'departments.noDepartments' | translate }}</h3>
+          <p class="text-gray-600 mb-6">{{ 'departments.noDepartmentsDesc' | translate }}</p>
+          @if (canManageDepts()) {
+            <button (click)="openAddModal()"
+              class="px-8 py-3 bg-company-primary text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-semibold">
+              {{ 'departments.addFirstDepartment' | translate }}
+            </button>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     Confirm Dialog
+     ══════════════════════════════════════════════════════════════════════════ -->
+@if (showConfirmDialog() && confirmDept()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);"
+    (click)="cancelToggle()">
+
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden" (click)="$event.stopPropagation()">
+
+      <!-- Top bar -->
+      <div class="h-1.5 w-full"
+        [class.bg-emerald-500]="!confirmDept()!.is_active"
+        [class.bg-red-500]="confirmDept()!.is_active">
+      </div>
+
+      <div class="p-7">
+        <!-- Icon -->
+        <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 text-4xl"
+          [class.bg-emerald-50]="!confirmDept()!.is_active"
+          [class.bg-red-50]="confirmDept()!.is_active">
+          {{ confirmDept()!.is_active ? '🔴' : '🟢' }}
+        </div>
+
+        <h2 class="text-2xl font-bold text-center text-gray-900 mb-2">
+          {{ confirmDept()!.is_active ? ('departments.toggleDeactivateTitle' | translate) : ('departments.toggleActivateTitle' | translate) }}
+        </h2>
+
+        <p class="text-center text-gray-600 mb-1">
+          {{ confirmDept()!.is_active ? ('departments.toggleConfirmDeactivate' | translate) : ('departments.toggleConfirmActivate' | translate) }}
+        </p>
+        <p class="text-center text-lg font-bold text-gray-900 mb-6">"{{ confirmDept()!.name }}"؟</p>
+
+        <!-- Note -->
+        <div class="rounded-xl px-4 py-3 mb-6 text-sm"
+          [class.bg-red-50]="confirmDept()!.is_active"     [class.text-red-700]="confirmDept()!.is_active"
+          [class.bg-emerald-50]="!confirmDept()!.is_active" [class.text-emerald-700]="!confirmDept()!.is_active">
+          @if (confirmDept()!.is_active) {
+            ⚠️ {{ 'departments.toggleDeactivateNote' | translate }}
+          } @else {
+            ✅ {{ 'departments.toggleActivateNote' | translate }}
+          }
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button (click)="cancelToggle()" [disabled]="confirmLoading()"
+            class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold hover:bg-gray-50 transition disabled:opacity-50">
+            {{ 'departments.toggleCancel' | translate }}
+          </button>
+          <button (click)="confirmToggle()" [disabled]="confirmLoading()"
+            class="flex-1 py-3 rounded-xl font-semibold text-white transition disabled:opacity-60 flex items-center justify-center gap-2"
+            [class.bg-emerald-600]="!confirmDept()!.is_active"
+            [class.bg-red-600]="confirmDept()!.is_active">
+            @if (confirmLoading()) {
+              <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+              </svg>
+              {{ 'departments.toggleUpdating' | translate }}
+            } @else {
+              {{ confirmDept()!.is_active ? ('departments.toggleConfirmNo' | translate) : ('departments.toggleConfirmYes' | translate) }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════════════════════════════════════════════════════════════════
+     Add Department Modal
+     ══════════════════════════════════════════════════════════════════════════ -->
+@if (showAddModal()) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" (click)="closeAddModal()">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" (click)="$event.stopPropagation()">
+
+      <div class="bg-linear-to-r from-company-primary to-company-primary/90 text-white p-6 rounded-t-2xl flex justify-between items-center">
+        <h2 class="text-2xl font-bold">{{ 'departments.addDepartment' | translate }}</h2>
+        <button (click)="closeAddModal()" class="text-white hover:text-gray-200 transition">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- Creation Mode -->
+        <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <label class="block text-sm font-semibold text-gray-700 mb-3">{{ 'departments.creationMode' | translate }}</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button"
+              [class]="creationMode() === 'simple' ? 'bg-company-primary text-white shadow-md' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-company-primary'"
+              (click)="creationMode.set('simple')"
+              class="py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-sm">
+              {{ 'departments.deptOnly' | translate }}
+            </button>
+            <button type="button"
+              [class]="creationMode() === 'with-manager' ? 'bg-company-primary text-white shadow-md' : 'bg-white text-gray-700 border-2 border-gray-300 hover:border-company-primary'"
+              (click)="creationMode.set('with-manager')"
+              class="py-3 px-4 rounded-lg font-semibold transition-all duration-200 text-sm">
+              {{ 'departments.deptWithManager' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.deptType' | translate }} *</label>
+            <div class="grid grid-cols-2 gap-3">
+              <button type="button" (click)="formDeptType.set('administrative')"
+                class="p-4 border-2 rounded-xl transition-all duration-200 flex items-center gap-3"
+                [class.border-company-primary]="formDeptType() === 'administrative'"
+                [class.border-gray-300]="formDeptType() !== 'administrative'">
+                <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center text-2xl">🏢</div>
+                <div class="text-right">
+                  <p class="font-semibold text-sm">{{ 'departments.administrative' | translate }}</p>
+                  <p class="text-xs text-gray-500">{{ 'departments.adminDesc' | translate }}</p>
+                </div>
+              </button>
+              <button type="button" (click)="formDeptType.set('technical')"
+                class="p-4 border-2 rounded-xl transition-all duration-200 flex items-center gap-3"
+                [class.border-company-primary]="formDeptType() === 'technical'"
+                [class.border-gray-300]="formDeptType() !== 'technical'">
+                <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-2xl">🔧</div>
+                <div class="text-right">
+                  <p class="font-semibold text-sm">{{ 'departments.technical' | translate }}</p>
+                  <p class="text-xs text-gray-500">{{ 'departments.techDesc' | translate }}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.departmentName' | translate }} *</label>
+            <input type="text" [(ngModel)]="formName"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="{{ 'departments.departmentNamePlaceholder' | translate }}">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.description' | translate }}</label>
+            <textarea [(ngModel)]="formDescription" rows="3"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary focus:ring-2 focus:ring-company-primary/20 transition"
+              placeholder="{{ 'departments.descriptionPlaceholder' | translate }}"></textarea>
+          </div>
+        </div>
+
+        @if (creationMode() === 'with-manager') {
+          <div class="space-y-4 border-t-2 border-gray-200 pt-6">
+            <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+              <svg class="w-5 h-5 text-company-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+              {{ 'departments.managerInfo' | translate }}
+            </h3>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.firstName' | translate }} *</label>
+                <input type="text" [(ngModel)]="formFirstName"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.lastName' | translate }} *</label>
+                <input type="text" [(ngModel)]="formLastName"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.email' | translate }} *</label>
+              <input type="email" [(ngModel)]="formEmail"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.username' | translate }} *</label>
+              <input type="text" [(ngModel)]="formUsername"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.password' | translate }} *</label>
+              <input type="password" [(ngModel)]="formPassword"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.phone' | translate }}</label>
+              <input type="tel" [(ngModel)]="formPhone"
+                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'departments.managerRole' | translate }}</label>
+              @if (rolesLoading()) {
+                <div class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 text-gray-500">{{ 'common.loading' | translate }}</div>
+              } @else {
+                <select [(ngModel)]="formRoleId"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-company-primary transition">
+                  <option [ngValue]="null">{{ 'departments.managerRole' | translate }}</option>
+                  @for (role of roles(); track role.id) {
+                    <option [ngValue]="role.id">{{ role.name }} - {{ role.description }}</option>
+                  }
+                </select>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl flex gap-3">
+        <button (click)="closeAddModal()"
+          class="flex-1 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition">
+          {{ 'common.cancel' | translate }}
+        </button>
+        <button (click)="submitForm()"
+          class="flex-1 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200">
+          {{ 'common.create' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

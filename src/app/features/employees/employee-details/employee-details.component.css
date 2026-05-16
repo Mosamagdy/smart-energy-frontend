@@ -1,0 +1,4 @@
+/* Employee Details Styles */
+button, input, textarea, select {
+  transition: all 0.2s ease-in-out;
+}

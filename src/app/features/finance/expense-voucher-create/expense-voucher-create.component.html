@@ -1,0 +1,150 @@
+<div class="expense-voucher-create">
+  <div class="header-bar">
+    <div>
+      <h1 class="page-title">{{ 'expenseVouchers.createNew' | translate }}</h1>
+      <p class="page-subtitle">{{ 'expenseVouchers.createSubtitle' | translate }}</p>
+    </div>
+    <a routerLink="/finance/expenses" class="btn-back">
+      <i class="fas fa-arrow-right"></i>
+      {{ 'common.back' | translate }}
+    </a>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+    <!-- Basic Information -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'expenseVouchers.basicInfo' | translate }}</h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">{{ 'expenseVouchers.date' | translate }} *</label>
+          <input 
+            type="date" 
+            [(ngModel)]="form.expense_date" 
+            name="expense_date"
+            class="form-input"
+            required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ 'expenseVouchers.amount' | translate }} ({{ 'common.sar' | translate }}) *</label>
+          <input 
+            type="number" 
+            [(ngModel)]="form.expense_amount" 
+            name="expense_amount"
+            class="form-input"
+            placeholder="0.00"
+            step="0.01"
+            min="0.01"
+            required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ 'expenseVouchers.description' | translate }} *</label>
+        <textarea 
+          [(ngModel)]="form.description" 
+          name="description"
+          class="form-textarea"
+          rows="3"
+          placeholder="{{ 'expenseVouchers.create.descriptionPlaceholder' | translate }}"
+          required></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ 'expenseVouchers.referenceNumber' | translate }}</label>
+        <input 
+          type="text" 
+          [(ngModel)]="form.reference_number" 
+          name="reference_number"
+          class="form-input"
+          placeholder="{{ 'expenseVouchers.create.referencePlaceholder' | translate }}">
+      </div>
+    </div>
+
+    <!-- Account Selection -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'expenseVouchers.accountSelection' | translate }}</h2>
+      
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">{{ 'expenseVouchers.expenseAccount' | translate }} *</label>
+          <select 
+            [(ngModel)]="form.expense_account_id" 
+            name="expense_account_id"
+            class="form-select"
+            required>
+            <option value="">{{ 'expenseVouchers.create.selectExpenseAccount' | translate }}</option>
+            @for (account of expenseAccounts(); track account.id) {
+              <option [value]="account.id">
+                {{ account.account_code }} - {{ account.account_name_ar }}
+              </option>
+            }
+          </select>
+          <p class="help-text">{{ 'expenseVouchers.create.expenseAccountHelp' | translate }}</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">{{ 'expenseVouchers.paymentMethod' | translate }} *</label>
+          <select 
+            [(ngModel)]="form.payment_method" 
+            name="payment_method"
+            class="form-select"
+            (change)="onPaymentMethodChange()"
+            required>
+            <option value="cash">{{ 'expenseVouchers.create.cash' | translate }}</option>
+            <option value="bank_transfer">{{ 'expenseVouchers.create.bankTransfer' | translate }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">{{ 'expenseVouchers.paymentAccount' | translate }} *</label>
+        <select 
+          [(ngModel)]="form.payment_account_id" 
+          name="payment_account_id"
+          class="form-select"
+          required>
+          <option value="">{{ 'expenseVouchers.create.selectPaymentAccount' | translate }}</option>
+          @for (account of paymentAccounts(); track account.id) {
+            <option [value]="account.id">
+              {{ account.account_code }} - {{ account.account_name_ar }}
+            </option>
+          }
+        </select>
+        <p class="help-text">{{ 'expenseVouchers.create.paymentAccountHelp' | translate }}</p>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section">
+      <h2 class="section-title">{{ 'expenseVouchers.notes' | translate }}</h2>
+      
+      <div class="form-group">
+        <label class="form-label">{{ 'expenseVouchers.additionalNotes' | translate }}</label>
+        <textarea 
+          [(ngModel)]="form.notes" 
+          name="notes"
+          class="form-textarea"
+          rows="3"
+          placeholder="{{ 'expenseVouchers.create.notesPlaceholder' | translate }}"></textarea>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn-submit" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ 'expenseVouchers.creating' | translate }}
+        } @else {
+          <i class="fas fa-check"></i>
+          {{ 'expenseVouchers.createVoucher' | translate }}
+        }
+      </button>
+      <a routerLink="/finance/expenses" class="btn-cancel">
+        {{ 'common.cancel' | translate }}
+      </a>
+    </div>
+  </form>
+</div>

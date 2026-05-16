@@ -1,0 +1,86 @@
+<div class="p-6" dir="rtl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">مشاريعي</h1>
+    <p class="text-gray-600 mt-2">متابعة حالة المشاريع قيد التنفيذ</p>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  <!-- Projects Grid -->
+  @if (!loading() && projects().length > 0) {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      @for (project of projects(); track project.id) {
+        <div 
+          (click)="viewProject(project)"
+          class="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-all cursor-pointer transform hover:-translate-y-1">
+          
+          <!-- Status Badge -->
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-lg font-bold text-gray-900">{{ project.name }}</h3>
+            <span class="px-3 py-1 rounded-full text-xs font-medium {{ getStatusBadgeClass(project.status) }}">
+              {{ getStatusText(project.status) }}
+            </span>
+          </div>
+
+          <!-- Description -->
+          @if (project.description) {
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ project.description }}</p>
+          }
+
+          <!-- Progress Bar -->
+          <div class="mb-4">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-gray-600">نسبة الإنجاز</span>
+              <span class="font-semibold text-blue-600">{{ getProgress(project) }}%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                class="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full transition-all"
+                [style.width.%]="getProgress(project)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Stats -->
+          <div class="grid grid-cols-2 gap-3 mb-4 text-sm">
+            <div>
+              <p class="text-gray-500">الميزانية</p>
+              <p class="font-semibold text-gray-900">{{ formatPrice(project.budget) }}</p>
+            </div>
+            <div>
+              <p class="text-gray-500">المهام</p>
+              <p class="font-semibold text-gray-900">{{ project.completed_tasks || 0 }} / {{ project.tasks_count || 0 }}</p>
+            </div>
+          </div>
+
+          <!-- Dates -->
+          <div class="pt-4 border-t text-xs text-gray-500">
+            <div class="flex justify-between">
+              <span>البداية: {{ formatDate(project.start_date) }}</span>
+              @if (project.end_date) {
+                <span>النهاية: {{ formatDate(project.end_date) }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && projects().length === 0) {
+    <div class="text-center py-20 bg-white rounded-xl shadow-md">
+      <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+      </svg>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">لا توجد مشاريع</h3>
+      <p class="mt-2 text-gray-500">لم يتم إنشاء أي مشاريع لك بعد</p>
+    </div>
+  }
+</div>

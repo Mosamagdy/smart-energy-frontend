@@ -1,0 +1,53 @@
+<div class="p-6" dir="rtl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">الملف الشخصي</h1>
+    <p class="text-gray-600 mt-2">معلومات حسابك الشخصي</p>
+  </div>
+
+  @if (loading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+    </div>
+  }
+
+  @if (!loading() && profile()) {
+    <div class="max-w-2xl mx-auto">
+      <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-teal-500 to-teal-600 p-6 text-white">
+          <div class="flex items-center gap-4">
+            <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center text-3xl font-bold text-teal-600">
+              {{ profile()!.first_name.charAt(0) }}
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold">{{ profile()!.first_name }} {{ profile()!.last_name }}</h2>
+              <p class="text-teal-100">عميل</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <div class="p-6 space-y-4">
+          <div class="flex justify-between items-center py-3 border-b">
+            <span class="text-gray-500">البريد الإلكتروني</span>
+            <span class="font-semibold">{{ profile()!.email }}</span>
+          </div>
+          <div class="flex justify-between items-center py-3 border-b">
+            <span class="text-gray-500">رقم الهاتف</span>
+            <span class="font-semibold">{{ profile()!.phone || 'غير محدد' }}</span>
+          </div>
+          <div class="flex justify-between items-center py-3 border-b">
+            <span class="text-gray-500">حالة الحساب</span>
+            <span class="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              {{ profile()!.status === 'active' ? 'نشط' : profile()!.status }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center py-3">
+            <span class="text-gray-500">تاريخ التسجيل</span>
+            <span class="font-semibold">{{ profile()!.created_at | date:'yyyy/MM/dd' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

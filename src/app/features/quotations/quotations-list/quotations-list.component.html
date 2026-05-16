@@ -1,0 +1,329 @@
+<div class="p-6 space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-[#0c0725]">{{ 'quotations.title' | translate }}</h1>
+      <p class="text-gray-600 mt-1">{{ 'quotations.subtitle' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Filter Buttons (For Finance & GM) -->
+  @if (userRole() === 'finance_manager' || userRole() === 'general_manager') {
+    <div class="flex gap-3">
+      <button
+        (click)="selectedStatus.set('all')"
+        [ngClass]="selectedStatus() === 'all' ? 'bg-[#2876c9] text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+        class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm border-2 border-transparent hover:border-[#2876c9]/30">
+        <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+        </svg>
+        {{ 'quotations.filterAll' | translate }}
+      </button>
+      <button
+        (click)="selectedStatus.set('awaiting_review')"
+        [ngClass]="selectedStatus() === 'awaiting_review' ? 'bg-linear-to-r from-orange-500 to-red-500 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50'"
+        class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm border-2 border-transparent hover:border-orange-300 relative">
+        <svg class="w-4 h-4 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        {{ 'quotations.filterAwaitingReview' | translate }}
+        @if (selectedStatus() === 'awaiting_review') {
+          <span class="absolute -top-2 -right-2 bg-white text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-md">
+            {{ getAwaitingCount() }}
+          </span>
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center py-16">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2876c9]"></div>
+    </div>
+  }
+
+  <!-- Quotations List -->
+  @if (!loading()) {
+    @if (quotations().length === 0) {
+      <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+        <div class="text-6xl mb-4">📄</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">{{ 'quotations.noQuotations' | translate }}</h3>
+        <p class="text-gray-600">{{ 'quotations.willBeCreated' | translate }}</p>
+      </div>
+    } @else {
+      <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <table class="w-full">
+          <thead class="bg-[#0c0725] text-white">
+            <tr>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.quotationNumber' | translate }}</th>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.client' | translate }}</th>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.totalAmount' | translate }}</th>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.status' | translate }}</th>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.creationDate' | translate }}</th>
+              <th class="px-6 py-4 text-right text-sm font-bold">{{ 'quotations.actions' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            @for (quotation of filteredQuotations(); track quotation.id) {
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4">
+                  <span class="text-sm font-bold text-[#0c0725]">#{{ quotation.id }}</span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#2876c9]/10 flex items-center justify-center text-[#2876c9] font-bold">
+                      {{ quotation.client_name?.charAt(0) || 'C' }}
+                    </div>
+                    <div>
+                      <p class="text-sm font-semibold text-[#0c0725]">
+                        {{ quotation.client_name || ('quotations.client' | translate) }}
+                      </p>
+                      <p class="text-xs text-gray-500">
+                        {{ quotation.service_type || '' }}
+                      </p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-bold text-[#0c0725]">
+                    {{ (quotation.final_price || quotation.total_price).toLocaleString('ar-EG') }} {{ 'common.egp' | translate }}
+                  </div>
+                  @if (quotation.discount > 0) {
+                    <div class="text-xs text-green-600">
+                      {{ 'quotations.discount' | translate }} {{ quotation.discount }}%
+                    </div>
+                  }
+                </td>
+                <td class="px-6 py-4">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold"
+                        [ngClass]="getStatusColor(quotation.status)">
+                    {{ getStatusText(quotation.status) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="text-sm text-gray-600">
+                    {{ quotation.created_at | date:'yyyy-MM-dd' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-2">
+                    <button
+                      (click)="viewQuotation(quotation.id)"
+                      class="px-3 py-1.5 bg-[#2876c9] text-white rounded-lg text-xs font-bold hover:bg-[#2876c9]/90 transition">
+                      {{ 'quotations.view' | translate }}
+                    </button>
+                    @if (quotation.status === 'draft') {
+                      <button
+                        (click)="deleteQuotation(quotation.id)"
+                        class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-xs font-bold hover:bg-red-200 transition">
+                        {{ 'quotations.delete' | translate }}
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════
+       QUOTATION CREATION MODAL
+       ═══════════════════════════════════════════════════════════ -->
+  @if (showCreateModal()) {
+    <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+         (click)="closeCreateModal()">
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+           (click)="$event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div class="sticky top-0 bg-linear-to-r from-[#2876c9] to-[#2cdc78] text-white px-8 py-6 rounded-t-2xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-2xl font-bold">{{ 'quotationCreate.title' | translate }}</h2>
+              <p class="text-white/90 mt-1">{{ 'quotationCreate.client' | translate:{name: selectedLeadName()} }}</p>
+            </div>
+            <button (click)="closeCreateModal()"
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/20 hover:bg-white/30 transition">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-8 space-y-6">
+          
+          <!-- BOQ Items Section -->
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-bold text-[#0c0725] flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#2876c9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                {{ 'quotationCreate.boqSection' | translate }}
+              </h3>
+              <button (click)="addBoqItem()"
+                class="px-4 py-2 bg-[#2cdc78] text-[#0c0725] rounded-lg font-bold hover:bg-[#2cdc78]/90 transition flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                {{ 'quotationCreate.addItem' | translate }}
+              </button>
+            </div>
+
+            @if (formBoqItems().length > 0) {
+              <div class="space-y-3">
+                @for (item of formBoqItems(); track $index) {
+                  <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-4">
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                      <input type="text" [(ngModel)]="item.name" [placeholder]="'quotationCreate.itemName' | translate"
+                        (ngModelChange)="updateBoqItem($index, 'name', $event)"
+                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+                      <input type="text" [(ngModel)]="item.description" [placeholder]="'quotationCreate.itemDescription' | translate"
+                        (ngModelChange)="updateBoqItem($index, 'description', $event)"
+                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+                      <input type="number" [(ngModel)]="item.quantity" [placeholder]="'quotationCreate.itemQuantity' | translate" min="1"
+                        (ngModelChange)="updateBoqItem($index, 'quantity', $event)"
+                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+                      <input type="number" [(ngModel)]="item.unit_price" [placeholder]="'quotationCreate.itemUnitPrice' | translate" min="0"
+                        (ngModelChange)="updateBoqItem($index, 'unit_price', $event)"
+                        class="px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+                      <div class="flex items-center gap-2">
+                        <span class="text-sm font-bold text-[#0c0725]">{{ item.total | number:'1.2-2' }} {{ 'common.egp' | translate }}</span>
+                        <button (click)="removeBoqItem($index)"
+                          class="w-8 h-8 flex items-center justify-center rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-8 bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl">
+                <p class="text-gray-500">{{ 'quotationCreate.noItems' | translate }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="bg-linear-to-r from-blue-50 to-green-50 border-2 border-[#2876c9]/20 rounded-xl p-6">
+            <h3 class="text-lg font-bold text-[#0c0725] mb-4">{{ 'quotationCreate.pricingSection' | translate }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">{{ 'quotationCreate.subtotal' | translate }}</label>
+                <div class="px-4 py-3 bg-white border-2 border-gray-300 rounded-xl font-bold text-[#0c0725]">
+                  {{ formTotalPrice() | number:'1.2-2' }} {{ 'common.egp' | translate }}
+                </div>
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">{{ 'quotationCreate.discountPercent' | translate }}</label>
+                <input type="number" [(ngModel)]="formDiscount" min="0" max="100"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+              </div>
+              <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">{{ 'quotationCreate.taxPercent' | translate }}</label>
+                <input type="number" [(ngModel)]="formTax" min="0" max="100"
+                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition">
+              </div>
+            </div>
+            <div class="mt-4 pt-4 border-t-2 border-[#2876c9]/20">
+              <div class="flex items-center justify-between">
+                <span class="text-lg font-bold text-[#0c0725]">{{ 'quotationCreate.finalPrice' | translate }}</span>
+                <span class="text-2xl font-bold text-[#2cdc78]">{{ getFinalPrice() | number:'1.2-2' }} {{ 'common.egp' | translate }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- File Upload Section -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              {{ 'quotationCreate.fileUpload' | translate }}
+              <span class="text-xs font-normal text-gray-500">{{ 'quotationCreate.fileUploadHint' | translate }}</span>
+            </label>
+            <div class="border-2 border-dashed rounded-xl p-6 text-center transition-all duration-200"
+              [class.border-[#2cdc78]]="uploadedFile()"
+              [class.bg-[#2cdc78]/5]="uploadedFile()"
+              [class.border-gray-300]="!uploadedFile()">
+              @if (!uploadedFile()) {
+                <input type="file" #fileInput (change)="onFileSelected($event)"
+                  accept=".pdf,.doc,.docx" class="hidden">
+                <button type="button" (click)="fileInput.click()"
+                  class="px-6 py-3 bg-[#2876c9] text-white rounded-xl font-bold hover:bg-[#2876c9]/90 transition flex items-center gap-2 mx-auto">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                  </svg>
+                  <span>{{ 'quotationCreate.selectFile' | translate }}</span>
+                </button>
+                <p class="text-sm text-gray-600 mt-3">{{ 'quotationCreate.fileFormats' | translate }}</p>
+              } @else {
+                <div class="flex items-center justify-center gap-4">
+                  <div class="flex-1 text-right">
+                    <p class="font-bold text-[#0c0725]">{{ uploadedFile()?.name }}</p>
+                    <p class="text-sm text-gray-600">{{ formatFileSize(uploadedFile()?.size || 0) }}</p>
+                    @if (uploadProgress() > 0 && uploadProgress() < 100) {
+                      <div class="mt-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div class="bg-[#2cdc78] h-2 rounded-full transition-all duration-300"
+                            [style.width.%]="uploadProgress()"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 mt-1">{{ 'quotationCreate.uploadProgress' | translate:{progress: uploadProgress()} }}</p>
+                      </div>
+                    }
+                  </div>
+                  <button (click)="removeUploadedFile()"
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Notes Section -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">{{ 'quotations.notes' | translate }}</label>
+            <textarea [(ngModel)]="formNotes" rows="3" [placeholder]="'quotationCreate.notesPlaceholder' | translate"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-[#2876c9] focus:ring-2 focus:ring-[#2876c9]/20 transition resize-none"></textarea>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="sticky bottom-0 bg-gray-50 px-8 py-4 border-t-2 border-gray-200 rounded-b-2xl">
+          <div class="flex items-center gap-3 justify-end">
+            <button (click)="closeCreateModal()"
+              class="px-6 py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+              [disabled]="isUploading()">
+              {{ 'quotationCreate.cancel' | translate }}
+            </button>
+            <button (click)="submitQuotation()"
+              class="px-8 py-3 bg-linear-to-r from-[#2876c9] to-[#2cdc78] text-white rounded-xl font-bold hover:from-[#2876c9]/90 hover:to-[#2cdc78]/90 transition flex items-center gap-2 shadow-lg"
+              [disabled]="isUploading()">
+              @if (isUploading()) {
+                <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ 'quotationCreate.uploading' | translate }}</span>
+              } @else {
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>{{ 'quotationCreate.create' | translate }}</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

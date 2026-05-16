@@ -1,0 +1,96 @@
+<div class="container mx-auto p-6 max-w-5xl">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600"></div>
+    </div>
+  } @else if (hasVoucher()) {
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">{{ 'receiptVouchers.detail.title' | translate }}</h1>
+        <p class="text-gray-600 mt-1 font-mono text-lg">{{ getVoucherNumber() }}</p>
+      </div>
+      <button (click)="goBack()"
+              class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-colors">
+        <i class="fas fa-arrow-right ml-2"></i> {{ 'receiptVouchers.detail.back' | translate }}
+      </button>
+    </div>
+
+    <!-- Voucher Info Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{{ 'receiptVouchers.detail.voucherInfo' | translate }}</h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.voucherNumber' | translate }}</span>
+          <p class="font-bold text-lg text-green-600 font-mono">{{ getVoucherNumber() }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.clientName' | translate }}</span>
+          <p class="font-bold text-lg text-gray-800">{{ getClientName() }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.totalAmount' | translate }}</span>
+          <p class="font-bold text-2xl text-green-600">{{ formatCurrency(getAmount()) }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.paymentMethod' | translate }}</span>
+          <p class="font-bold text-lg text-gray-800">{{ getMethodLabel(getPaymentMethod()) }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.receiptDate' | translate }}</span>
+          <p class="font-bold text-lg text-gray-800">{{ formatDate(getReceiptDate()) }}</p>
+        </div>
+        <div>
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.status' | translate }}</span>
+          <p>
+            <span class="px-3 py-1 rounded-full text-sm font-bold {{ getStatusBadge(getStatus()) }}">
+              {{ getStatusLabel(getStatus()) }}
+            </span>
+          </p>
+        </div>
+        @if (hasReferenceNo()) {
+          <div>
+            <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.referenceNo' | translate }}</span>
+            <p class="font-bold text-lg text-gray-800 font-mono">{{ getReferenceNo() }}</p>
+          </div>
+        }
+      </div>
+      @if (hasDescription()) {
+        <div class="mt-6 pt-4 border-t">
+          <span class="text-gray-600 text-sm">{{ 'receiptVouchers.detail.description' | translate }}</span>
+          <p class="text-gray-800 mt-1">{{ getDescription() }}</p>
+        </div>
+      }
+    </div>
+
+    <!-- Invoices Paid -->
+    @if (invoices().length > 0) {
+      <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">{{ 'receiptVouchers.detail.invoicesPaid' | translate }}</h2>
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.detail.invoiceNumber' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.detail.invoiceTotal' | translate }}</th>
+              <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.detail.amountPaid' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            @for (item of invoices(); track item.id) {
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 font-mono font-bold text-blue-600">{{ item.invoice_number }}</td>
+                <td class="px-4 py-3 font-bold text-gray-800">{{ formatCurrency(item.total_amount) }}</td>
+                <td class="px-4 py-3 font-bold text-green-600">{{ formatCurrency(item.amount_applied) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    <div class="text-center py-20">
+      <i class="fas fa-exclamation-triangle text-6xl text-red-500 mb-4"></i>
+      <p class="text-xl text-gray-700">{{ 'receiptVouchers.detail.voucherNotFound' | translate }}</p>
+    </div>
+  }
+</div>

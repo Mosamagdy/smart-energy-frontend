@@ -1,0 +1,162 @@
+<div class="general-ledger-container" dir="rtl">
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-content">
+      <h1>
+        <i class="fas fa-book-open"></i>
+        {{ 'generalLedger.title' | translate }}
+      </h1>
+      <p class="subtitle">{{ 'generalLedger.subtitle' | translate }}</p>
+      <div class="account-info">
+        <span class="account-code">{{ accountCode() }}</span>
+        <span class="account-name">{{ accountNameAr() || accountName() }}</span>
+      </div>
+    </div>
+    <button (click)="goBack()" class="btn-back">
+      <i class="fas fa-arrow-right"></i>
+      {{ 'generalLedger.backToTrialBalance' | translate }}
+    </button>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="filter-section">
+    <div class="date-range">
+      <div class="date-field">
+        <label for="startDate">{{ 'reports.from' | translate }}:</label>
+        <input 
+          type="date" 
+          id="startDate"
+          [(ngModel)]="startDate" 
+          (change)="onDateChange()"
+          class="date-input"
+        >
+      </div>
+      <div class="date-field">
+        <label for="endDate">{{ 'reports.to' | translate }}:</label>
+        <input 
+          type="date" 
+          id="endDate"
+          [(ngModel)]="endDate" 
+          (change)="onDateChange()"
+          class="date-input"
+        >
+      </div>
+      <button (click)="loadGeneralLedger()" class="btn-refresh">
+        <i class="fas fa-sync-alt"></i>
+        {{ 'reports.refresh' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>{{ 'generalLedger.loading' | translate }}</p>
+  </div>
+
+  <!-- Report Content -->
+  <div *ngIf="!isLoading()" class="report-content">
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card debit-card">
+        <div class="card-icon">
+          <i class="fas fa-arrow-up"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.totalDebit' | translate }}</h3>
+          <p class="card-amount">{{ formatCurrency(totalDebit()) }}</p>
+        </div>
+      </div>
+
+      <div class="summary-card credit-card">
+        <div class="card-icon">
+          <i class="fas fa-arrow-down"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.totalCredit' | translate }}</h3>
+          <p class="card-amount">{{ formatCurrency(totalCredit()) }}</p>
+        </div>
+      </div>
+
+      <div class="summary-card balance-card">
+        <div class="card-icon">
+          <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'generalLedger.endingBalance' | translate }}</h3>
+          <p class="card-amount">{{ formatCurrency(endingBalance()) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Transactions Table -->
+    <div class="table-container">
+      <table class="ledger-table">
+        <thead>
+          <tr>
+            <th class="col-date">{{ 'generalLedger.date' | translate }}</th>
+            <th class="col-ref">{{ 'generalLedger.reference' | translate }}</th>
+            <th class="col-desc">{{ 'generalLedger.description' | translate }}</th>
+            <th class="col-debit">{{ 'reports.debit' | translate }}</th>
+            <th class="col-credit">{{ 'reports.credit' | translate }}</th>
+            <th class="col-balance">{{ 'reports.balance' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (txn of transactions(); track txn.entry_date; let i = $index) {
+            <tr class="transaction-row">
+              <td class="col-date">
+                {{ formatDate(txn.entry_date) }}
+              </td>
+              <td class="col-ref">
+                <span class="reference-badge">{{ txn.entry_number || 'N/A' }}</span>
+              </td>
+              <td class="col-desc">
+                {{ txn.description || ('generalLedger.noDescription' | translate) }}
+              </td>
+              <td class="col-debit amount-cell debit-amount">
+                {{ txn.debit_amount > 0 ? formatCurrency(txn.debit_amount) : '-' }}
+              </td>
+              <td class="col-credit amount-cell credit-amount">
+                {{ txn.credit_amount > 0 ? formatCurrency(txn.credit_amount) : '-' }}
+              </td>
+              <td class="col-balance amount-cell balance-cell">
+                {{ formatCurrency(txn.running_balance) }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="empty-table-cell">
+                <i class="fas fa-inbox"></i>
+                <p>{{ 'generalLedger.noTransactions' | translate }}</p>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="3" class="totals-label">
+              <strong>{{ 'reports.totals' | translate }}</strong>
+            </td>
+            <td class="col-debit amount-cell debit-amount">
+              <strong>{{ formatCurrency(totalDebit()) }}</strong>
+            </td>
+            <td class="col-credit amount-cell credit-amount">
+              <strong>{{ formatCurrency(totalCredit()) }}</strong>
+            </td>
+            <td class="col-balance amount-cell ending-balance">
+              <strong>{{ formatCurrency(endingBalance()) }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Transaction Count -->
+    <div class="transaction-count">
+      <i class="fas fa-list"></i>
+      <span>{{ 'generalLedger.transactionCount' | translate }}: <strong>{{ transactions().length }}</strong></span>
+    </div>
+  </div>
+</div>

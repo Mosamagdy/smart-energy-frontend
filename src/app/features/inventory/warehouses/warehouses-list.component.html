@@ -1,0 +1,209 @@
+<div class="warehouses-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>{{ 'warehouses.title' | translate }}</h1>
+      <p>{{ 'warehouses.subtitle' | translate }}</p>
+    </div>
+    @if (canManageWarehouses()) {
+      <button class="btn-primary" (click)="openCreateModal()">
+        <span>➕</span>
+        <span>{{ 'warehouses.addWarehouse' | translate }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card">
+      <div class="card-icon">🏭</div>
+      <div class="card-content">
+        <h3>{{ totalWarehouses() }}</h3>
+        <p>{{ 'warehouses.summary.totalWarehouses' | translate }}</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-icon">✅</div>
+      <div class="card-content">
+        <h3>{{ activeCount() }}</h3>
+        <p>{{ 'warehouses.summary.activeWarehouses' | translate }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>{{ 'warehouses.messages.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Warehouses Table -->
+  @if (!loading()) {
+    <div class="table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{{ 'warehouses.table.code' | translate }}</th>
+            <th>{{ 'warehouses.table.name' | translate }}</th>
+            <th>{{ 'warehouses.table.location' | translate }}</th>
+            <th>{{ 'warehouses.table.supervisor' | translate }}</th>
+            <th>{{ 'warehouses.table.capacity' | translate }}</th>
+            <th>{{ 'warehouses.table.status' | translate }}</th>
+            <th>{{ 'warehouses.table.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (warehouse of warehouses(); track warehouse.id) {
+            <tr>
+              <td class="code-cell">{{ warehouse.warehouse_code }}</td>
+              <td>
+                <div class="name-cell">
+                  <span class="name-ar">{{ warehouse.warehouse_name_ar || warehouse.warehouse_name }}</span>
+                  @if (warehouse.warehouse_name && warehouse.warehouse_name_ar) {
+                    <span class="name-en">{{ warehouse.warehouse_name }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ warehouse.location_ar || warehouse.location }}</td>
+              <td>{{ warehouse.supervisor_name || ('warehouses.messages.notSpecified' | translate) }}</td>
+              <td>{{ warehouse.capacity_cubic_m ? warehouse.capacity_cubic_m + ' م³' : ('warehouses.messages.notSpecified' | translate) }}</td>
+              <td>
+                <span class="status-badge" [style.background]="getStatusColor(warehouse.is_active)">
+                  {{ getStatusText(warehouse.is_active) }}
+                </span>
+              </td>
+              <td class="actions-cell">
+                @if (canManageWarehouses()) {
+                  <button class="btn-icon btn-edit" (click)="openEditModal(warehouse)" [title]="'warehouses.actions.edit' | translate">
+                    ✏️
+                  </button>
+                  <button class="btn-icon btn-delete" (click)="deleteWarehouse(warehouse)" [title]="'warehouses.actions.delete' | translate">
+                    🗑️
+                  </button>
+                } @else {
+                  <span class="text-gray-400">—</span>
+                }
+              </td>
+            </tr>
+          }
+          @empty {
+            <tr>
+              <td colspan="7" class="empty-state">
+                <div class="empty-icon">🏭</div>
+                <p>{{ 'warehouses.empty.title' | translate }}</p>
+                @if (canManageWarehouses()) {
+                  <button class="btn-primary" (click)="openCreateModal()">{{ 'warehouses.empty.addFirst' | translate }}</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Modal -->
+  @if (showModal()) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editingWarehouse() ? ('warehouses.modal.editTitle' | translate) : ('warehouses.modal.createTitle' | translate) }}</h2>
+          <button class="btn-close" (click)="closeModal()">✕</button>
+        </div>
+
+        <form (ngSubmit)="saveWarehouse()" class="modal-form">
+          <div class="form-grid">
+            <!-- Warehouse Name (Arabic) -->
+            <div class="form-group">
+              <label>{{ 'warehouses.modal.nameAr' | translate }} <span class="required">*</span></label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData().warehouse_name_ar" 
+                name="warehouse_name_ar"
+                [placeholder]="'warehouses.modal.nameArPlaceholder' | translate"
+                required
+              />
+            </div>
+
+            <!-- Warehouse Name (English) -->
+            <div class="form-group">
+              <label>{{ 'warehouses.modal.nameEn' | translate }}</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData().warehouse_name" 
+                name="warehouse_name"
+                [placeholder]="'warehouses.modal.nameEnPlaceholder' | translate"
+              />
+            </div>
+
+            <!-- Location (Arabic) -->
+            <div class="form-group">
+              <label>{{ 'warehouses.modal.locationAr' | translate }} <span class="required">*</span></label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData().location_ar" 
+                name="location_ar"
+                [placeholder]="'warehouses.modal.locationArPlaceholder' | translate"
+                required
+              />
+            </div>
+
+            <!-- Location (English) -->
+            <div class="form-group">
+              <label>{{ 'warehouses.modal.locationEn' | translate }}</label>
+              <input 
+                type="text" 
+                [(ngModel)]="formData().location" 
+                name="location"
+                [placeholder]="'warehouses.modal.locationEnPlaceholder' | translate"
+              />
+            </div>
+
+            <!-- Address -->
+            <div class="form-group full-width">
+              <label>{{ 'warehouses.modal.address' | translate }}</label>
+              <textarea 
+                [(ngModel)]="formData().address" 
+                name="address"
+                rows="2"
+                [placeholder]="'warehouses.modal.addressPlaceholder' | translate"
+              ></textarea>
+            </div>
+
+            <!-- Capacity -->
+            <div class="form-group">
+              <label>{{ 'warehouses.modal.capacity' | translate }}</label>
+              <input 
+                type="number" 
+                [(ngModel)]="formData().capacity_cubic_m" 
+                name="capacity_cubic_m"
+                [placeholder]="'warehouses.modal.capacityPlaceholder' | translate"
+                min="0"
+              />
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group full-width">
+              <label>{{ 'warehouses.modal.notes' | translate }}</label>
+              <textarea 
+                [(ngModel)]="formData().notes" 
+                name="notes"
+                rows="3"
+                [placeholder]="'warehouses.modal.notesPlaceholder' | translate"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="closeModal()">{{ 'warehouses.modal.cancel' | translate }}</button>
+            <button type="submit" class="btn-primary">
+              {{ editingWarehouse() ? ('warehouses.modal.update' | translate) : ('warehouses.modal.create' | translate) }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,178 @@
+<div class="credit-note-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>إنشاء إشعار دائن (مرتجع مبيعات)</h1>
+    <h2>Create Credit Note (Sales Return)</h2>
+    <button class="btn-back" (click)="cancel()">← Back to Invoice</button>
+  </div>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="error-message">
+      <strong>❌ Error:</strong> {{ error() }}
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading">
+      <div class="spinner-large"></div>
+      <p>Loading invoice details...</p>
+    </div>
+  } @else if (invoice()) {
+    <!-- Original Invoice Info -->
+    <div class="invoice-info-card">
+      <h3>Original Invoice Details</h3>
+      <div class="info-grid">
+        <div class="info-item">
+          <label>Invoice Number:</label>
+          <span>{{ invoice().invoice_number }}</span>
+        </div>
+        <div class="info-item">
+          <label>Client:</label>
+          <span>{{ invoice().client_name || 'N/A' }}</span>
+        </div>
+        <div class="info-item">
+          <label>Original Total:</label>
+          <span class="amount">{{ invoice().total_amount | number:'1.2-2' }} SAR</span>
+        </div>
+        <div class="info-item">
+          <label>Project:</label>
+          <span>{{ invoice().project_name || 'N/A' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Return Form -->
+    <form (ngSubmit)="submit()" class="credit-note-form">
+      <!-- Reason & Date -->
+      <div class="form-section">
+        <h3>Return Details</h3>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Return Date *</label>
+            <input type="date" [(ngModel)]="returnDate" name="returnDate" required>
+          </div>
+          
+          <div class="form-group full-width">
+            <label>Reason for Return *</label>
+            <textarea [(ngModel)]="reason" name="reason" rows="3" required 
+                      placeholder="Specify the reason for this return..."></textarea>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Additional Notes</label>
+          <textarea [(ngModel)]="notes" name="notes" rows="2" 
+                    placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+
+      <!-- Return Items -->
+      <div class="form-section">
+        <h3>Return Items</h3>
+        <p class="info-text">Enter the quantity for each item being returned</p>
+        
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Unit Price</th>
+              <th>Return Qty</th>
+              <th>Discount</th>
+              <th>Tax %</th>
+              <th>Line Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of returnItems(); track $index) {
+              <tr>
+                <td>{{ item.description }}</td>
+                <td>{{ item.unit_price | number:'1.2-2' }}</td>
+                <td>
+                  <input type="number" [(ngModel)]="item.quantity" 
+                         name="qty_{{ $index }}" min="0" step="0.01"
+                         (ngModelChange)="calculateTotals()"
+                         class="qty-input">
+                </td>
+                <td>
+                  <input type="number" [(ngModel)]="item.discount_amount" 
+                         name="disc_{{ $index }}" min="0" step="0.01"
+                         (ngModelChange)="calculateTotals()">
+                </td>
+                <td>{{ item.tax_rate }}%</td>
+                <td class="line-total">
+                  @if (item.quantity > 0) {
+                    {{ ((item.quantity * item.unit_price - item.discount_amount) * (1 + item.tax_rate / 100)) | number:'1.2-2' }}
+                  } @else {
+                    0.00
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Summary -->
+      <div class="summary-section">
+        <h3>Return Summary</h3>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <label>Subtotal:</label>
+            <span>{{ subtotal() | number:'1.2-2' }} SAR</span>
+          </div>
+          <div class="summary-item">
+            <label>Discount:</label>
+            <span class="discount">-{{ discountAmount() | number:'1.2-2' }} SAR</span>
+          </div>
+          <div class="summary-item">
+            <label>Tax Amount:</label>
+            <span>{{ taxAmount() | number:'1.2-2' }} SAR</span>
+          </div>
+          <div class="summary-item total">
+            <label>Total Return:</label>
+            <span>{{ totalAmount() | number:'1.2-2' }} SAR</span>
+          </div>
+        </div>
+
+        <!-- Accounting Info -->
+        <div class="accounting-info">
+          <h4>Journal Entry Preview</h4>
+          <div class="entry-preview">
+            <div class="entry-line debit">
+              <span>DEBIT:</span>
+              <span>4112 - مردودات المبيعات (Sales Returns)</span>
+              <span>{{ subtotal() | number:'1.2-2' }} SAR</span>
+            </div>
+            <div class="entry-line debit">
+              <span>DEBIT:</span>
+              <span>VAT Input Account (ضريبة القيمة المضافة)</span>
+              <span>{{ taxAmount() | number:'1.2-2' }} SAR</span>
+            </div>
+            <div class="entry-line credit">
+              <span>CREDIT:</span>
+              <span>Client AR Account (الذمم المدينة)</span>
+              <span>{{ totalAmount() | number:'1.2-2' }} SAR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="cancel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="loading()">
+          @if (loading()) {
+            <span class="spinner"></span>
+            Creating...
+          } @else {
+            Create Credit Note
+          }
+        </button>
+      </div>
+    </form>
+  } @else {
+    <div class="loading">Loading invoice details...</div>
+  }
+</div>

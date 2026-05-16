@@ -1,0 +1,145 @@
+<div class="container mx-auto p-6 max-w-7xl">
+  <!-- Header -->
+  <div class="mb-6 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-800">{{ 'fixedAssets.title' | translate }}</h1>
+      <p class="text-gray-600 mt-1">{{ 'fixedAssets.subtitle' | translate }}</p>
+    </div>
+    <div class="flex gap-3">
+      <!-- Run Depreciation Button -->
+      <button
+        (click)="runDepreciation()"
+        [disabled]="runningDepreciation()"
+        class="px-6 py-3 bg-linear-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:from-gray-400 disabled:to-gray-500 text-white rounded-lg font-semibold transition-all flex items-center gap-2 shadow-lg hover:shadow-xl disabled:cursor-not-allowed">
+        @if (runningDepreciation()) {
+          <i class="fas fa-spinner fa-spin"></i>
+          {{ 'fixedAssets.runningDepreciation' | translate }}
+        } @else {
+          <i class="fas fa-calculator"></i>
+          {{ 'fixedAssets.runDepreciation' | translate }}
+        }
+      </button>
+      
+      <!-- Create Asset Button -->
+      <button
+        (click)="createAsset()"
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-lg hover:shadow-xl">
+        <i class="fas fa-plus"></i>
+        {{ 'fixedAssets.addAsset' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && assets().length === 0) {
+    <div class="bg-white rounded-lg shadow-md p-12 text-center">
+      <i class="fas fa-building text-6xl text-gray-300 mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">{{ 'fixedAssets.empty.title' | translate }}</h3>
+      <p class="text-gray-500 mb-4">{{ 'fixedAssets.empty.message' | translate }}</p>
+      <button
+        (click)="createAsset()"
+        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors">
+        <i class="fas fa-plus mr-2"></i>
+        {{ 'fixedAssets.empty.addFirst' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Assets Table -->
+  @if (!loading() && assets().length > 0) {
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.assetNumber' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.assetName' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.category' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.purchaseDate' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.purchaseCost' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.accumulatedDepr' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.netBookValue' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.status' | translate }}</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{{ 'fixedAssets.table.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (asset of assets(); track asset.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-semibold text-blue-600">{{ asset.asset_number }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div>
+                  <span class="text-sm font-medium text-gray-900">{{ asset.asset_name }}</span>
+                  @if (asset.asset_name_ar) {
+                    <div class="text-xs text-gray-500">{{ asset.asset_name_ar }}</div>
+                  }
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800">
+                  {{ getCategoryLabel(asset.category) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-gray-600">{{ formatDate(asset.purchase_date) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-bold text-gray-900">{{ formatCurrency(asset.purchase_cost) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm text-red-600 font-semibold">{{ formatCurrency(asset.accumulated_depr) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-sm font-bold text-green-600">{{ formatCurrency(asset.net_book_value) }}</span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full"
+                      [class]="asset.status === 'active' ? 'bg-green-100 text-green-800' : 
+                               asset.status === 'fully_depreciated' ? 'bg-yellow-100 text-yellow-800' : 
+                               'bg-gray-100 text-gray-800'">
+                  {{ getStatusLabel(asset.status) }}
+                </span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex gap-2">
+                  <button
+                    (click)="viewAsset(asset)"
+                    class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors flex items-center gap-1 text-xs font-semibold">
+                    <i class="fas fa-eye"></i>
+                    {{ 'fixedAssets.actions.view' | translate }}
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- Info Card -->
+  @if (!loading() && assets().length > 0) {
+    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
+        <div>
+          <h4 class="font-semibold text-blue-900 mb-1">{{ 'fixedAssets.info.title' | translate }}</h4>
+          <ul class="text-sm text-blue-800 space-y-1">
+            <li>{{ 'fixedAssets.info.method1' | translate }}</li>
+            <li>{{ 'fixedAssets.info.method2' | translate }}</li>
+            <li>{{ 'fixedAssets.info.journalEntry' | translate }}</li>
+            <li>{{ 'fixedAssets.info.monthly' | translate }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  }
+</div>

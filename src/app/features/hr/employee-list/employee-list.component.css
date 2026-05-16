@@ -1,0 +1,19 @@
+.status-active { 
+  background-color: #dcfce7; 
+  color: #166534; 
+}
+
+.status-inactive { 
+  background-color: #fee2e2; 
+  color: #991b1b; 
+}
+
+.status-on_leave { 
+  background-color: #fef3c7; 
+  color: #92400e; 
+}
+
+.status-terminated { 
+  background-color: #f3f4f6; 
+  color: #374151; 
+}

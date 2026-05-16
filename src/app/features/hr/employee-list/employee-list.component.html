@@ -1,0 +1,224 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">{{ 'hr.employees' | translate }}</h1>
+      <p class="text-gray-600 mt-2">{{ 'hr.title' | translate }}</p>
+    </div>
+    <button
+      [routerLink]="['/hr/employees/create']"
+      class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-lg hover:shadow-xl">
+      <i class="fas fa-plus mr-2"></i>
+      {{ 'hr.addEmployee' | translate }}
+    </button>
+  </div>
+
+  <!-- Smart Filter Buttons -->
+  <div class="mb-4 flex gap-3">
+    <button
+      (click)="activeFilter.set('all')"
+      [class]="activeFilter() === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'"
+      class="px-4 py-2 rounded-lg transition font-medium">
+      <i class="fas fa-users mr-2"></i>
+      {{ 'employees.filters.all' | translate }}
+    </button>
+    <button
+      (click)="activeFilter.set('contracts')"
+      [class]="activeFilter() === 'contracts' ? 'bg-red-600 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'"
+      class="px-4 py-2 rounded-lg transition font-medium">
+      <i class="fas fa-file-contract mr-2"></i>
+      {{ 'employees.filters.expiringContracts' | translate }}
+      @if (expiringContractsCount() > 0) {
+        <span class="ml-2 px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs">
+          {{ expiringContractsCount() }}
+        </span>
+      }
+    </button>
+    <button
+      (click)="activeFilter.set('passports')"
+      [class]="activeFilter() === 'passports' ? 'bg-red-600 text-white' : 'bg-orange-100 text-orange-800 hover:bg-orange-200'"
+      class="px-4 py-2 rounded-lg transition font-medium">
+      <i class="fas fa-passport mr-2"></i>
+      {{ 'employees.filters.expiringPassports' | translate }}
+      @if (expiringPassportsCount() > 0) {
+        <span class="ml-2 px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs">
+          {{ expiringPassportsCount() }}
+        </span>
+      }
+    </button>
+    <button
+      (click)="activeFilter.set('residences')"
+      [class]="activeFilter() === 'residences' ? 'bg-red-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'"
+      class="px-4 py-2 rounded-lg transition font-medium">
+      <i class="fas fa-id-card mr-2"></i>
+      {{ 'employees.filters.expiringResidences' | translate }}
+      @if (expiringResidencesCount() > 0) {
+        <span class="ml-2 px-2 py-0.5 bg-white bg-opacity-30 rounded-full text-xs">
+          {{ expiringResidencesCount() }}
+        </span>
+      }
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+      <p class="text-red-700">{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Employee Table -->
+  @if (!loading() && employees().length > 0) {
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'hr.employeeNumber' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'sidebar.employees' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'hr.jobTitle' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'hr.department' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'employees.passportExpiry' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'employees.contractExpiry' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'hr.basicSalary' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'hr.status' | translate }}
+            </th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {{ 'common.actions' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (employee of filteredEmployees(); track employee.id) {
+            <tr class="hover:bg-gray-50 cursor-pointer" (click)="viewEmployee(employee.id)">
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                {{ employee.employee_number }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm font-medium text-gray-900">
+                  {{ employee.first_name }} {{ employee.last_name }}
+                </div>
+                @if (employee.arabic_name) {
+                  <div class="text-sm text-gray-500">{{ employee.arabic_name }}</div>
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ employee.job_title || '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                {{ employee.department_name || '-' }}
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                @if (employee.passport_expiry) {
+                  <span [class]="isExpiringSoon(employee.passport_expiry) ? 'text-red-600 font-bold bg-red-50 px-2 py-1 rounded' : 'text-gray-900'">
+                    {{ formatDate(employee.passport_expiry) }}
+                    @if (isExpiringSoon(employee.passport_expiry)) {
+                      <i class="fas fa-exclamation-triangle ml-1"></i>
+                    }
+                  </span>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                @if (employee.contract_end_date) {
+                  <span [class]="isExpiringSoon(employee.contract_end_date) ? 'text-red-600 font-bold bg-red-50 px-2 py-1 rounded' : 'text-gray-900'">
+                    {{ formatDate(employee.contract_end_date) }}
+                    @if (isExpiringSoon(employee.contract_end_date)) {
+                      <i class="fas fa-exclamation-triangle ml-1"></i>
+                    }
+                  </span>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {{ employee.basic_salary | number:'1.2-2' }} SAR
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                      [class]="getStatusClass(employee.status)">
+                  {{ getStatusLabel(employee.status) | translate }}
+                </span>
+               </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm" (click)="$event.stopPropagation()">
+                <button
+                  [routerLink]="['/hr/employees', employee.id, 'edit']"
+                  class="text-blue-600 hover:text-blue-900 mr-3">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  (click)="viewEmployee(employee.id)"
+                  class="text-gray-600 hover:text-gray-900">
+                  <i class="fas fa-eye"></i>
+                </button>
+               </td>
+             </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary -->
+    <div class="mt-4 text-sm text-gray-600 flex items-center justify-between">
+      <div>
+        {{ 'common.total' | translate }}: {{ filteredEmployees().length }} {{ 'hr.employees' | translate | lowercase }}
+        @if (activeFilter() !== 'all') {
+          <span class="ml-2 text-blue-600 font-medium">
+            ({{ 'employees.filteredBy' | translate }}: 
+            @if (activeFilter() === 'contracts') {
+              {{ 'employees.filters.expiringContracts' | translate }}
+            }
+            @if (activeFilter() === 'passports') {
+              {{ 'employees.filters.expiringPassports' | translate }}
+            })
+          </span>
+        }
+      </div>
+      <div class="text-xs text-gray-500">
+        @if (expiringContractsCount() > 0 || expiringPassportsCount() > 0) {
+          <span class="mr-4">
+            <i class="fas fa-file-contract text-yellow-600 mr-1"></i>
+            {{ 'employees.summary.expiringContracts' | translate }}: {{ expiringContractsCount() }}
+          </span>
+          <span>
+            <i class="fas fa-passport text-orange-600 mr-1"></i>
+            {{ 'employees.summary.expiringPassports' | translate }}: {{ expiringPassportsCount() }}
+          </span>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && employees().length === 0 && !error()) {
+    <div class="bg-white rounded-lg shadow p-12 text-center">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">{{ 'employees.empty.title' | translate }}</h3>
+      <p class="mt-1 text-sm text-gray-500">{{ 'employees.empty.message' | translate }}</p>
+    </div>
+  }
+</div>

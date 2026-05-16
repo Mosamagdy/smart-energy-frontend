@@ -1,0 +1,15 @@
+/* Profit & Loss Component Styles */
+.min-h-screen {
+  min-height: 100vh;
+}
+
+/* Smooth transitions */
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Table row hover effects */
+div[class*="border-b"]:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  transition: background-color 0.2s ease;
+}

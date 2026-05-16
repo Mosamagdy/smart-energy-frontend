@@ -1,0 +1,171 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Header -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{ 'purchaseInvoices.title' | translate }}</h1>
+    <p class="text-sm text-gray-600 mt-1">{{ 'purchaseInvoices.subtitle' | translate }}</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-lg shadow p-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Status Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          {{ 'filters.status' | translate }}
+        </label>
+        <select 
+          [ngModel]="selectedStatus()" 
+          (ngModelChange)="selectedStatus.set($event); filterByStatus()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">{{ 'filters.all' | translate }}</option>
+          <option value="draft">{{ 'status.draft' | translate }}</option>
+          <option value="partial">{{ 'status.partial' | translate }}</option>
+          <option value="paid">{{ 'status.paid' | translate }}</option>
+        </select>
+      </div>
+
+      <!-- Supplier Filter -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          {{ 'filters.supplier' | translate }}
+        </label>
+        <select 
+          [ngModel]="selectedSupplier()" 
+          (ngModelChange)="selectedSupplier.set($event); filterBySupplier()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="all">{{ 'filters.all' | translate }}</option>
+          @for (supplier of suppliers(); track supplier.id) {
+            <option [value]="supplier.name">{{ supplier.name }}</option>
+          }
+        </select>
+      </div>
+
+      <!-- Results Count -->
+      <div class="flex items-end">
+        <span class="text-sm text-gray-600">
+          {{ 'filters.showing' | translate }} {{ filteredInvoices().length }} {{ 'filters.of' | translate }} {{ invoices().length }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="bg-white rounded-lg shadow p-8 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+      <p class="mt-4 text-gray-600">{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+      <p class="text-red-800">{{ error() }}</p>
+    </div>
+  }
+
+  <!-- Invoice Table -->
+  @if (!isLoading() && !error()) {
+    <div class="bg-white rounded-lg shadow overflow-x-auto">  <!-- Added overflow-x-auto -->
+      <table class="min-w-full divide-y divide-gray-200" style="table-layout: fixed;">  <!-- Added table-layout: fixed -->
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 12%;">  <!-- Reduced padding -->
+              {{ 'invoices.invoiceNumber' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">  <!-- Reduced padding -->
+              {{ 'invoices.supplier' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 12%;">  <!-- Reduced padding -->
+              {{ 'invoices.poNumber' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">  <!-- Reduced padding -->
+              {{ 'invoices.project' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">  <!-- Reduced padding -->
+              {{ 'invoices.date' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 12%;">  <!-- Reduced padding -->
+              {{ 'invoices.total' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">  <!-- Reduced padding -->
+              {{ 'invoices.status' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 14%;">  <!-- Reduced padding -->
+              {{ 'invoices.journalEntry' | translate }}
+            </th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider" style="width: 10%;">  <!-- Reduced padding -->
+              {{ 'purchaseInvoices.actions' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          @for (invoice of filteredInvoices(); track invoice.id) {
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 whitespace-nowrap text-xs">  <!-- Reduced padding + text-xs -->
+                <div class="font-medium text-blue-600 cursor-pointer hover:underline"
+                     (click)="viewInvoiceDetails(invoice.id)">
+                  {{ invoice.invoice_number }}
+                </div>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs">  <!-- Reduced padding + text-xs -->
+                <div class="text-gray-900 truncate">{{ invoice.supplier_name }}</div>  <!-- Added truncate -->
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600">  <!-- Reduced padding + text-xs -->
+                {{ invoice.po_number || '-' }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600 truncate">  <!-- Reduced padding + text-xs + truncate -->
+                {{ invoice.project_name || '-' }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-600">  <!-- Reduced padding + text-xs -->
+                {{ invoice.invoice_date | date:'yyyy-MM-dd' }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs font-semibold text-gray-900">  <!-- Reduced padding + text-xs -->
+                {{ formatCurrency(invoice.total_amount) }} {{ 'common.currency' | translate }}
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap">  <!-- Reduced padding -->
+                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ getStatusColor(invoice.status) }}">
+                  {{ getStatusLabel(invoice.status) }}
+                </span>
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs">  <!-- Reduced padding + text-xs -->
+                @if (invoice.journal_entry_number) {
+                  <button 
+                    (click)="viewJournalEntry(invoice.journal_entry_number!)"
+                    class="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer">
+                    #{{ invoice.journal_entry_number }}
+                  </button>
+                } @else {
+                  <span class="text-gray-400">{{ 'invoices.noEntry' | translate }}</span>
+                }
+              </td>
+              <td class="px-4 py-3 whitespace-nowrap text-xs">  <!-- Reduced padding + text-xs -->
+                @if (invoice.status === 'draft') {
+                  <button
+                    (click)="finalizeInvoice(invoice.id)"
+                    class="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+                    <i class="fas fa-check mr-1"></i>
+                    {{ 'purchaseInvoices.approve' | translate }}
+                  </button>
+                } @else if (invoice.status === 'final') {
+                  <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-semibold">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    {{ 'purchaseInvoices.approved' | translate }}
+                  </span>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="9" class="px-6 py-8 text-center text-gray-500">
+                {{ 'invoices.noInvoices' | translate }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

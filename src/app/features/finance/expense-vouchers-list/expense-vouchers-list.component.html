@@ -1,0 +1,73 @@
+<div class="expense-vouchers-list">
+  <!-- Header -->
+  <div class="header-bar">
+    <div>
+      <h1 class="page-title">{{ 'expenseVouchers.title' | translate }}</h1>
+      <p class="page-subtitle">{{ 'expenseVouchers.subtitle' | translate }}</p>
+    </div>
+    <a routerLink="/finance/expenses/create" class="btn-create">
+      <i class="fas fa-plus"></i>
+      {{ 'expenseVouchers.createNew' | translate }}
+    </a>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-state">
+      <i class="fas fa-spinner fa-spin"></i>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Vouchers Table -->
+  @if (!isLoading()) {
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>{{ 'expenseVouchers.voucherNumber' | translate }}</th>
+            <th>{{ 'expenseVouchers.date' | translate }}</th>
+            <th>{{ 'expenseVouchers.expenseAccount' | translate }}</th>
+            <th>{{ 'expenseVouchers.paymentMethod' | translate }}</th>
+            <th>{{ 'expenseVouchers.amount' | translate }}</th>
+            <th>{{ 'expenseVouchers.description' | translate }}</th>
+            <th>{{ 'expenseVouchers.journalEntry' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (voucher of vouchers(); track voucher.id) {
+            <tr>
+              <td class="font-bold">{{ voucher.voucher_number }}</td>
+              <td>{{ formatDate(voucher.expense_date) }}</td>
+              <td>{{ voucher.expense_account_code }} - {{ voucher.expense_account_name }}</td>
+              <td>
+                <span class="badge" [class]="voucher.payment_method === 'cash' ? 'badge-cash' : 'badge-bank'">
+                  {{ voucher.payment_account_code }}
+                </span>
+              </td>
+              <td class="font-bold text-red-600">{{ formatCurrency(voucher.expense_amount) }} ر.س</td>
+              <td class="truncate">{{ voucher.description }}</td>
+              <td>
+                @if (voucher.journal_entry_id) {
+                  <a [routerLink]="['/accounting/journal-entries', voucher.journal_entry_id]" class="btn-link">
+                    <i class="fas fa-eye"></i>
+                    {{ voucher.journal_entry_number }}
+                  </a>
+                } @else {
+                  <span class="text-gray-400">-</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (vouchers().length === 0) {
+        <div class="empty-state">
+          <i class="fas fa-receipt"></i>
+          <p>{{ 'expenseVouchers.noVouchers' | translate }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

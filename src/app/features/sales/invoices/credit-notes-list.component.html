@@ -1,0 +1,126 @@
+<div class="credit-notes-list-container">
+  <!-- Header -->
+  <div class="list-header">
+    <div class="header-content">
+      <h1>
+        <i class="fas fa-undo-alt"></i>
+        {{ 'creditNotes.title' | translate }}
+        
+      </h1>
+      <p class="description">{{ 'creditNotes.description' | translate }}</p>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="loading-container">
+      <div class="spinner"></div>
+      <p>{{ 'creditNotes.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error()) {
+    <div class="error-banner">
+      <i class="fas fa-exclamation-triangle"></i>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Credit Notes Table -->
+  @if (!loading() && !error()) {
+    <div class="table-container">
+      <table class="credit-notes-table">
+        <thead>
+          <tr>
+            <th>{{ 'creditNotes.table.creditNoteNumber' | translate }}</th>
+            <th>{{ 'creditNotes.table.invoiceNumber' | translate }}</th>
+            <th>{{ 'creditNotes.table.client' | translate }}</th>
+            <th>{{ 'creditNotes.table.reason' | translate }}</th>
+            <th>{{ 'creditNotes.table.returnDate' | translate }}</th>
+            <th>{{ 'creditNotes.table.amount' | translate }}</th>
+            <th>{{ 'creditNotes.table.tax' | translate }}</th>
+            <th>{{ 'creditNotes.table.total' | translate }}</th>
+            <th>{{ 'creditNotes.table.status' | translate }}</th>
+            <th>{{ 'creditNotes.table.action' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (creditNotes().length === 0) {
+            <tr>
+              <td colspan="10" class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>{{ 'creditNotes.empty.title' | translate }}</p>
+                <small>{{ 'creditNotes.empty.subtitle' | translate }}</small>
+              </td>
+            </tr>
+          } @else {
+            @for (note of creditNotes(); track note.id) {
+              <tr>
+                <td class="number-cell">
+                  <strong>{{ note.credit_note_number }}</strong>
+                </td>
+                <td>{{ note.original_invoice_number || '-' }}</td>
+                <td class="client-cell">{{ note.client_name || '-' }}</td>
+                <td class="reason-cell">{{ note.reason }}</td>
+                <td>{{ formatDate(note.return_date) }}</td>
+                <td class="amount-cell">{{ formatCurrency(note.subtotal) }}</td>
+                <td class="amount-cell">{{ formatCurrency(note.tax_amount) }}</td>
+                <td class="total-cell">{{ formatCurrency(note.total_amount) }}</td>
+                <td>
+                  <span class="status-badge {{ getStatusClass(note.status) }}">
+                    {{ getStatusText(note.status) }}
+                  </span>
+                </td>
+                <td>
+                  <button class="btn-pdf" (click)="downloadPDF(note.id)" [title]="'creditNotes.actions.downloadPDF' | translate">
+                    {{ 'creditNotes.actions.downloadPDF' | translate }}
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Summary Cards -->
+    @if (creditNotes().length > 0) {
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="card-icon">
+            <i class="fas fa-file-invoice"></i>
+          </div>
+          <div class="card-content">
+            <div class="card-label">{{ 'creditNotes.summary.totalNotes' | translate }}</div>
+            <div class="card-value">{{ totalNotesCount() }}</div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">
+            <i class="fas fa-money-bill-wave"></i>
+          </div>
+          <div class="card-content">
+            <div class="card-label">{{ 'creditNotes.summary.totalReturned' | translate }}</div>
+            <div class="card-value">
+              {{ totalReturnedAmount() | currency:'SAR':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+
+        <div class="summary-card">
+          <div class="card-icon">
+            <i class="fas fa-percent"></i>
+          </div>
+          <div class="card-content">
+            <div class="card-label">{{ 'creditNotes.summary.totalTaxReturned' | translate }}</div>
+            <div class="card-value">
+              {{ totalTaxAmount() | currency:'SAR':'symbol':'1.2-2' }}
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

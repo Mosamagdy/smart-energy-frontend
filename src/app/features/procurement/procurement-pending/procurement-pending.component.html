@@ -1,0 +1,629 @@
+<div class="min-h-screen bg-linear-to-br from-blue-50 via-white to-purple-50 p-6">
+  <!-- Header -->
+  <div class="bg-linear-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="text-5xl">📦</div>
+        <div>
+          <h1 class="text-3xl font-bold mb-2">{{ 'pendingPOs.title' | translate }}</h1>
+          <p class="text-blue-100">{{ 'pendingPOs.subtitle' | translate }}</p>
+        </div>
+      </div>
+      <div class="bg-white/20 px-6 py-3 rounded-xl backdrop-blur-sm">
+        <span class="text-3xl font-bold">{{ pendingPOs().length }}</span>
+        <span class="text-sm block">{{ 'pendingPOs.pendingCount' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ Phase 1: Status Filters -->
+  <div class="bg-white rounded-2xl shadow-lg p-4 mb-6">
+    <div class="flex items-center gap-4">
+      <label class="text-sm font-semibold text-gray-700">{{ 'pendingPOs.filterByStatus' | translate }}</label>
+      <select 
+        [ngModel]="selectedStatus()"
+        (ngModelChange)="selectedStatus.set($event); filterByStatus()"
+        class="px-4 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+        @if (isProcurementManager()) {
+          <option value="all">{{ 'pendingPOs.all' | translate }}</option>
+          <option value="pending">{{ 'pendingPOs.newPending' | translate }}</option>
+          <option value="pending_finance">{{ 'pendingPOs.pendingFinance' | translate }}</option>
+          <option value="approved">{{ 'pendingPOs.approved' | translate }}</option>
+          <option value="rejected">{{ 'pendingPOs.rejected' | translate }}</option>
+        }
+        @if (isFinanceManager()) {
+          <option value="all">{{ 'pendingPOs.all' | translate }}</option>
+          <option value="pending_finance">{{ 'pendingPOs.pendingApproval' | translate }}</option>
+          <option value="approved">{{ 'pendingPOs.myApprovals' | translate }}</option>
+          <option value="rejected">{{ 'pendingPOs.myRejections' | translate }}</option>
+        }
+      </select>
+      <span class="text-sm text-gray-600">
+        {{ 'pendingPOs.showing' | translate }} {{ filteredPOs().length }} {{ 'pendingPOs.of' | translate }} {{ pendingPOs().length }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
+      <p class="text-gray-600">{{ 'pendingPOs.loadingPOs' | translate }}</p>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && pendingPOs().length === 0) {
+    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+      <div class="text-6xl mb-4">✅</div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ 'pendingPOs.noPendingRequests' | translate }}</h2>
+      <p class="text-gray-600">{{ 'pendingPOs.allReviewed' | translate }}</p>
+    </div>
+  }
+
+  <!-- PO Cards -->
+  @if (!loading() && filteredPOs().length > 0) {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      @for (po of filteredPOs(); track po.id) {
+        <div class="bg-white rounded-2xl shadow-lg border-2 border-gray-100 hover:border-blue-400 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+          <!-- Card Header -->
+          <div class="p-5 border-b border-gray-100 bg-linear-to-r from-blue-50 to-purple-50">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex-1 cursor-pointer" (click)="isFinanceManager() && selectedPO.set(po)">
+                <h3 class="text-xl font-bold text-gray-900 mb-1">
+                  {{ po.po_number }}
+                </h3>
+                <p class="text-sm text-gray-600">{{ 'pendingPOs.project' | translate }} {{ po.project_name }}</p>
+                <p class="text-sm text-gray-600">{{ 'pendingPOs.createdBy' | translate }} {{ po.creator_name }}</p>
+                @if (po.supplier_name) {
+                  <p class="text-sm text-blue-700 font-semibold mt-1">{{ 'pendingPOs.supplier' | translate }} {{ po.supplier_name }}</p>
+                }
+              </div>
+            </div>
+
+            <!-- Total Amount -->
+            <div class="bg-white p-3 rounded-lg shadow-sm">
+              <p class="text-xs text-gray-600 mb-1">{{ 'pendingPOs.totalAmount' | translate }}</p>
+              <p class="text-2xl font-bold text-blue-700">
+                {{ po.total_amount.toLocaleString() }}
+                <span class="text-sm">{{ 'common.sar' | translate }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Card Details -->
+          <div class="p-4 space-y-3 bg-gray-50">
+            <!-- Items Count -->
+            <div class="flex items-center gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              <span class="font-medium">{{ 'pendingPOs.itemsCount' | translate }}</span>
+              <span>{{ po.items_count || 0 }}</span>
+            </div>
+
+            <!-- Date -->
+            <div class="flex items-center gap-2 text-sm text-gray-700">
+              <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span class="font-medium">{{ 'pendingPOs.createdAt' | translate }}</span>
+              <span>{{ formatDate(po.created_at) }}</span>
+            </div>
+
+            <!-- Notes -->
+            @if (po.notes) {
+              <div class="bg-gray-100 p-3 rounded-lg">
+                <p class="text-xs text-gray-600 font-semibold mb-1">{{ 'pendingPOs.notes' | translate }}</p>
+                <p class="text-sm text-gray-700">{{ po.notes }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Action Button -->
+          <div class="p-4 border-t border-gray-200 bg-white">
+            <!-- ✅ Procurement Manager: Price & Select Supplier -->
+            @if (isProcurementManager()) {
+              <button 
+                (click)="openSupplierModal(po)"
+                class="w-full py-3 px-4 bg-linear-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+                {{ 'pendingPOs.selectSupplierAndPrice' | translate }}
+              </button>
+            }
+
+            <!-- ✅ Finance Manager: VAT Toggle + Approve/Reject Buttons -->
+            @if (isFinanceManager()) {
+              <div class="space-y-3">
+                <!-- VAT Toggle (SCOPED TO THIS PO) -->
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg border-2 border-gray-200">
+                  <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                    <div>
+                      <label class="text-sm font-semibold text-gray-900 cursor-pointer" [for]="'vat-toggle-' + po.id">
+                        {{ 'pendingPOs.addVat' | translate }}
+                      </label>
+                      <p class="text-xs text-gray-600">{{ 'pendingPOs.applyVat' | translate }}</p>
+                    </div>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      [id]="'vat-toggle-' + po.id"
+                      [checked]="getPOTaxToggle(po.id)"
+                      (change)="setPOTaxToggle(po.id, $any($event.target).checked)"
+                      class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex gap-2">
+                  <button 
+                    (click)="openApprovalModal(po)"
+                    [disabled]="submitting()"
+                    class="flex-1 py-3 px-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    {{ submitting() ? ('pendingPOs.approving' | translate) : ('pendingPOs.approve' | translate) }}
+                  </button>
+                  <button 
+                    (click)="openRejectionModal(po)"
+                    [disabled]="submitting()"
+                    class="flex-1 py-3 px-4 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition font-semibold flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    {{ 'pendingPOs.reject' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Supplier & Price Modal (Procurement Only) -->
+  @if (showSupplierModal() && selectedPO() && isProcurementManager()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">🏷️</div>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'pendingPOs.selectSupplier' | translate }}</h2>
+        </div>
+
+        <!-- PO Info -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.poNumber' | translate }}</strong> {{ selectedPO()?.po_number }}</p>
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.project' | translate }}</strong> {{ selectedPO()?.project_name }}</p>
+          <p class="text-sm text-gray-700"><strong>{{ 'pendingPOs.createdBy' | translate }}</strong> {{ selectedPO()?.creator_name }}</p>
+        </div>
+
+        <!-- Supplier Selection -->
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            {{ 'pendingPOs.chooseSupplier' | translate }} <span class="text-red-600">*</span>
+          </label>
+          <select 
+            [ngModel]="selectedSupplierId()"
+            (ngModelChange)="selectedSupplierId.set($event)"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+            <option [ngValue]="null" disabled>{{ 'pendingPOs.selectSupplierPlaceholder' | translate }}</option>
+            @for (supplier of suppliers(); track supplier.id) {
+              <option [ngValue]="supplier.id">
+                {{ supplier.name }} ({{ supplier.supplier_code }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <!-- Items with Prices -->
+        @if (selectedPO()?.items && selectedPO()!.items!.length > 0) {
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              {{ 'pendingPOs.poItems' | translate }}
+            </label>
+            <div class="space-y-2">
+              @for (item of selectedPO()?.items; track item.item_id) {
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div class="flex items-center justify-between mb-2">
+                    <div>
+                      <p class="font-semibold text-gray-900 text-sm">{{ item.item_name }}</p>
+                      @if (item.item_code) {
+                        <p class="text-xs text-gray-600">{{ item.item_code }}</p>
+                      }
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="text-xs text-gray-600 mb-1 block">{{ 'pendingPOs.quantity' | translate }}</label>
+                      <input 
+                        type="number"
+                        [ngModel]="getItemQuantity(item.item_id)"
+                        (ngModelChange)="updateItemQuantity(item.item_id, $event)"
+                        min="1"
+                        step="1"
+                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm">
+                    </div>
+                    <div>
+                      <label class="text-xs text-gray-600 mb-1 block">{{ 'pendingPOs.unitPrice' | translate }} <span class="text-red-600">*</span></label>
+                      <input 
+                        type="number"
+                        [ngModel]="getItemPrice(item.item_id)"
+                        (ngModelChange)="updateItemPrice(item.item_id, $event)"
+                        min="0"
+                        step="0.01"
+                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm">
+                    </div>
+                  </div>
+                  <div class="mt-2 text-xs text-gray-600">
+                    {{ 'pendingPOs.total' | translate }} {{ (getItemPrice(item.item_id) * getItemQuantity(item.item_id)).toLocaleString() }} {{ 'common.sar' | translate }}
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Total -->
+        <div class="bg-green-50 border-2 border-green-300 p-4 rounded-lg mb-4">
+          <div class="flex items-center justify-between">
+            <p class="text-lg font-bold text-green-900">{{ 'pendingPOs.totalAmount' | translate }}</p>
+            <p class="text-2xl font-bold text-green-700">{{ calculateTotal().toLocaleString() }} {{ 'common.sar' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
+          <p class="text-xs text-yellow-800">
+            ⚠️ {{ 'pendingPOs.confirmApprovalWarning' | translate }}
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            (click)="saveSupplierAndPrices()"
+            class="flex-1 py-3 px-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold shadow-md">
+            {{ 'pendingPOs.saveAndSendToFinance' | translate }}
+          </button>
+          <button 
+            (click)="showSupplierModal.set(false)"
+            class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold">
+            {{ 'pendingPOs.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ✅ Finance Manager: PO Details Modal (Read-Only) -->
+  @if (selectedPO() && isFinanceManager()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">📋</div>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'pendingPOs.reviewPurchaseOrder' | translate }}</h2>
+        </div>
+
+        <!-- PO Info -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.poNumber' | translate }}</strong> {{ selectedPO()?.po_number }}</p>
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.project' | translate }}</strong> {{ selectedPO()?.project_name }}</p>
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.createdBy' | translate }}</strong> {{ selectedPO()?.creator_name }}</p>
+          @if (selectedPO()?.supplier_name) {
+            <p class="text-sm text-gray-700"><strong>{{ 'pendingPOs.selectedSupplier' | translate }}</strong> <span class="text-blue-700 font-semibold">{{ selectedPO()?.supplier_name }}</span></p>
+          }
+        </div>
+
+        <!-- Items (Read-Only) -->
+        @if (selectedPO()?.items && selectedPO()!.items!.length > 0) {
+          <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">
+              {{ 'pendingPOs.poItems' | translate }}
+            </label>
+            <div class="space-y-2">
+              @for (item of selectedPO()?.items; track item.item_id) {
+                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                  <div class="flex items-center justify-between mb-2">
+                    <div>
+                      <p class="font-semibold text-gray-900 text-sm">{{ item.item_name }}</p>
+                      @if (item.item_code) {
+                        <p class="text-xs text-gray-600">{{ item.item_code }}</p>
+                      }
+                    </div>
+                  </div>
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-white p-2 rounded border">
+                      <p class="text-xs text-gray-600">{{ 'pendingPOs.quantity' | translate }}</p>
+                      <p class="text-sm font-semibold text-gray-900">{{ item.quantity }}</p>
+                    </div>
+                    <div class="bg-white p-2 rounded border">
+                      <p class="text-xs text-gray-600">{{ 'pendingPOs.unitPrice' | translate }}</p>
+                      <p class="text-sm font-semibold text-blue-700">{{ item.unit_cost.toLocaleString() }} {{ 'common.sar' | translate }}</p>
+                    </div>
+                    <div class="bg-white p-2 rounded border">
+                      <p class="text-xs text-gray-600">{{ 'pendingPOs.total' | translate }}</p>
+                      <p class="text-sm font-semibold text-green-700">{{ ((item.quantity || 0) * (item.unit_cost || 0)).toLocaleString() }} {{ 'common.sar' | translate }}</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Total -->
+        <div class="bg-green-50 border-2 border-green-300 p-4 rounded-lg mb-4">
+          <div class="flex items-center justify-between">
+            <p class="text-lg font-bold text-green-900">{{ 'pendingPOs.totalAmount' | translate }}</p>
+            <p class="text-2xl font-bold text-green-700">{{ selectedPO()?.total_amount?.toLocaleString() }} {{ 'common.sar' | translate }}</p>
+          </div>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
+          <p class="text-xs text-yellow-800">
+            ⚠️ {{ 'pendingPOs.confirmApprovalWarning' | translate }}
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            (click)="openApprovalModal(selectedPO()!)"
+            [disabled]="submitting()"
+            class="flex-1 py-3 px-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {{ submitting() ? ('pendingPOs.approving' | translate) : ('pendingPOs.approve' | translate) }}
+          </button>
+          <button 
+            (click)="openRejectionModal(selectedPO()!)"
+            [disabled]="submitting()"
+            class="flex-1 py-3 px-4 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            {{ 'pendingPOs.reject' | translate }}
+          </button>
+          <button 
+            (click)="selectedPO.set(null)"
+            class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold">
+            {{ 'pendingPOs.close' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ✅ Finance Manager: Approval Confirmation Modal (with VAT Toggle) -->
+  @if (showApprovalModal() && selectedApprovalPO()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'pendingPOs.confirmApproval' | translate }}</h2>
+        </div>
+
+        <!-- PO Info -->
+        <div class="bg-blue-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.poNumber' | translate }}</strong> {{ selectedApprovalPO()?.po_number }}</p>
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.project' | translate }}</strong> {{ selectedApprovalPO()?.project_name }}</p>
+          <p class="text-sm text-gray-700"><strong>{{ 'pendingPOs.selectedSupplier' | translate }}</strong> <span class="text-blue-700 font-semibold">{{ selectedApprovalPO()?.supplier_name }}</span></p>
+        </div>
+
+        <!-- ✅ Items Table - FORCE INJECTED -->
+        @if (selectedApprovalPO()?.items && selectedApprovalPO()!.items!.length > 0) {
+          <div class="mb-4">
+            <h3 class="text-base font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+              </svg>
+              {{ 'pendingPOs.itemsToApprove' }} ({{ selectedApprovalPO()!.items!.length }} {{ 'pendingPOs.items' | translate }})
+            </h3>
+            
+            <!-- Items Table -->
+            <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-linear-to-r from-blue-600 to-purple-600">
+                  <tr>
+                    <th class="px-3 py-2 text-right text-xs font-bold text-white uppercase">#</th>
+                    <th class="px-3 py-2 text-right text-xs font-bold text-white uppercase">{{ 'pendingPOs.itemName' | translate }}</th>
+                    <th class="px-3 py-2 text-center text-xs font-bold text-white uppercase">{{ 'pendingPOs.quantity' | translate }}</th>
+                    <th class="px-3 py-2 text-center text-xs font-bold text-white uppercase">{{ 'pendingPOs.unitPrice' | translate }}</th>
+                    <th class="px-3 py-2 text-center text-xs font-bold text-white uppercase">{{ 'pendingPOs.total' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  @for (item of selectedApprovalPO()?.items; track item.id; let idx = $index) {
+                    <tr class="{{ idx % 2 === 0 ? 'bg-gray-50' : 'bg-white' }} hover:bg-blue-50 transition-colors">
+                      <td class="px-3 py-2 text-center">
+                        <span class="text-sm font-semibold text-gray-900">{{ idx + 1 }}</span>
+                      </td>
+                      <td class="px-3 py-2">
+                        <div class="text-sm font-semibold text-gray-900">
+                          {{ item.item_name_ar || item.item_name }}
+                        </div>
+                        @if (item.item_code) {
+                          <div class="text-xs text-gray-500 mt-0.5">{{ item.item_code }}</div>
+                        }
+                      </td>
+                      <td class="px-3 py-2 text-center">
+                        <span class="text-sm font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded">
+                          {{ item.quantity }}
+                        </span>
+                      </td>
+                      <td class="px-3 py-2 text-center">
+                        <span class="text-sm text-gray-900 font-medium">
+                          {{ item.unit_cost.toLocaleString() || 0 }} {{ 'common.sar' | translate }}
+                        </span>
+                      </td>
+                      <td class="px-3 py-2 text-center">
+                        <span class="text-sm font-bold text-green-700 bg-green-50 px-2 py-1 rounded">
+                          {{ item.total_cost.toLocaleString() || 0 }} {{ 'common.sar' | translate }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot class="bg-linear-to-r from-gray-100 to-gray-200 border-t-2 border-gray-300">
+                  <tr>
+                    <td colspan="4" class="px-3 py-2 text-right">
+                      <span class="text-sm font-bold text-gray-900">{{ 'pendingPOs.totalItems' | translate }}</span>
+                    </td>
+                    <td class="px-3 py-2 text-center">
+                      <span class="text-base font-bold text-blue-700">
+                        {{ selectedApprovalPO()?.total_amount?.toLocaleString() || 0 }} {{ 'common.sar' | translate }}
+                      </span>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        } @else {
+          <div class="mb-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p class="text-sm font-semibold text-yellow-800 flex items-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+              {{ 'pendingPOs.noItems' | translate }}
+            </p>
+          </div>
+        }
+
+        <!-- VAT Toggle in Modal -->
+        <div class="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+              </svg>
+              <span class="text-sm font-semibold text-gray-900">{{ 'pendingPOs.addVat' | translate }}</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                [checked]="getPOTaxToggle(selectedApprovalPO()!.id)"
+                (change)="setPOTaxToggle(selectedApprovalPO()!.id, $any($event.target).checked)"
+                class="sr-only peer">
+              <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
+          </div>
+
+          <!-- Financial Breakdown -->
+          @if (getPOTaxToggle(selectedApprovalPO()!.id)) {
+            <div class="space-y-2 text-sm border-t border-gray-200 pt-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">{{ 'pendingPOs.amountBeforeTax' | translate }}</span>
+                <span class="font-semibold">{{ (selectedApprovalPO()!.total_amount / 1.15).toFixed(2) }} {{ 'common.sar' | translate }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">{{ 'pendingPOs.vatAmount' | translate }}</span>
+                <span class="font-semibold text-blue-600">{{ (selectedApprovalPO()!.total_amount - selectedApprovalPO()!.total_amount / 1.15).toFixed(2) }} {{ 'common.sar' | translate }}</span>
+              </div>
+              <div class="flex justify-between border-t border-gray-200 pt-2 font-bold">
+                <span>{{ 'pendingPOs.totalWithVat' | translate }}</span>
+                <span class="text-green-600">{{ selectedApprovalPO()?.total_amount?.toLocaleString() }} {{ 'common.sar' | translate }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="space-y-2 text-sm border-t border-gray-200 pt-3">
+              <div class="flex justify-between">
+                <span class="text-gray-600">{{ 'pendingPOs.originalTotal' | translate }}</span>
+                <span class="line-through text-gray-500">{{ selectedApprovalPO()?.total_amount?.toLocaleString() }} {{ 'common.sar' | translate }}</span>
+              </div>
+              <div class="flex justify-between border-t border-gray-200 pt-2 font-bold">
+                <span>{{ 'pendingPOs.newTotal' | translate }}</span>
+                <span class="text-green-600">{{ (selectedApprovalPO()!.total_amount / 1.15).toFixed(2) }} {{ 'common.sar' | translate }}</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
+          <p class="text-xs text-yellow-800">
+            ⚠️ {{ 'pendingPOs.confirmApprovalWarning' | translate }}
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            (click)="approveByFinance()"
+            [disabled]="submitting()"
+            class="flex-1 py-3 px-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            {{ submitting() ? ('pendingPOs.approving' | translate) : ('pendingPOs.confirmApprovalBtn' | translate) }}
+          </button>
+          <button 
+            (click)="showApprovalModal.set(false)"
+            [disabled]="submitting()"
+            class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ 'pendingPOs.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ✅ Finance Manager: Rejection Modal -->
+  @if (showRejectionModal() && selectedPO()) {
+    <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="text-4xl">⚠️</div>
+          <h2 class="text-2xl font-bold text-gray-900">{{ 'pendingPOs.rejectionReason' | translate }}</h2>
+        </div>
+
+        <div class="bg-red-50 p-4 rounded-lg mb-4">
+          <p class="text-sm text-gray-700 mb-2"><strong>{{ 'pendingPOs.poNumber' | translate }}</strong> {{ selectedPO()?.po_number }}</p>
+          <p class="text-sm text-gray-700"><strong>{{ 'pendingPOs.project' | translate }}</strong> {{ selectedPO()?.project_name }}</p>
+        </div>
+
+        <div class="mb-4">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            {{ 'pendingPOs.rejectionReason' | translate }} <span class="text-red-600">*</span>
+          </label>
+          <textarea 
+            [ngModel]="rejectionReason()"
+            (ngModelChange)="rejectionReason.set($event)"
+            rows="4"
+            [placeholder]="'pendingPOs.rejectionReasonPlaceholder' | translate"
+            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-red-500 focus:ring-2 focus:ring-red-500/20 transition"></textarea>
+        </div>
+
+        <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-lg mb-4">
+          <p class="text-xs text-yellow-800">
+            ⚠️ {{ 'pendingPOs.rejectionWarning' | translate }}
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button 
+            (click)="rejectByFinance()"
+            [disabled]="submitting() || !rejectionReason().trim()"
+            class="flex-1 py-3 px-4 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition font-semibold shadow-md disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ submitting() ? ('pendingPOs.approving' | translate) : ('pendingPOs.confirmRejection' | translate) }}
+          </button>
+          <button 
+            (click)="showRejectionModal.set(false)"
+            [disabled]="submitting()"
+            class="flex-1 py-3 px-4 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+            {{ 'pendingPOs.cancel' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

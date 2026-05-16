@@ -1,0 +1,188 @@
+<div class="trial-balance-container" dir="rtl">
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-content">
+      <h1>
+        <i class="fas fa-balance-scale"></i>
+        {{ 'reports.trialBalance' | translate }}
+      </h1>
+      <p class="subtitle">{{ 'reports.subtitle' | translate }}</p>
+    </div>
+    <button routerLink="/finance" class="btn-back">
+      <i class="fas fa-arrow-right"></i>
+      {{ 'reports.back' | translate }}
+    </button>
+  </div>
+
+  <!-- Date Range Filter -->
+  <div class="filter-section">
+    <div class="filter-header">
+      <h3><i class="fas fa-filter"></i> {{ 'reports.dateFilter' | translate }}</h3>
+    </div>
+    <div class="date-range">
+      <div class="date-field">
+        <label for="startDate">{{ 'reports.from' | translate }}:</label>
+        <input 
+          type="date" 
+          id="startDate"
+          [(ngModel)]="startDate" 
+          (change)="onDateChange()"
+          class="date-input"
+        >
+      </div>
+      <div class="date-field">
+        <label for="endDate">{{ 'reports.to' | translate }}:</label>
+        <input 
+          type="date" 
+          id="endDate"
+          [(ngModel)]="endDate" 
+          (change)="onDateChange()"
+          class="date-input"
+        >
+      </div>
+      <button (click)="loadTrialBalance()" class="btn-refresh">
+        <i class="fas fa-sync-alt"></i>
+        {{ 'reports.refresh' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>{{ 'reports.loading' | translate }}</p>
+  </div>
+
+  <!-- Report Content -->
+  <div *ngIf="!isLoading() && accounts().length > 0" class="report-content">
+    
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="summary-card debit-card">
+        <div class="card-icon">
+          <i class="fas fa-arrow-up"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.totalDebit' | translate }}</h3>
+          <p class="card-amount">{{ formatCurrency(totalDebit()) }}</p>
+        </div>
+      </div>
+
+      <div class="summary-card credit-card">
+        <div class="card-icon">
+          <i class="fas fa-arrow-down"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.totalCredit' | translate }}</h3>
+          <p class="card-amount">{{ formatCurrency(totalCredit()) }}</p>
+        </div>
+      </div>
+
+      <div class="summary-card" [class]="isBalanced() ? 'balanced-card' : 'unbalanced-card'">
+        <div class="card-icon">
+          <i class="fas" [class]="isBalanced() ? 'fa-check-circle' : 'fa-exclamation-triangle'"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.balanceStatus' | translate }}</h3>
+          <p class="card-status">
+            <span *ngIf="isBalanced()">{{ 'reports.balanced' | translate }}</span>
+            <span *ngIf="!isBalanced()">{{ 'reports.unbalanced' | translate }}</span>
+          </p>
+          <p *ngIf="!isBalanced()" class="difference-amount">
+            {{ 'reports.difference' | translate }}: {{ formatCurrency(difference()) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="summary-card info-card">
+        <div class="card-icon">
+          <i class="fas fa-list-ol"></i>
+        </div>
+        <div class="card-details">
+          <h3>{{ 'reports.accountCount' | translate }}</h3>
+          <p class="card-amount">{{ accountsWithActivity() }} / {{ accountCount() }}</p>
+          <p class="card-note">{{ 'reports.activeTotal' | translate }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trial Balance Table -->
+    <div class="table-container">
+      <table class="trial-balance-table">
+        <thead>
+          <tr>
+            <th class="col-code">{{ 'reports.accountCode' | translate }}</th>
+            <th class="col-name">{{ 'reports.accountName' | translate }}</th>
+            <th class="col-group">{{ 'reports.group' | translate }}</th>
+            <th class="col-type">{{ 'reports.accountType' | translate }}</th>
+            <th class="col-debit">{{ 'reports.debit' | translate }}</th>
+            <th class="col-credit">{{ 'reports.credit' | translate }}</th>
+            <th class="col-balance">{{ 'reports.balance' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr 
+            *ngFor="let account of accounts()" 
+            (click)="drillDownToLedger(account.account_code)"
+            class="clickable-row"
+            [title]="'reports.clickToViewLedger' | translate"
+          >
+            <td class="col-code account-code">{{ account.account_code }}</td>
+            <td class="col-name account-name">
+              {{ account.account_name_ar || account.account_name }}
+            </td>
+            <td class="col-group">
+              <span class="coa-badge" [class]="'badge-' + account.coa_group.toLowerCase()">
+                {{ account.coa_group }}
+              </span>
+            </td>
+            <td class="col-type">{{ account.account_type }}</td>
+            <td class="col-debit amount-cell debit-amount">
+              {{ account.total_debit > 0 ? formatCurrency(account.total_debit) : '-' }}
+            </td>
+            <td class="col-credit amount-cell credit-amount">
+              {{ account.total_credit > 0 ? formatCurrency(account.total_credit) : '-' }}
+            </td>
+            <td class="col-balance amount-cell" [class]="getBalanceClass(account)">
+              {{ account.balance !== 0 ? formatCurrency(account.balance) : '-' }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totals-row">
+            <td colspan="4" class="totals-label">
+              <strong>{{ 'reports.totals' | translate }}</strong>
+            </td>
+            <td class="col-debit amount-cell debit-amount">
+              <strong>{{ formatCurrency(totalDebit()) }}</strong>
+            </td>
+            <td class="col-credit amount-cell credit-amount">
+              <strong>{{ formatCurrency(totalCredit()) }}</strong>
+            </td>
+            <td class="col-balance amount-cell" [class]="difference() === 0 ? 'zero-balance' : (difference() > 0 ? 'debit-balance' : 'credit-balance')">
+              <strong>{{ difference() !== 0 ? formatCurrency(difference()) : '-' }}</strong>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Balance Validation Message -->
+    <div class="validation-message" [class]="isBalanced() ? 'validation-success' : 'validation-error'">
+      <i class="fas" [class]="isBalanced() ? 'fa-check-circle' : 'fa-exclamation-circle'"></i>
+      <span *ngIf="isBalanced()">
+        {{ 'reports.balancedMessage' | translate }}
+      </span>
+      <span *ngIf="!isBalanced()">
+        {{ 'reports.unbalancedMessage' | translate }} {{ formatCurrency(difference()) }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading() && accounts().length === 0" class="empty-state">
+    <i class="fas fa-inbox"></i>
+    <h3>{{ 'reports.noData' | translate }}</h3>
+    <p>{{ 'reports.noDataDesc' | translate }}</p>
+  </div>
+</div>

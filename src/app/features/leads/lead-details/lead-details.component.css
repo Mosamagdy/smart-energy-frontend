@@ -1,0 +1,62 @@
+/* Lead Details Component Styles */
+
+/* Custom scrollbar for timeline */
+.space-y-4::-webkit-scrollbar {
+  width: 6px;
+}
+
+.space-y-4::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.space-y-4::-webkit-scrollbar-thumb {
+  background: rgba(44, 220, 120, 0.4);
+  border-radius: 3px;
+}
+
+.space-y-4::-webkit-scrollbar-thumb:hover {
+  background: rgba(44, 220, 120, 0.6);
+}
+
+/* Smooth transitions for pipeline stages */
+.w-16.h-16 {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal animation */
+.fixed {
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Timeline dot pulse animation for active items */
+.timeline-dot-active {
+  animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    border-color: rgba(44, 220, 120, 0.3);
+  }
+  50% {
+    border-color: rgba(44, 220, 120, 0.6);
+  }
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
