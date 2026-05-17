@@ -55,7 +55,6 @@ export class SalesInvoicesListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInvoices();
-    this.loadWarehouses();
   }
 
   async loadWarehouses(): Promise<void> {
@@ -76,7 +75,8 @@ export class SalesInvoicesListComponent implements OnInit {
       const response: any = await firstValueFrom(
         this.http.get(`${environment.apiUrl}/sales/invoices`)
       );
-      this.invoices.set(response.data?.invoices || []);
+      this.invoices.set(response.data || response.invoices || response || []);
+      console.log('[SalesInvoices] Raw response:', JSON.stringify(response));
       console.log(`[SalesInvoices] Loaded ${this.invoices().length} invoices`);
     } catch (error) {
       console.error('[SalesInvoices] Error loading invoices:', error);
