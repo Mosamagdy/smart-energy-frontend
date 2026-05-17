@@ -102,7 +102,7 @@ export class SalesInvoicesListComponent implements OnInit {
   }
 
   createNewInvoice(): void {
-    this.router.navigate(['/finance/sales-invoices/create']);
+    this.router.navigate(['/sales/invoices/create']);
   }
 
   async generateTaxInvoice(invoiceId: number): Promise<void> {

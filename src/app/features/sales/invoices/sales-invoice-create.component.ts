@@ -332,15 +332,12 @@ export class SalesInvoiceCreateComponent implements OnInit {
           notes: item.notes || undefined
         }))
       };
-      
-      console.log('[SalesInvoice] 📤 Sending payload:', JSON.stringify(invoicePayload, null, 2));
-      
+            
       const result = await this.salesService.createInvoice(invoicePayload);
 
       this.createdInvoice.set(result);
       this.success.set(true);
       
-      console.log('[SalesInvoice] ✅ Invoice created successfully!');
       this.toast.success('تم إنشاء فاتورة المبيعات بنجاح!');
       
     } catch (error: any) {
