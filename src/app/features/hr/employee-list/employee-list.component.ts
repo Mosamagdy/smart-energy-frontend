@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { filter } from 'rxjs/operators';
 import { Subscription } from 'rxjs';

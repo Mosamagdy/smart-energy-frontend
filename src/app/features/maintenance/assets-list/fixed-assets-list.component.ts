@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment';
 
 interface FixedAsset {
   id: number;
@@ -49,7 +50,8 @@ export class FixedAssetsListComponent implements OnInit {
     this.loading.set(true);
     try {
       const response: any = await firstValueFrom(
-        this.http.get('/api/fixed-assets')
+        this.http.get(`${environment.apiUrl}/fixed-assets`)
+
       );
 
       this.assets.set(response.data || []);
@@ -71,7 +73,8 @@ export class FixedAssetsListComponent implements OnInit {
     this.runningDepreciation.set(true);
     try {
       const response: any = await firstValueFrom(
-        this.http.post('/api/fixed-assets/depreciation/run', {})
+        this.http.post(`${environment.apiUrl}/fixed-assets/depreciation/run`, {})
+
       );
 
       this.toast.success(response.message || 'تم تشغيل الإهلاك الشهري بنجاح');

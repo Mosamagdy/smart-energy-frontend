@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-credit-note-create',
@@ -67,7 +68,7 @@ export class CreditNoteCreateComponent {
       console.log('[CreditNote] Loading invoice:', this.invoiceId());
       
       const response: any = await firstValueFrom(
-        this.http.get(`/api/sales/invoices/${this.invoiceId()}`)
+        this.http.get(`${environment.apiUrl}/sales/invoices/${this.invoiceId()}`)
       );
       
       console.log('[CreditNote] Invoice loaded:', response.data);
@@ -147,7 +148,8 @@ export class CreditNoteCreateComponent {
       };
 
       await firstValueFrom(
-        this.http.post('/api/credit-notes', payload)
+        this.http.post(`${environment.apiUrl}/credit-notes`, payload)
+
       );
 
       console.log('[CreditNote] Credit note created successfully');

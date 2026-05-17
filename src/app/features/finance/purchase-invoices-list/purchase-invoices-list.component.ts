@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment.prod';
 
 interface PurchaseInvoice {
   id: number;
@@ -52,17 +53,11 @@ export class PurchaseInvoicesListComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    console.log('🔄 Starting to load invoices...');
-
-    this.http.get<any>('/api/purchasing/invoices').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/purchasing/invoices`).subscribe({
       next: (response) => {
-        console.log('📦 API Response:', response);
-        console.log('📊 Invoices array:', response.data);
-        console.log('📊 Invoices count:', response.data?.length);
         
         if (response.status === 'success') {
           this.invoices.set(response.data || []);
-          console.log('✅ Invoices signal set:', this.invoices().length);
           this.applyFilters();
           this.extractSuppliers(response.data || []);
           this.isLoading.set(false);
@@ -96,21 +91,15 @@ export class PurchaseInvoicesListComponent implements OnInit {
 
   applyFilters(): void {
     let filtered = this.invoices();
-    console.log('🔍 applyFilters - Total invoices:', filtered.length);
-    console.log('🔍 Current status filter:', this.selectedStatus());
-    console.log('🔍 Current supplier filter:', this.selectedSupplier());
 
     if (this.selectedStatus() !== 'all') {
       filtered = filtered.filter(inv => inv.status === this.selectedStatus());
-      console.log('🔍 After status filter:', filtered.length);
     }
 
     if (this.selectedSupplier() !== 'all') {
       filtered = filtered.filter(inv => inv.supplier_name === this.selectedSupplier());
-      console.log('🔍 After supplier filter:', filtered.length);
     }
 
-    console.log('✅ Setting filteredInvoices:', filtered.length);
     this.filteredInvoices.set(filtered);
   }
 
@@ -172,7 +161,7 @@ export class PurchaseInvoicesListComponent implements OnInit {
       return;
     }
 
-    this.http.post<any>(`/api/purchasing/invoices/${invoiceId}/finalize`, {}).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/purchasing/invoices/${invoiceId}/finalize`, {}).subscribe({
       next: (response) => {
         alert('تم اعتماد فاتورة الشراء بنجاح');
         this.loadInvoices();

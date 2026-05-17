@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { SalesService, CreateInvoiceResult } from '../../../core/services/sales.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Router } from '@angular/router';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -154,14 +154,10 @@ export class SalesInvoiceCreateComponent implements OnInit {
     if (field === 'inventory_item_id' && value) {
       // Convert value to number (HTML select returns string)
       const itemId = typeof value === 'string' ? parseInt(value, 10) : value;
-      
-      console.log(`[SalesInvoice] Looking for item ID: ${itemId} (type: ${typeof itemId})`);
-      console.log(`[SalesInvoice] Available items:`, this.inventoryItems().map(i => ({ id: i.id, name: i.item_name_ar, unit_cost: i.unit_cost })));
-      
+            
       const selectedItem = this.inventoryItems().find(item => item.id === itemId);
       
       if (selectedItem) {
-        console.log(`[SalesInvoice] ✅ Found item: ${selectedItem.item_name_ar}, unit_cost: ${selectedItem.unit_cost} (type: ${typeof selectedItem.unit_cost})`);
         
         // Convert unit_cost to number (PostgreSQL returns NUMERIC as string)
         const price = typeof selectedItem.unit_cost === 'string' 

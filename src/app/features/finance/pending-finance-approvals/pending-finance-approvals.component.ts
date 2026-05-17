@@ -2,7 +2,7 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateModule } from '@ngx-translate/core';

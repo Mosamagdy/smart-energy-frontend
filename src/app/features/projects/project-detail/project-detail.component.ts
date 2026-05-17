@@ -8,7 +8,7 @@ import { ProjectsService, Project } from '../../../data/api/projects.service';
 import { TasksService, Task, CreateTaskDto } from '../../../data/api/tasks.service';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 
 @Component({
   selector: 'app-project-detail',

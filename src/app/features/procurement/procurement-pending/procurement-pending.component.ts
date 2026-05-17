@@ -2,7 +2,7 @@ import { Component, signal, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
 import { TranslateModule } from '@ngx-translate/core';
@@ -92,7 +92,6 @@ export class ProcurementPendingComponent implements OnInit {
     const allPOs = this.pendingPOs();
     const status = this.selectedStatus();
     
-    console.log(`[Filter] Applying filter: "${status}" on ${allPOs.length} POs`);
     
     if (status === 'all' || !status) {
       console.log(`[Filter] Showing all POs`);
@@ -128,7 +127,6 @@ export class ProcurementPendingComponent implements OnInit {
       }
     });
     
-    console.log(`[Filter] Filtered to ${filtered.length} POs`);
     this.filteredPOs.set(filtered);
   }
 
@@ -147,7 +145,6 @@ export class ProcurementPendingComponent implements OnInit {
     const token = this.auth.token();
     
     if (!token) {
-      console.error('[Procurement] No auth token found - user not authenticated');
       this.toast.error('يجب تسجيل الدخول أولاً', 3000);
       this.loading.set(false);
       return;
@@ -159,8 +156,6 @@ export class ProcurementPendingComponent implements OnInit {
       endpoint = '/procurement/pending-finance'; // finance_manager sees different queue
     }
     
-    console.log(`[Procurement] Loading pending POs from: ${endpoint}`);
-    console.log(`[Procurement] User role: ${userRole}`);
     
     // Rely on AuthInterceptor instead of manually setting headers
     // This ensures consistent token attachment and avoids 401 errors
@@ -169,7 +164,6 @@ export class ProcurementPendingComponent implements OnInit {
     ).subscribe({
       next: (response) => {
         const approvals = response.data?.approvals || [];
-        console.log('[Procurement] Successfully loaded pending POs:', approvals.length);
         
         // Log items for each PO
         approvals.forEach((po: any) => {

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { TranslateModule } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment';
 
 interface CreditNote {
   id: number;
@@ -63,7 +64,8 @@ export class CreditNotesListComponent implements OnInit {
 
     try {
       const response: any = await firstValueFrom(
-        this.http.get('/api/credit-notes')
+        this.http.get(`${environment.apiUrl}/credit-notes`)
+
       );
 
       console.log('[CreditNotesList] Loaded:', response.data);
@@ -128,7 +130,7 @@ export class CreditNotesListComponent implements OnInit {
         return;
       }
       
-      const response = await fetch(`/api/credit-notes/${creditNoteId}/pdf`, {
+      const response = await fetch(`${environment.apiUrl}/credit-notes/${creditNoteId}/pdf`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

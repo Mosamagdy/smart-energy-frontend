@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-fixed-asset-create',
@@ -85,7 +86,8 @@ export class FixedAssetCreateComponent {
       };
 
       const response: any = await firstValueFrom(
-        this.http.post('/api/fixed-assets', payload)
+       this.http.post(`${environment.apiUrl}/fixed-assets`, payload)
+ 
       );
 
       this.toast.success(response.message || 'تم إضافة الأصل بنجاح');

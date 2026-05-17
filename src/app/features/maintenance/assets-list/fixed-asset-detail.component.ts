@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 interface FixedAsset {
   id: number;
@@ -67,7 +68,8 @@ export class FixedAssetDetailComponent implements OnInit {
       }
 
       const response: any = await firstValueFrom(
-        this.http.get(`/api/fixed-assets/${assetId}`)
+        this.http.get(`${environment.apiUrl}/fixed-assets/${assetId}`)
+
       );
 
       this.asset.set(response.data);
@@ -89,7 +91,8 @@ export class FixedAssetDetailComponent implements OnInit {
     this.loadingSchedule.set(true);
     try {
       const response: any = await firstValueFrom(
-        this.http.get(`/api/fixed-assets/${assetId}/schedule`)
+      this.http.get(`${environment.apiUrl}/fixed-assets/${assetId}/schedule`)
+
       );
 
       // Transform the schedule data to match frontend expectations
