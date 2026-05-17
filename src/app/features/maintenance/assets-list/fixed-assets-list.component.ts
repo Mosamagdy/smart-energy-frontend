@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 
 interface FixedAsset {
   id: number;
@@ -55,7 +55,6 @@ export class FixedAssetsListComponent implements OnInit {
       );
 
       this.assets.set(response.data || []);
-      console.log(`[FixedAssets] Loaded ${this.assets().length} assets`);
       
     } catch (error: any) {
       console.error('[FixedAssets] Error:', error);

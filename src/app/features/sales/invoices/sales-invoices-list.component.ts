@@ -3,38 +3,55 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { SalesService, SalesInvoice } from '../../../core/services/sales.service';
-import { ToastService } from '../../../core/services/toast.service';
-import { environment } from '../../../../environments/environment.prod';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment.prod';
+import { ToastService } from '../../../core/services/toast.service';
+
+interface SalesInvoice {
+  id: number;
+  invoice_number: string;
+  client_id: number;
+  client_name: string;
+  project_id: number;
+  project_name: string;
+  issue_date: string;
+  due_date: string;
+  total_amount: number;
+  vat_amount: number;
+  net_amount: number;
+  status: 'draft' | 'final' | 'cancelled';
+  payment_status: 'paid' | 'partial' | 'unpaid';
+  pdf_path: string;
+  is_tax_invoice: boolean;
+  tax_invoice_no: string;
+  tax_invoice_pdf?: string;
+  credit_note_id?: number;
+  created_at: string;
+}
 
 @Component({
   selector: 'app-sales-invoices-list',
   standalone: true,
-  imports: [CommonModule, FormsModule ,TranslateModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   templateUrl: './sales-invoices-list.component.html',
   styleUrl: './sales-invoices-list.component.css'
 })
 export class SalesInvoicesListComponent implements OnInit {
   private http = inject(HttpClient);
+  private toast = inject(ToastService);
+  private router = inject(Router);
 
   invoices = signal<SalesInvoice[]>([]);
   loading = signal(false);
-  generatingTaxInvoiceId = signal<number | null>(null); // Track which invoice is being generated
-  finalizingInvoiceId = signal<number | null>(null); // Track which invoice is being finalized
+  generatingTaxInvoiceId = signal<number | null>(null);
+  finalizingInvoiceId = signal<number | null>(null);
   
   // Warehouse selection for finalization
   warehouses = signal<any[]>([]);
   showWarehouseModal = signal(false);
-  selectedWarehouseId = signal<number | null>(1); // Default to WH-DEFAULT
-  pendingInvoiceId = signal<number | null>(null);
-
-  constructor(
-    private salesService: SalesService,
-    private toast: ToastService,
-    private router: Router
-  ) {}
+  selectedWarehouseId = signal<number | null>(null);
+  currentFinalizingInvoiceId = signal<number | null>(null);
 
   ngOnInit(): void {
     this.loadInvoices();
@@ -44,10 +61,10 @@ export class SalesInvoicesListComponent implements OnInit {
   async loadWarehouses(): Promise<void> {
     try {
       const response: any = await firstValueFrom(
-        this.http.get(`${environment.apiUrl}/warehouses`)
+        this.http.get(`${environment.apiUrl}/inventory/warehouses`)
       );
-      this.warehouses.set(response.data || []);
-      console.log('[Sales Invoice] Loaded warehouses:', this.warehouses());
+      this.warehouses.set(response.data?.warehouses || []);
+      console.log('[Sales Invoice] Loaded warehouses:', this.warehouses().length);
     } catch (error) {
       console.error('[Sales Invoice] Error loading warehouses:', error);
     }
@@ -59,28 +76,8 @@ export class SalesInvoicesListComponent implements OnInit {
       const response: any = await firstValueFrom(
         this.http.get(`${environment.apiUrl}/sales/invoices`)
       );
-
-      this.invoices.set(response.data || []);
+      this.invoices.set(response.data?.invoices || []);
       console.log(`[SalesInvoices] Loaded ${this.invoices().length} invoices`);
-      
-      // Debug: Log first invoice to check fields
-      if (this.invoices().length > 0) {
-        const firstInvoice = this.invoices()[0];
-        console.log('[SalesInvoices] First invoice sample:', {
-          id: firstInvoice.id,
-          invoice_number: firstInvoice.invoice_number,
-          status: firstInvoice.status,
-          is_tax_invoice: firstInvoice.is_tax_invoice,
-          tax_invoice_no: firstInvoice.tax_invoice_no,
-          has_is_tax_invoice_field: 'is_tax_invoice' in firstInvoice
-        });
-        
-        // Log ALL invoices with tax status
-        console.log('[SalesInvoices] Tax invoice status for all invoices:');
-        this.invoices().forEach(inv => {
-          console.log(`  - ID: ${inv.id}, Number: ${inv.invoice_number}, Status: ${inv.status}, is_tax_invoice: ${inv.is_tax_invoice}`);
-        });
-      }
     } catch (error) {
       console.error('[SalesInvoices] Error loading invoices:', error);
       this.toast.error('فشل تحميل الفواتير');
@@ -91,9 +88,8 @@ export class SalesInvoicesListComponent implements OnInit {
 
   getPdfUrl(pdfPath: string | null): string {
     if (!pdfPath) return '';
-    // Normalize slashes and strip leading slash
+    if (pdfPath.startsWith('http')) return pdfPath;
     const cleanPath = pdfPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    // Strip /api suffix from apiUrl to get backend root (e.g. http://localhost:3000)
     const backendBase = environment.apiUrl.replace(/\/api\/?$/, '');
     return `${backendBase}/${cleanPath}`;
   }
@@ -108,48 +104,40 @@ export class SalesInvoicesListComponent implements OnInit {
   }
 
   createNewInvoice(): void {
-    this.router.navigate(['/sales/invoices/create']);
+    this.router.navigate(['/finance/sales-invoices/create']);
   }
 
   async generateTaxInvoice(invoiceId: number): Promise<void> {
     try {
-      // Immediately disable button
       this.generatingTaxInvoiceId.set(invoiceId);
-      
       console.log(`[Tax Invoice] Generating for sales invoice ID: ${invoiceId}`);
       
+      // ✅ التصحيح: استخدام المسار الصحيح /sales/invoices
       const response: any = await firstValueFrom(
-        this.http.post(`${environment.apiUrl}/finance/invoices/${invoiceId}/generate-tax-invoice`, {})
+        this.http.post(`${environment.apiUrl}/sales/invoices/${invoiceId}/generate-tax-invoice`, {})
       );
       
-      console.log('[Tax Invoice] ✅ Success response:', response);
-      
+      console.log('[Tax Invoice] Success response:', response);
       this.toast.success(response.message || 'تم إصدار الفاتورة الضريبية بنجاح');
       
-      // IMMEDIATE STATE SYNC: Update the local invoice object without waiting for reload
+      // Update local state immediately
       const currentInvoices = this.invoices();
       const updatedInvoices = currentInvoices.map(inv => {
         if (inv.id === invoiceId) {
           return {
             ...inv,
             is_tax_invoice: true,
-            tax_invoice_no: response.data?.tax_invoice_no || inv.tax_invoice_no,
-            zatca_uuid: response.data?.zatca_uuid || inv.zatca_uuid,
-            qr_code_data: response.data?.qr_code_data || inv.qr_code_data
+            tax_invoice_no: response.data?.tax_invoice_no || inv.tax_invoice_no
           };
         }
         return inv;
       });
-      
-      // Update signal immediately
       this.invoices.set(updatedInvoices);
       
-      console.log('[Tax Invoice] ✅ Local state updated - button will change to green');
-      
-      // Reload invoices in background to ensure full sync
+      // Reload to ensure full sync
       await this.loadInvoices();
       
-      // Navigate to tax invoices page to see the result
+      // Navigate to tax invoices page
       setTimeout(() => {
         this.router.navigate(['/sales/tax-invoices']);
       }, 1000);
@@ -158,24 +146,27 @@ export class SalesInvoicesListComponent implements OnInit {
       console.error('[Tax Invoice] Error:', error);
       this.toast.error(error.error?.message || 'فشل إصدار الفاتورة الضريبية');
     } finally {
-      // Re-enable button
       this.generatingTaxInvoiceId.set(null);
     }
   }
   
   showDraftToast(): void {
-    this.toast.error('يجب تحويل الفاتورة إلى نهائية أولاً');
+    this.toast.warning('يجب تحويل الفاتورة إلى نهائية أولاً');
   }
   
   async finalizeInvoice(invoiceId: number): Promise<void> {
-    // Show warehouse selection modal
-    this.pendingInvoiceId.set(invoiceId);
-    this.selectedWarehouseId.set(1); // Default to WH-DEFAULT
+    // Load warehouses first
+    await this.loadWarehouses();
+    if (this.warehouses().length === 0) {
+      this.toast.error('لا توجد مستودعات متاحة للخصم');
+      return;
+    }
+    this.currentFinalizingInvoiceId.set(invoiceId);
     this.showWarehouseModal.set(true);
   }
 
   async confirmFinalize(): Promise<void> {
-    const invoiceId = this.pendingInvoiceId();
+    const invoiceId = this.currentFinalizingInvoiceId();
     const warehouseId = this.selectedWarehouseId();
     
     if (!invoiceId) {
@@ -183,24 +174,20 @@ export class SalesInvoicesListComponent implements OnInit {
       return;
     }
     
-    this.showWarehouseModal.set(false);
+    if (!warehouseId) {
+      this.toast.warning('يرجى اختيار المستودع');
+      return;
+    }
     
-    try {
-      console.log(`[Finalize Button] ===== CLICKED =====`);
-      console.log(`[Finalize Button] Invoice ID: ${invoiceId}`);
-      console.log(`[Finalize Button] Warehouse ID: ${warehouseId}`);
-      
-      // Immediately disable button
-      this.finalizingInvoiceId.set(invoiceId);
-      
-      const url = `${environment.apiUrl}/sales/invoices/${invoiceId}/finalize`;
-      console.log(`[Finalize Button] POST URL: ${url}`);
-      
+    this.showWarehouseModal.set(false);
+    this.finalizingInvoiceId.set(invoiceId);
+    
+    try {      
       const response: any = await firstValueFrom(
-        this.http.post(url, { warehouse_id: warehouseId })
+        this.http.post(`${environment.apiUrl}/sales/invoices/${invoiceId}/finalize`, { 
+          warehouse_id: warehouseId 
+        })
       );
-      
-      console.log(`[Finalize Button] ✅ Response:`, response);
       
       this.toast.success(response.message || 'تم اعتماد الفاتورة وخصم المخزون بنجاح');
       
@@ -208,20 +195,19 @@ export class SalesInvoicesListComponent implements OnInit {
       await this.loadInvoices();
       
     } catch (error: any) {
-      console.error(`[Finalize Button] ❌ ERROR:`, error);
-      console.error(`[Finalize Button] Error status:`, error.status);
-      console.error(`[Finalize Button] Error message:`, error.error?.message);
+      console.error('[Finalize] Error:', error);
       this.toast.error(error.error?.message || 'فشل اعتماد الفاتورة');
     } finally {
-      // Re-enable button
       this.finalizingInvoiceId.set(null);
-      this.pendingInvoiceId.set(null);
+      this.currentFinalizingInvoiceId.set(null);
+      this.selectedWarehouseId.set(null);
     }
   }
 
   cancelFinalize(): void {
     this.showWarehouseModal.set(false);
-    this.pendingInvoiceId.set(null);
+    this.currentFinalizingInvoiceId.set(null);
+    this.selectedWarehouseId.set(null);
   }
 
   createCreditNote(invoiceId: number): void {

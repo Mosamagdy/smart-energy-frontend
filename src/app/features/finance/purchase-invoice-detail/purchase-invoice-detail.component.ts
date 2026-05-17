@@ -82,21 +82,14 @@ export class PurchaseInvoiceDetailComponent implements OnInit {
     this.isLoading.set(true);
     this.error.set(null);
 
-    console.log(`[InvoiceDetail] Loading invoice ID: ${id}`);
 
-    this.http.get<any>(`/api/purchasing/invoices/${id}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/purchasing/invoices/${id}`).subscribe({
       next: (response) => {
-        console.log('[InvoiceDetail] API Response:', response);
         
         if (response.status === 'success') {
           const invoiceData = response.data;
-          
-          console.log('[InvoiceDetail] Invoice loaded:', invoiceData.invoice_number);
-          console.log('[InvoiceDetail] Items count:', invoiceData.items?.length || 0);
-          console.log('[InvoiceDetail] Items:', invoiceData.items);
-          
+                    
           if (invoiceData.items && invoiceData.items.length > 0) {
-            console.log('[InvoiceDetail] First item:', invoiceData.items[0]);
           } else {
             console.warn('[InvoiceDetail] ⚠️ No items found in invoice!');
           }
@@ -126,7 +119,8 @@ export class PurchaseInvoiceDetailComponent implements OnInit {
   viewJournalEntry(): void {
     const inv = this.invoice();
     if (inv && inv.journal_entry_number) {
-      this.toast.info(`رقم القيد: ${inv.journal_entry_number} - صفحة تفاصيل قيد اليومية قيد التطوير`, 5000);
+      this.router.navigate(['accounting/journal-entries', inv.journal_entry_number]);
+
     }
   }
 
@@ -145,7 +139,7 @@ export class PurchaseInvoiceDetailComponent implements OnInit {
       return;
     }
 
-    this.http.post<any>(`/api/purchasing/invoices/${inv.id}/finalize`, {}).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/purchasing/invoices/${inv.id}/finalize`, {}).subscribe({
       next: (response) => {
         this.toast.success('تم اعتماد فاتورة الشراء بنجاح');
         this.loadInvoice(inv.id);

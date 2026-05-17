@@ -64,14 +64,11 @@ export class CreditNoteCreateComponent {
     this.loading.set(true);
     this.error.set(null);
     
-    try {
-      console.log('[CreditNote] Loading invoice:', this.invoiceId());
-      
+    try {      
       const response: any = await firstValueFrom(
         this.http.get(`${environment.apiUrl}/sales/invoices/${this.invoiceId()}`)
       );
       
-      console.log('[CreditNote] Invoice loaded:', response.data);
       this.invoice.set(response.data);
 
       // Sales invoices don't have line items - create a single return entry
@@ -151,8 +148,6 @@ export class CreditNoteCreateComponent {
         this.http.post(`${environment.apiUrl}/credit-notes`, payload)
 
       );
-
-      console.log('[CreditNote] Credit note created successfully');
       
       // Navigate to credit notes list
       this.router.navigate(['/sales/credit-notes']);

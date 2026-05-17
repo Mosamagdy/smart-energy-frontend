@@ -40,7 +40,6 @@ export class TaxInvoicesListComponent implements OnInit {
       );
 
       this.invoices.set(response.data || []);
-      console.log(`[TaxInvoices] Loaded ${this.invoices().length} tax invoices from invoices table`);
       
     } catch (error) {
       console.error('[TaxInvoices] Error loading tax invoices:', error);

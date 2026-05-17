@@ -85,7 +85,7 @@
                     (click)="viewPdf(invoice)"
                     [disabled]="!invoice.pdf_path"
                     class="px-3 py-1.5 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white rounded-xl transition-all duration-200 flex items-center gap-1 shadow-sm hover:shadow-md text-xs font-bold"
-                    title="{{ 'salesInvoices.viewPdf' | translate }}">
+                    [title]="'salesInvoices.viewPdf' | translate">
                     <i class="fas fa-file-pdf"></i>
                     {{ 'salesInvoices.viewPdf' | translate }}
                   </button>
@@ -96,7 +96,7 @@
                       (click)="finalizeInvoice(invoice.id); $event.stopPropagation()"
                       [disabled]="finalizingInvoiceId() === invoice.id"
                       class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-indigo-100 text-indigo-700 hover:bg-indigo-600 hover:text-white border border-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="{{ 'salesInvoices.finalize' | translate }}">
+                      [title]="'salesInvoices.finalize' | translate">
                       @if (finalizingInvoiceId() === invoice.id) {
                         <i class="fas fa-spinner fa-spin"></i>
                         {{ 'salesInvoices.finalizing' | translate }}
@@ -114,7 +114,7 @@
                       (click)="generateTaxInvoice(invoice.id); $event.stopPropagation()"
                       [disabled]="generatingTaxInvoiceId() === invoice.id"
                       class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-purple-100 text-purple-700 hover:bg-purple-600 hover:text-white border border-purple-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                      title="{{ 'salesInvoices.generateTaxInvoice' | translate }}">
+                      [title]="'salesInvoices.generateTaxInvoice' | translate">
                       @if (generatingTaxInvoiceId() === invoice.id) {
                         <i class="fas fa-spinner fa-spin"></i>
                         {{ 'salesInvoices.generating' | translate }}
@@ -125,7 +125,6 @@
                     </button>
                   } @else if (invoice.status === 'final' && invoice.is_tax_invoice) {
                     <!-- HARD LOCKED Green Button - Already taxed in database -->
-                    <!-- ✅ تم إصلاح الخطأ هنا ✅ -->
                     <button
                       disabled
                       class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm bg-green-500 text-white border-2 border-green-600 cursor-not-allowed opacity-90"
@@ -138,7 +137,7 @@
                     <button
                       (click)="showDraftToast(); $event.stopPropagation()"
                       class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm bg-gray-100 text-gray-500 cursor-not-allowed border border-gray-200"
-                      title="{{ 'salesInvoices.notAvailable' | translate }}">
+                      [title]="'salesInvoices.notAvailable' | translate">
                       <i class="fas fa-lock"></i>
                       {{ 'salesInvoices.notAvailable' | translate }}
                     </button>
@@ -149,7 +148,7 @@
                     <button
                       (click)="createCreditNote(invoice.id); $event.stopPropagation()"
                       class="px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md bg-orange-100 text-orange-700 hover:bg-orange-600 hover:text-white border border-orange-200"
-                      title="{{ 'salesInvoices.createCreditNote' | translate }}">
+                      [title]="'salesInvoices.createCreditNote' | translate">
                       <i class="fas fa-undo"></i>
                       {{ 'salesInvoices.createCreditNote' | translate }}
                     </button>
