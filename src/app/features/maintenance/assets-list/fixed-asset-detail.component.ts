@@ -4,7 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 
 interface FixedAsset {
   id: number;
@@ -73,7 +73,6 @@ export class FixedAssetDetailComponent implements OnInit {
       );
 
       this.asset.set(response.data);
-      console.log(`[FixedAssetDetail] Loaded asset: ${response.data.asset_name}`);
       
       // Load depreciation schedule
       await this.loadDepreciationSchedule(assetId);

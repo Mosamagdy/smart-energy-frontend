@@ -76,8 +76,6 @@ export class SalesInvoicesListComponent implements OnInit {
         this.http.get(`${environment.apiUrl}/sales/invoices`)
       );
       this.invoices.set(response.data || response.invoices || response || []);
-      console.log('[SalesInvoices] Raw response:', JSON.stringify(response));
-      console.log(`[SalesInvoices] Loaded ${this.invoices().length} invoices`);
     } catch (error) {
       console.error('[SalesInvoices] Error loading invoices:', error);
       this.toast.error('فشل تحميل الفواتير');
@@ -114,10 +112,9 @@ export class SalesInvoicesListComponent implements OnInit {
       
       // ✅ التصحيح: استخدام المسار الصحيح /sales/invoices
       const response: any = await firstValueFrom(
-        this.http.post(`${environment.apiUrl}/sales/invoices/${invoiceId}/generate-tax-invoice`, {})
+        this.http.post(`${environment.apiUrl}/finance/invoices/${invoiceId}/generate-tax-invoice`, {})
       );
       
-      console.log('[Tax Invoice] Success response:', response);
       this.toast.success(response.message || 'تم إصدار الفاتورة الضريبية بنجاح');
       
       // Update local state immediately

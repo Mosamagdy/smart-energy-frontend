@@ -321,7 +321,6 @@ export class PayrollComponent implements OnInit {
     const month = this.selectedMonth();
     const year = this.selectedYear();
     
-    console.log(`[Payroll] Checking status for month ${month}, year ${year}`);
     
     this.http.get<any>(
       `${environment.apiUrl}/payroll/status?month=${month}&year=${year}`,
@@ -335,21 +334,17 @@ export class PayrollComponent implements OnInit {
         // Response is now array of { department_id, department_name, payroll_status }
         const departments = Array.isArray(response?.data) ? response.data : [];
         
-        console.log(`[Payroll] Found ${departments.length} approved departments`);
         
         departments.forEach((dept: any) => {
           if (dept.department_id && dept.payroll_status === true) {
-            console.log(`[Payroll] ✅ Dept ${dept.department_id} (${dept.department_name}) is approved`);
             statusMap[dept.department_id] = true;
           }
         });
         
         this.payrollStatus.set(statusMap);
-        console.log('[Payroll] Final status map:', statusMap);
       },
       error: (err) => {
         // Frontend Resilience - Default to 'Pending' on error
-        console.warn('[Payroll] Failed to check payroll status, defaulting to Pending:', err);
         this.payrollStatus.set({}); // Empty = all pending
       }
     });
@@ -364,7 +359,6 @@ export class PayrollComponent implements OnInit {
       headers: { Authorization: `Bearer ${this.authStore.token() as string}` }
     }).subscribe({
       next: (response) => {
-        console.log('Payroll API Response:', response);
         
         // Robust data handling - extract employees array from any response format
         let emps: any[] = [];
@@ -379,7 +373,6 @@ export class PayrollComponent implements OnInit {
           emps = response.employees;
         }
         
-        console.log('Extracted Employees Array:', emps.length, 'employees');
         
         // Safety check: ensure we have an array before filtering
         if (!Array.isArray(emps)) {
@@ -389,9 +382,7 @@ export class PayrollComponent implements OnInit {
         
         // Filter active employees with departments
         const activeEmployees = emps.filter((e: any) => e.status === 'active' && e.department_id);
-        
-        console.log('Active Employees with Departments:', activeEmployees.length);
-        
+                
         this.employees.set(activeEmployees);
         this.calculatePayroll(activeEmployees);
         this.loading.set(false);
