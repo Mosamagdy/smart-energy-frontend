@@ -8,6 +8,7 @@ import { InspectionReportsService, InspectionReport } from '../../../data/api/in
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { environment } from '../../../../environments/environment.prod';
 
 @Component({
   selector: 'app-quotation-details',
@@ -201,12 +202,10 @@ export class QuotationDetailsComponent implements OnInit {
   }
 
   getFullFileUrl(fileUrl: string): string {
-    if (!fileUrl) return '';
-    if (fileUrl.startsWith('http')) return fileUrl;
-    // Assume it's a relative path like /uploads/reports/file.pdf
-    return `http://localhost:3000${fileUrl}`;
-  }
-
+  if (!fileUrl) return '';
+  if (fileUrl.startsWith('http')) return fileUrl;
+  return `${environment.apiUrl.replace('/api', '')}${fileUrl}`;
+ } 
   downloadFile(fileUrl: string): void {
     const fullUrl = this.getFullFileUrl(fileUrl);
     const link = document.createElement('a');

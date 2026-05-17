@@ -39,9 +39,7 @@ export class NotificationsService {
     if (unreadOnly) {
       params = params.set('unread_only', 'true');
     }
-    
-    console.log('[Notifications Service] Fetching from:', this.apiUrl);
-    
+        
     return this.http.get<{ status: string; data: { notifications: Notification[]; unread_count: number; count: number } }>(this.apiUrl, { params });
   }
 

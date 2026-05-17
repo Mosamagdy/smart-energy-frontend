@@ -10,7 +10,7 @@ import { UsersService, User } from '../../../data/api/users.service';
 import { InspectionReportsService, InspectionReport } from '../../../data/api/inspection-reports.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthStore } from '../../../core/auth/auth.store';
-
+import { environment } from '../../../../environments/environment.prod';
 interface Interaction {
   id: number;
   lead_id: number;
@@ -640,7 +640,7 @@ export class LeadDetailsComponent implements OnInit {
   resolveFileUrl(url: string): string {
     if (!url) return url;
     if (url.startsWith('http://') || url.startsWith('https://')) return url;
-    const backendBase = 'http://localhost:3000';
+    const backendBase = environment.apiUrl.replace('/api', '');
     return `${backendBase}${url.startsWith('/') ? '' : '/'}${url}`;
   }
 

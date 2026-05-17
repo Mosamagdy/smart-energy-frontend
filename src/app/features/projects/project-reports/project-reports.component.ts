@@ -5,7 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
-import { environment } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment.prod';
 
 // ============================================================================
 // Document Interface
