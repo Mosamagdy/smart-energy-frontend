@@ -29,7 +29,7 @@ type OnLeaveRecord = {
     <div class="min-h-screen bg-gray-50 p-6" dir="rtl">
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900">{{ 'hr.leaveRequests' | translate }}</h1>
-        <p class="text-sm text-gray-500 mt-1">Unified leave management dashboard</p>
+      
       </div>
 
       <div class="mb-6 bg-white p-2 rounded-xl shadow-sm border border-gray-100 flex gap-3">

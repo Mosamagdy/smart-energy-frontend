@@ -6,11 +6,12 @@ import { Router } from '@angular/router';
 import { ToastService } from '../../../core/services/toast.service';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-fixed-asset-create',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule ,TranslateModule],
   templateUrl: './fixed-asset-create.component.html',
   styleUrl: './fixed-asset-create.component.css'
 })

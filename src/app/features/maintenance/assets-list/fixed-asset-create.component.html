@@ -1,8 +1,8 @@
 <div class="container mx-auto p-6 max-w-4xl">
   <!-- Header -->
   <div class="mb-6">
-    <h1 class="text-3xl font-bold text-gray-800">إضافة أصل ثابت جديد</h1>
-    <p class="text-gray-600 mt-1">أدخل بيانات الأصل الثابت لحساب الإهلاك تلقائياً</p>
+    <h1 class="text-3xl font-bold text-gray-800">{{ 'fixedAssets.create.title' | translate }}</h1>
+    <p class="text-gray-600 mt-1">{{ 'fixedAssets.create.subtitle' | translate }}</p>
   </div>
 
   <!-- Form -->
@@ -11,12 +11,12 @@
       
       <!-- Basic Information Section -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">البيانات الأساسية</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">{{ 'fixedAssets.create.basicInfo' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Asset Name -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              اسم الأصل <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.assetName' | translate }} <span class="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -24,35 +24,35 @@
               name="assetName"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="مثال: سيارة تويوتا 2024">
+              [placeholder]="'fixedAssets.create.assetNamePlaceholder' | translate">
           </div>
 
           <!-- Asset Name Arabic -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              اسم الأصل (عربي)
+              {{ 'fixedAssets.create.assetNameAr' | translate }}
             </label>
             <input
               type="text"
               [(ngModel)]="assetNameAr"
               name="assetNameAr"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="مثال: سيارة تويوتا كامري 2024">
+              [placeholder]="'fixedAssets.create.assetNameArPlaceholder' | translate">
           </div>
 
           <!-- Category -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              الفئة <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.category' | translate }} <span class="text-red-500">*</span>
             </label>
             <select
               [(ngModel)]="category"
               name="category"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-              <option value="">اختر الفئة</option>
+              <option value="">{{ 'fixedAssets.create.selectCategory' | translate }}</option>
               @for (cat of categories; track cat.value) {
-                <option [value]="cat.value">{{ cat.label }} ({{ cat.labelEn }})</option>
+                <option [value]="cat.value">{{ cat.label }}</option>
               }
             </select>
           </div>
@@ -61,12 +61,12 @@
 
       <!-- Financial Information Section -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">البيانات المالية</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">{{ 'fixedAssets.create.financialInfo' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Purchase Cost -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              تكلفة الشراء <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.purchaseCost' | translate }} <span class="text-red-500">*</span>
             </label>
             <div class="relative">
               <input
@@ -78,14 +78,14 @@
                 step="0.01"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00">
-              <span class="absolute left-3 top-2 text-gray-500">SAR</span>
+              <span class="absolute left-3 top-2 text-gray-500">{{ 'common.sar' | translate }}</span>
             </div>
           </div>
 
           <!-- Salvage Value -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              قيمة الإنقاذ (المتبقية)
+              {{ 'fixedAssets.create.salvageValue' | translate }}
             </label>
             <div class="relative">
               <input
@@ -96,14 +96,14 @@
                 step="0.01"
                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="0.00">
-              <span class="absolute left-3 top-2 text-gray-500">SAR</span>
+              <span class="absolute left-3 top-2 text-gray-500">{{ 'common.sar' | translate }}</span>
             </div>
           </div>
 
           <!-- Purchase Date -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              تاريخ الشراء <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.purchaseDate' | translate }} <span class="text-red-500">*</span>
             </label>
             <input
               type="date"
@@ -116,7 +116,7 @@
           <!-- Useful Life -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              العمر الإنتاجي (سنوات) <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.usefulLife' | translate }} <span class="text-red-500">*</span>
             </label>
             <input
               type="number"
@@ -125,19 +125,19 @@
               required
               min="1"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="5">
+              [placeholder]="'fixedAssets.create.usefulLifePlaceholder' | translate">
           </div>
         </div>
       </div>
 
       <!-- Depreciation Settings Section -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">إعدادات الإهلاك</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">{{ 'fixedAssets.create.depreciationSettings' | translate }}</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- Depreciation Method -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              طريقة الإهلاك <span class="text-red-500">*</span>
+              {{ 'fixedAssets.create.depreciationMethod' | translate }} <span class="text-red-500">*</span>
             </label>
             <select
               [(ngModel)]="depreciationMethod"
@@ -145,7 +145,7 @@
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
               @for (method of depreciationMethods; track method.value) {
-                <option [value]="method.value">{{ method.label }} ({{ method.labelEn }})</option>
+                <option [value]="method.value">{{ method.label }}</option>
               }
             </select>
           </div>
@@ -153,7 +153,7 @@
           <!-- Depreciation Rate (Calculated) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              معدل الإهلاك السنوي (تلقائي)
+              {{ 'fixedAssets.create.depreciationRate' | translate }}
             </label>
             <div class="px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
               <span class="text-blue-900 font-bold text-lg">{{ depreciationRate() }}%</span>
@@ -163,14 +163,14 @@
           <!-- Annual Depreciation (Calculated) -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
-              مصروف الإهلاك السنوي (تلقائي)
+              {{ 'fixedAssets.create.annualDepreciation' | translate }}
             </label>
             <div class="px-4 py-2 bg-green-50 border border-green-200 rounded-lg">
-              <span class="text-green-900 font-bold text-lg">{{ annualDepreciation() | number:'1.2-2' }} SAR</span>
+              <span class="text-green-900 font-bold text-lg">{{ annualDepreciation() | number:'1.2-2' }} {{ 'common.sar' | translate }}</span>
             </div>
             <p class="text-xs text-gray-500 mt-1">
               <i class="fas fa-calculator"></i>
-              (تكلفة الشراء - قيمة الإنقاذ) × (معدل الإهلاك / 100)
+              {{ 'fixedAssets.create.depreciationFormula' | translate }}
             </p>
           </div>
         </div>
@@ -178,13 +178,13 @@
 
       <!-- Notes Section -->
       <div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">ملاحظات</h3>
+        <h3 class="text-lg font-semibold text-gray-900 mb-4 border-b pb-2">{{ 'fixedAssets.create.notes' | translate }}</h3>
         <textarea
           [(ngModel)]="notes"
           name="notes"
           rows="3"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          placeholder="أي ملاحظات إضافية حول الأصل..."></textarea>
+          [placeholder]="'fixedAssets.create.notesPlaceholder' | translate"></textarea>
       </div>
 
       <!-- Action Buttons -->
@@ -195,10 +195,10 @@
           class="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg font-semibold transition-colors flex items-center gap-2 disabled:cursor-not-allowed">
           @if (submitting()) {
             <i class="fas fa-spinner fa-spin"></i>
-            جاري الحفظ...
+            {{ 'fixedAssets.create.saving' | translate }}
           } @else {
             <i class="fas fa-save"></i>
-            حفظ الأصل
+            {{ 'fixedAssets.create.save' | translate }}
           }
         </button>
         
@@ -207,7 +207,7 @@
           (click)="cancel()"
           class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-semibold transition-colors flex items-center gap-2">
           <i class="fas fa-times"></i>
-          إلغاء
+          {{ 'fixedAssets.create.cancel' | translate }}
         </button>
       </div>
     </form>
@@ -218,12 +218,12 @@
     <div class="flex items-start gap-3">
       <i class="fas fa-info-circle text-blue-600 text-xl mt-1"></i>
       <div>
-        <h4 class="font-semibold text-blue-900 mb-1">معلومات مهمة</h4>
+        <h4 class="font-semibold text-blue-900 mb-1">{{ 'fixedAssets.create.infoTitle' | translate }}</h4>
         <ul class="text-sm text-blue-800 space-y-1">
-          <li>• <strong>طريقة القسط الثابت:</strong> يتم توزيع التكلفة بشكل متساوٍ على سنوات العمر الإنتاجي</li>
-          <li>• <strong>طريقة القسط المتناقص:</strong> يتم احتساب إهلاك أكبر في السنوات الأولى</li>
-          <li>• <strong>القيد المحاسبي:</strong> مدين: مصروف الإهلاك (323) / دائن: الإهلاك المتراكم (112)</li>
-          <li>• يمكن تشغيل الإهلاك الشهري من صفحة قائمة الأصول الثابتة</li>
+          <li>{{ 'fixedAssets.create.infoMethod1' | translate }}</li>
+          <li>{{ 'fixedAssets.create.infoMethod2' | translate }}</li>
+          <li>{{ 'fixedAssets.create.infoJournalEntry' | translate }}</li>
+          <li>{{ 'fixedAssets.create.infoMonthly' | translate }}</li>
         </ul>
       </div>
     </div>
