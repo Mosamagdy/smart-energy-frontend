@@ -11,6 +11,7 @@ import { InspectionReportsService, InspectionReport } from '../../../data/api/in
 import { ToastService } from '../../../core/services/toast.service';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { environment } from '../../../../environments/environment.prod';
+
 interface Interaction {
   id: number;
   lead_id: number;
@@ -45,30 +46,24 @@ export class LeadDetailsComponent implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
 
-  // Timeline state
   interactions = signal<Interaction[]>([]);
   interactionsLoading = signal(false);
   showInteractionForm = signal(false);
 
-  // Interaction form state
   formInteractionType = signal<'call' | 'email' | 'meeting' | 'note'>('call');
   formDescription = signal('');
   formNextFollowUp = signal('');
 
-  // Assignment modals
   showAssignSalesModal = signal(false);
   showAssignEngineerModal = signal(false);
 
-  // Users for dropdowns
   salesReps = signal<User[]>([]);
   engineers = signal<User[]>([]);
   usersLoading = signal(false);
 
-  // Assignment form state
   selectedSalesRepId = signal<number | null>(null);
   selectedEngineerId = signal<number | null>(null);
 
-  // Inspection Reports state
   reports = signal<InspectionReport[]>([]);
   reportsLoading = signal(false);
   showReportUploadModal = signal(false);
@@ -76,11 +71,9 @@ export class LeadDetailsComponent implements OnInit {
   formReportFileUrl = signal('');
   formReportImagesUrls = signal<string[]>([]);
 
-  // File upload state
   uploadedFile = signal<File | null>(null);
   uploadProgress = signal<number>(0);
 
-  // ── In-App File Viewer ──
   fileViewerUrl = signal<string | null>(null);
   fileViewerType = signal<'image' | 'pdf' | 'other'>('other');
 
@@ -97,7 +90,7 @@ export class LeadDetailsComponent implements OnInit {
     }
   }
 
-  private loadLead(id: number): void {
+  loadLead(id: number): void {
     this.loading.set(true);
     this.error.set(null);
 
@@ -110,7 +103,6 @@ export class LeadDetailsComponent implements OnInit {
         const userDeptId = this.auth.user()?.department_id;
         const userDeptType = this.auth.user()?.dept_type;
 
-        // Engineers: only their assigned lead
         if (userRole === 'engineer') {
           if (leadData.assigned_engineer_id !== userId) {
             this.toast.error(this.translate.instant('leads.unauthorizedAccess'));
@@ -119,7 +111,6 @@ export class LeadDetailsComponent implements OnInit {
           }
         }
 
-        // Sales reps: only their assigned lead
         if (userRole === 'sales_rep') {
           if (leadData.assigned_sales_rep_id !== userId) {
             this.toast.error(this.translate.instant('leads.unauthorizedAccess'));
@@ -128,7 +119,6 @@ export class LeadDetailsComponent implements OnInit {
           }
         }
 
-        // Technical dept heads: only leads in their department
         if (userRole === 'tech_head' && userDeptId) {
           if (userDeptType === 'technical') {
             if (leadData.technical_dept_id !== userDeptId) {
@@ -180,7 +170,6 @@ export class LeadDetailsComponent implements OnInit {
     });
   }
 
-  // ── Pipeline stage calculation ──
   getCurrentStage(): number {
     const lead = this.lead();
     if (!lead) return 0;
@@ -199,13 +188,10 @@ export class LeadDetailsComponent implements OnInit {
     return stageMap[lead.status] || 1;
   }
 
-  // ── Permission guards ──
-
-  // ✅ الـ roles المصرح ليها بطلب المعاينة
   private readonly surveyAllowedRoles = [
     'super_admin',
     'general_manager',
-    'sales_manager', // ✅ كان ناقص هنا
+    'sales_manager',
     'sales_rep',
     'dept_head'
   ];
@@ -275,8 +261,6 @@ export class LeadDetailsComponent implements OnInit {
     });
   }
 
-  // ── Actions ──
-
   requestSurvey(): void {
     const lead = this.lead();
     const leadId = lead?.id;
@@ -284,7 +268,6 @@ export class LeadDetailsComponent implements OnInit {
 
     const role = this.auth.role();
 
-    // ✅ FIX: استخدمنا نفس اللستة بتاعة canRequestSurvey بدل اللستة القديمة اللي كانت ناقصة sales_manager
     if (!this.surveyAllowedRoles.includes(role || '')) {
       this.toast.warning(this.translate.instant('leads.unauthorizedSurveyRequest'));
       return;
@@ -347,8 +330,6 @@ export class LeadDetailsComponent implements OnInit {
     });
   }
 
-  // ── Assignment ──
-
   openAssignSalesModal(): void {
     this.showAssignSalesModal.set(true);
     this.selectedSalesRepId.set(null);
@@ -382,7 +363,7 @@ export class LeadDetailsComponent implements OnInit {
     }
 
     const role = this.auth.role();
-    if (!['super_admin', 'general_manager' , 'sales_manager'].includes(role || '')) {
+    if (!['super_admin', 'general_manager', 'sales_manager'].includes(role || '')) {
       this.toast.warning(this.translate.instant('leads.unauthorizedAssignSalesRep'));
       return;
     }
@@ -391,9 +372,9 @@ export class LeadDetailsComponent implements OnInit {
     if (!leadId) return;
 
     this.leadsService.assignSalesRep(leadId, this.selectedSalesRepId()!).subscribe({
-      next: (response) => {
-        this.lead.set(response.data.lead);
+      next: () => {
         this.closeAssignSalesModal();
+        this.loadLead(leadId); // ✅ reload كامل عشان يجيب الاسم
         this.toast.success(this.translate.instant('leads.salesRepAssignedSuccess'));
       },
       error: (err) => {
@@ -461,9 +442,9 @@ export class LeadDetailsComponent implements OnInit {
     if (!leadId) return;
 
     this.leadsService.assignEngineer(leadId, this.selectedEngineerId()!).subscribe({
-      next: (response) => {
-        this.lead.set(response.data.lead);
+      next: () => {
         this.closeAssignEngineerModal();
+        this.loadLead(leadId); // ✅ reload كامل عشان يجيب الاسم
         this.toast.success(this.translate.instant('leads.engineerAssignedSuccess'));
       },
       error: (err) => {
@@ -508,8 +489,6 @@ export class LeadDetailsComponent implements OnInit {
       }
     });
   }
-
-  // ── Inspection Reports ──
 
   private loadReports(leadId: number): void {
     this.reportsLoading.set(true);
@@ -627,8 +606,6 @@ export class LeadDetailsComponent implements OnInit {
     }
   }
 
-  // ── In-App File Viewer ──
-
   getFileType(url: string): 'image' | 'pdf' | 'other' {
     if (!url) return 'other';
     const lower = url.toLowerCase().split('?')[0];
@@ -653,8 +630,6 @@ export class LeadDetailsComponent implements OnInit {
     this.fileViewerUrl.set(null);
     this.fileViewerType.set('other');
   }
-
-  // ── Helpers ──
 
   setInteractionType(type: string): void {
     if (type === 'call' || type === 'email' || type === 'meeting' || type === 'note') {

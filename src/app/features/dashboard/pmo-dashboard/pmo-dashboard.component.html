@@ -1,4 +1,4 @@
-<div class="space-y-6">
+<div class="w-full min-w-0 space-y-4 sm:space-y-6">
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex justify-center items-center py-20">
@@ -8,29 +8,56 @@
 
   @if (!loading()) {
     <!-- Header -->
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-gray-900">{{ 'pmo.title' | translate }}</h1>
-        <p class="text-gray-600 mt-1">{{ 'pmo.subtitle' | translate }}</p>
+    <div
+      class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="min-w-0">
+        <h1
+          class="text-2xl font-bold text-gray-900 wrap-break-word sm:text-3xl"
+        >
+          {{ 'pmo.title' | translate }}
+        </h1>
+        <p class="mt-1 text-sm text-gray-600 sm:text-base">
+          {{ 'pmo.subtitle' | translate }}
+        </p>
       </div>
-      <button 
+      <button
+        type="button"
         (click)="loadDashboard()"
-        class="px-4 py-2 bg-company-primary text-white rounded-lg hover:bg-company-primary/90 transition">
-        <svg class="w-5 h-5 inline-block ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        class="inline-flex shrink-0 items-center justify-center gap-2 self-stretch rounded-lg bg-company-primary px-4 py-2.5 text-sm font-medium text-white transition hover:bg-company-primary/90 sm:self-auto"
+      >
+        <svg
+          class="h-5 w-5 shrink-0"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
         </svg>
-        {{ 'pmo.refresh' | translate }}
+        <span>{{ 'pmo.refresh' | translate }}</span>
       </button>
     </div>
 
     <!-- 4 Main Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
       <!-- Card 1: Total Active Projects -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.totalActiveProjects' | translate }}</p>
-            <p class="text-4xl font-bold text-gray-900 mt-2">{{ stats().total_active_projects }}</p>
+      <div
+        class="rounded-2xl border-l-4 border-blue-500 bg-white p-4 shadow-lg sm:p-6"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-600">
+              {{ 'pmo.stats.totalActiveProjects' | translate }}
+            </p>
+            <p class="mt-2 text-3xl font-bold text-gray-900 sm:text-4xl">
+              {{ stats().total_active_projects }}
+            </p>
           </div>
           <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
             <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -41,11 +68,17 @@
       </div>
 
       <!-- Card 2: Delayed Tasks -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.delayedTasks' | translate }}</p>
-            <p class="text-4xl font-bold text-red-600 mt-2">{{ stats().delayed_tasks }}</p>
+      <div
+        class="rounded-2xl border-l-4 border-red-500 bg-white p-4 shadow-lg sm:p-6"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-600">
+              {{ 'pmo.stats.delayedTasks' | translate }}
+            </p>
+            <p class="mt-2 text-3xl font-bold text-red-600 sm:text-4xl">
+              {{ stats().delayed_tasks }}
+            </p>
           </div>
           <div class="w-16 h-16 bg-red-100 rounded-xl flex items-center justify-center">
             <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,11 +89,15 @@
       </div>
 
       <!-- Card 3: Resource Utilization -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.resourceUtilization' | translate }}</p>
-            <p class="text-4xl font-bold mt-2" [ngClass]="utilizationColor()">
+      <div
+        class="rounded-2xl border-l-4 border-green-500 bg-white p-4 shadow-lg sm:p-6"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-600">
+              {{ 'pmo.stats.resourceUtilization' | translate }}
+            </p>
+            <p class="mt-2 text-3xl font-bold sm:text-4xl" [ngClass]="utilizationColor()">
               {{ stats().resource_utilization }}%
             </p>
           </div>
@@ -73,11 +110,17 @@
       </div>
 
       <!-- Card 4: Awaiting PM Assignment -->
-      <div class="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-gray-600 text-sm font-medium">{{ 'pmo.stats.awaitingPMAssignment' | translate }}</p>
-            <p class="text-4xl font-bold text-yellow-600 mt-2">{{ stats().awaiting_pm_assignment }}</p>
+      <div
+        class="rounded-2xl border-l-4 border-yellow-500 bg-white p-4 shadow-lg sm:p-6"
+      >
+        <div class="flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-sm font-medium text-gray-600">
+              {{ 'pmo.stats.awaitingPMAssignment' | translate }}
+            </p>
+            <p class="mt-2 text-3xl font-bold text-yellow-600 sm:text-4xl">
+              {{ stats().awaiting_pm_assignment }}
+            </p>
           </div>
           <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center">
             <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -89,22 +132,36 @@
     </div>
 
     <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
       <!-- Left Column: Project Progress Chart (2/3 width) -->
-      <div class="lg:col-span-2 bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">{{ 'pmo.projectProgress.title' | translate }}</h2>
+      <div
+        class="rounded-2xl bg-white p-4 shadow-lg sm:p-6 lg:col-span-2"
+      >
+        <h2 class="mb-4 text-lg font-bold text-gray-900 sm:mb-6 sm:text-xl">
+          {{ 'pmo.projectProgress.title' | translate }}
+        </h2>
         
         @if (projectProgress().length > 0) {
           <div class="space-y-4">
             @for (project of projectProgress(); track project.id) {
-              <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                <div class="flex items-center justify-between mb-2">
-                  <div class="flex-1">
-                    <h3 class="font-semibold text-gray-900">{{ project.name }}</h3>
-                    <p class="text-sm text-gray-600">{{ project.department_name }}</p>
+              <div
+                class="rounded-lg border border-gray-200 p-3 transition hover:shadow-md sm:p-4"
+              >
+                <div
+                  class="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between"
+                >
+                  <div class="min-w-0 flex-1">
+                    <h3 class="font-semibold text-gray-900 wrap-break-word">
+                      {{ project.name }}
+                    </h3>
+                    <p class="text-sm text-gray-600 wrap-break-word">
+                      {{ project.department_name }}
+                    </p>
                   </div>
-                  <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                        [ngClass]="getStatusBadgeClass(project.status)">
+                  <span
+                    class="shrink-0 self-start rounded-full px-3 py-1 text-xs font-semibold"
+                    [ngClass]="getStatusBadgeClass(project.status)"
+                  >
                     {{ getStatusText(project.status) }}
                   </span>
                 </div>
@@ -136,18 +193,31 @@
       </div>
 
       <!-- Right Column: Delayed Tasks (1/3 width) -->
-      <div class="bg-white rounded-2xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">{{ 'pmo.delayedTasks.title' | translate }}</h2>
+      <div class="rounded-2xl bg-white p-4 shadow-lg sm:p-6">
+        <h2 class="mb-4 text-lg font-bold text-gray-900 sm:mb-6 sm:text-xl">
+          {{ 'pmo.delayedTasks.title' | translate }}
+        </h2>
         
         @if (delayedTasks().length > 0) {
           <div class="space-y-3 max-h-96 overflow-y-auto">
             @for (task of delayedTasks(); track task.id) {
-              <div class="border-l-4 border-red-500 bg-red-50 p-4 rounded-r-lg">
-                <h3 class="font-semibold text-gray-900 text-sm">{{ task.title }}</h3>
-                <p class="text-xs text-gray-600 mt-1">{{ task.project_name }}</p>
-                <div class="flex items-center justify-between mt-2">
-                  <span class="text-xs text-gray-500">{{ task.assigned_to_name || ('pmo.delayedTasks.unassigned' | translate) }}</span>
-                  <span class="text-xs font-bold text-red-600">{{ task.days_overdue }} {{ 'pmo.delayedTasks.daysOverdue' | translate }}</span>
+              <div class="rounded-r-lg border-l-4 border-red-500 bg-red-50 p-3 sm:p-4">
+                <h3 class="text-sm font-semibold text-gray-900 wrap-break-word">
+                  {{ task.title }}
+                </h3>
+                <p class="mt-1 text-xs text-gray-600 wrap-break-word">
+                  {{ task.project_name }}
+                </p>
+                <div
+                  class="mt-2 flex flex-wrap items-center justify-between gap-2"
+                >
+                  <span class="min-w-0 flex-1 text-xs text-gray-500 wrap-break-word">{{
+                    task.assigned_to_name || ('pmo.delayedTasks.unassigned' | translate)
+                  }}</span>
+                  <span class="shrink-0 text-xs font-bold text-red-600">
+                    {{ task.days_overdue }}
+                    {{ 'pmo.delayedTasks.daysOverdue' | translate }}
+                  </span>
                 </div>
                 <p class="text-xs text-gray-500 mt-1">{{ 'pmo.delayedTasks.dueDate' | translate }}: {{ formatDate(task.due_date) }}</p>
               </div>
@@ -166,50 +236,110 @@
     </div>
 
     <!-- Recent Projects Table -->
-    <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-200">
-        <h2 class="text-xl font-bold text-gray-900">{{ 'pmo.recentProjects.title' | translate }}</h2>
+    <div class="overflow-hidden rounded-2xl bg-white shadow-lg">
+      <div class="border-b border-gray-200 px-4 py-3 sm:px-6 sm:py-4">
+        <h2 class="text-lg font-bold text-gray-900 sm:text-xl">
+          {{ 'pmo.recentProjects.title' | translate }}
+        </h2>
       </div>
-      
+
       @if (recentProjects().length > 0) {
-        <div class="overflow-x-auto">
-          <table class="w-full">
+        <div class="mx-0 overflow-x-auto sm:mx-0">
+          <table class="w-full min-w-[720px]table-fixed">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.project' | translate }}</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.department' | translate }}</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.status' | translate }}</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.budget' | translate }}</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.createdAt' | translate }}</th>
-                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">{{ 'pmo.recentProjects.actions' | translate }}</th>
+                <th
+                  class="w-[22%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.project' | translate }}
+                </th>
+                <th
+                  class="w-[16%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.department' | translate }}
+                </th>
+                <th
+                  class="w-[14%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.status' | translate }}
+                </th>
+                <th
+                  class="w-[14%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.budget' | translate }}
+                </th>
+                <th
+                  class="w-[16%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.createdAt' | translate }}
+                </th>
+                <th
+                  class="w-[18%] px-3 py-3 text-right text-xs font-medium uppercase text-gray-500 sm:px-6"
+                >
+                  {{ 'pmo.recentProjects.actions' | translate }}
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
               @for (project of recentProjects(); track project.id) {
-                <tr class="hover:bg-gray-50 transition">
-                  <td class="px-6 py-4">
-                    <div class="font-semibold text-gray-900">{{ project.name }}</div>
+                <tr class="transition hover:bg-gray-50">
+                  <td class="px-3 py-3 align-top sm:px-6 sm:py-4">
+                    <div class="font-semibold text-gray-900 wrap-break-word">
+                      {{ project.name }}
+                    </div>
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ project.department_name || '-' }}</td>
-                  <td class="px-6 py-4">
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold"
-                          [ngClass]="getStatusBadgeClass(project.status)">
+                  <td class="px-3 py-3 align-top text-sm text-gray-600 wrap-break-word sm:px-6 sm:py-4">
+                    {{ project.department_name || '-' }}
+                  </td>
+                  <td class="px-3 py-3 align-top sm:px-6 sm:py-4">
+                    <span
+                      class="inline-flex max-w-full rounded-full px-2 py-1 text-xs font-semibold wrap-break-word sm:px-3"
+                      [ngClass]="getStatusBadgeClass(project.status)"
+                    >
                       {{ getStatusText(project.status) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {{ project.budget ? (project.budget | number:'1.0-0') + ' ' + ('pmo.budgetAmount' | translate) : '-' }}
+                  <td class="px-3 py-3 align-top text-sm font-semibold wrap-break-word text-gray-900 sm:px-6 sm:py-4">
+                    {{
+                      project.budget
+                        ? (project.budget | number : '1.0-0') +
+                          ' ' +
+                          ('pmo.budgetAmount' | translate)
+                        : '-'
+                    }}
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(project.created_at) }}</td>
-                  <td class="px-6 py-4">
-                    <button 
+                  <td class="px-3 py-3 align-top text-sm whitespace-nowrap text-gray-600 sm:px-6 sm:py-4">
+                    {{ formatDate(project.created_at) }}
+                  </td>
+                  <td class="px-3 py-3 align-top sm:px-6 sm:py-4">
+                    <button
+                      type="button"
                       (click)="viewProjectDetails(project.id)"
-                      class="px-4 py-2 bg-company-primary text-white rounded-lg hover:bg-company-primary/90 transition text-sm font-semibold flex items-center gap-2">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      class="inline-flex w-full min-w-0 items-center justify-center gap-2 rounded-lg bg-company-primary px-3 py-2 text-xs font-semibold text-white transition hover:bg-company-primary/90 sm:w-auto sm:px-4 sm:text-sm"
+                    >
+                      <svg
+                        class="h-4 w-4 shrink-0"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
                       </svg>
-                      <span>{{ 'projects.viewDetails' | translate }}</span>
+                      <span class="min-w-0 truncate">{{
+                        'projects.viewDetails' | translate
+                      }}</span>
                     </button>
                   </td>
                 </tr>

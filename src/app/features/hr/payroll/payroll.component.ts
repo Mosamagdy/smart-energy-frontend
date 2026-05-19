@@ -60,14 +60,14 @@ interface DepartmentGroup {
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-   <div class="p-6 pb-32">
+   <div class="w-full min-w-0 p-4 pb-32 sm:p-6">
   <!-- Header -->
-  <div class="mb-6 flex items-center justify-between">
+  <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
     <div>
-      <h1 class="text-3xl font-bold text-gray-900">{{ 'payroll.title' | translate }}</h1>
+      <h1 class="text-2xl font-bold break-words text-gray-900 sm:text-3xl">{{ 'payroll.title' | translate }}</h1>
       <p class="text-gray-600 mt-2">{{ 'payroll.subtitle' | translate }}</p>
     </div>
-    <div class="flex gap-3 items-center">
+    <div class="flex flex-wrap gap-3 items-stretch sm:items-center">
       <!-- TASK 6-A: Export to Excel Button -->
       <button
         (click)="exportToExcel()"
@@ -173,7 +173,7 @@ interface DepartmentGroup {
 
         <!-- Employee Table -->
         <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
+          <table class="w-full min-w-[720px] divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
@@ -252,7 +252,7 @@ interface DepartmentGroup {
 
   <!-- Empty State -->
   @if (!loading() && payrollData().length === 0 && !error()) {
-    <div class="bg-white rounded-lg shadow p-12 text-center">
+    <div class="bg-white rounded-lg shadow p-6 sm:p-12 text-center">
       <i class="fas fa-users text-6xl text-gray-300 mb-4"></i>
       <p class="text-gray-600 text-lg">{{ 'payroll.noActiveEmployees' | translate }}</p>
       <p class="text-gray-500 mt-2">{{ 'payroll.noActiveEmployeesDesc' | translate }}</p>

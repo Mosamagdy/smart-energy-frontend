@@ -7,11 +7,13 @@ import { TranslatePipe } from '@ngx-translate/core';
   standalone: true,
   imports: [TranslatePipe],
   template: `
-    <section class="rounded-2xl border border-black/10 bg-white p-6">
-      <h1 class="text-lg font-semibold">
+    <section
+      class="w-full min-w-0 rounded-2xl border border-black/10 bg-white p-4 sm:p-6"
+    >
+      <h1 class="text-base font-semibold sm:text-lg">
         {{ titleKey() | translate }}
       </h1>
-      <p class="mt-2 text-sm text-black/70">
+      <p class="mt-2 wrap-break-word text-sm text-black/70">
         {{ 'app.noData' | translate }}
       </p>
     </section>
@@ -24,4 +26,3 @@ export class RoleDashboardComponent {
     this.route.snapshot.data['titleKey'] ?? 'sidebar.dashboard'
   );
 }
-

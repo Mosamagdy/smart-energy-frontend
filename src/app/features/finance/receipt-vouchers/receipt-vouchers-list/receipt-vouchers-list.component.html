@@ -1,96 +1,217 @@
-<div class="container mx-auto p-6">
+<div class="w-full min-w-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6" dir="rtl">
   <!-- Header -->
-  <div class="flex justify-between items-center mb-6">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-800">{{ 'receiptVouchers.list.title' | translate }}</h1>
-      <p class="text-gray-600 mt-1">{{ 'receiptVouchers.list.subtitle' | translate }}</p>
-    </div>
-    <button 
-      (click)="router.navigate(['/finance/receipt-vouchers/create'])"
-      class="btn-primary px-6 py-3 rounded-lg shadow-md hover:shadow-lg transition-all">
-      <i class="fas fa-plus ml-2"></i>
-      {{ 'receiptVouchers.list.create' | translate }}
-    </button>
-  </div>
-
-  <!-- Filters -->
-  <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-    <div class="flex items-center gap-4">
-      <label class="font-semibold text-gray-700">{{ 'receiptVouchers.list.status' | translate }}:</label>
-      <select 
-        [(ngModel)]="statusFilter"
-        (change)="loadVouchers()"
-        class="form-select px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
-        <option value="all">{{ 'receiptVouchers.list.all' | translate }}</option>
-        <option value="posted">{{ 'receiptVouchers.list.posted' | translate }}</option>
-        <option value="draft">{{ 'receiptVouchers.list.draft' | translate }}</option>
-        <option value="cancelled">{{ 'receiptVouchers.list.cancelled' | translate }}</option>
-      </select>
+  <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold break-words mb-2 sm:text-3xl">{{ 'receiptVouchers.create.title' | translate }}</h1>
+          <p class="text-blue-100">{{ 'receiptVouchers.create.subtitle' | translate }}</p>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Loading State -->
-  @if (isLoading()) {
-    <div class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600"></div>
-    </div>
-  } @else {
-    <!-- Vouchers Table -->
-    <div class="bg-white rounded-lg shadow-md overflow-hidden">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.voucherNumber' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.clientName' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.amount' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.paymentMethodLabel' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.date' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.status' | translate }}</th>
-            <th class="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase">{{ 'receiptVouchers.list.actions' | translate }}</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          @for (voucher of vouchers(); track voucher.id) {
-            <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="font-mono font-bold text-green-600">{{ voucher.voucher_no }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-gray-800 font-medium">{{ voucher.client_name }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="font-bold text-green-600">{{ formatCurrency(voucher.amount) }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-gray-700">{{ getMethodLabel(voucher.payment_method) }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="text-gray-700">{{ formatDate(voucher.receipt_date) }}</span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <span class="px-3 py-1 rounded-full text-xs font-bold {{ getStatusBadge(voucher.status) }}">
-                  {{ getStatusLabel(voucher.status) }}
-                </span>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <button 
-                  (click)="viewVoucher(voucher.id)"
-                  class="text-green-600 hover:text-green-800 font-medium transition-colors">
-                  <i class="fas fa-eye ml-1"></i>
-                  {{ 'receiptVouchers.list.view' | translate }}
-                </button>
-              </td>
-            </tr>
-          } @empty {
-            <tr>
-              <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                <i class="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
-                <p class="text-lg">{{ 'receiptVouchers.list.noVouchers' | translate }}</p>
-              </td>
-            </tr>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Left: Form -->
+    <div class="lg:col-span-1 space-y-6">
+      <!-- Client Selection -->
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          {{ 'receiptVouchers.create.selectClient' | translate }}
+        </h2>
+        <select 
+          [ngModel]="selectedClientId()"
+          (ngModelChange)="onClientSelect($event)"
+          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+          <option value="">{{ 'receiptVouchers.create.selectClientPlaceholder' | translate }}</option>
+          @for (client of clients(); track client.id) {
+            <option [value]="client.id">{{ client.client_name }}</option>
           }
-        </tbody>
-      </table>
+        </select>
+      </div>
+
+      <!-- Payment Details -->
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+          </svg>
+          {{ 'receiptVouchers.create.paymentDetails' | translate }}
+        </h2>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'receiptVouchers.create.receiptDate' | translate }}</label>
+            <input 
+              type="date"
+              [ngModel]="receiptDate()"
+              (ngModelChange)="receiptDate.set($event)"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'receiptVouchers.create.paymentMethod' | translate }}</label>
+            <select 
+              [ngModel]="paymentMethod()"
+              (ngModelChange)="paymentMethod.set($event)"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+              <option value="bank">{{ 'receiptVouchers.create.bank' | translate }}</option>
+              <option value="cash">{{ 'receiptVouchers.create.cash' | translate }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'receiptVouchers.create.paymentAccount' | translate }}</label>
+            <select 
+              [ngModel]="selectedPaymentAccountId()"
+              (ngModelChange)="selectedPaymentAccountId.set($event)"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition">
+              <option value="">{{ 'receiptVouchers.create.selectAccount' | translate }}</option>
+              @for (account of paymentAccounts(); track account.id) {
+                <option [value]="account.id">{{ account.account_code }} - {{ account.account_name_ar }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'receiptVouchers.create.referenceNo' | translate }}</label>
+            <input 
+              type="text"
+              [ngModel]="referenceNo()"
+              (ngModelChange)="referenceNo.set($event)"
+              placeholder="{{ 'receiptVouchers.create.referenceNoPlaceholder' | translate }}"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition" />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">{{ 'receiptVouchers.create.description' | translate }}</label>
+            <textarea 
+              [ngModel]="description()"
+              (ngModelChange)="description.set($event)"
+              rows="3"
+              placeholder="{{ 'receiptVouchers.create.descriptionPlaceholder' | translate }}"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Amount -->
+      @if (totalAmount > 0) {
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white">
+          <p class="text-sm opacity-90 mb-2">{{ 'receiptVouchers.create.total' | translate }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl">{{ totalAmount | number:'1.2-2' }} {{ 'profitLoss.sar' | translate }}</p>
+        </div>
+      }
+
+      <!-- Action Buttons -->
+      <div class="space-y-3">
+        <button 
+          (click)="submitVoucher(true)"
+          [disabled]="!canSubmit || isSubmitting()"
+          class="w-full py-4 px-6 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition font-bold text-lg shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          @if (isSubmitting()) {
+            <div class="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+          } @else {
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          }
+          {{ 'receiptVouchers.create.createAndPost' | translate }}
+        </button>
+
+        <button 
+          (click)="submitVoucher(false)"
+          [disabled]="!canSubmit || isSubmitting()"
+          class="w-full py-3 px-6 bg-white text-gray-700 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+          {{ 'receiptVouchers.create.saveAsDraft' | translate }}
+        </button>
+      </div>
     </div>
-  }
+
+    <!-- Right: Invoices -->
+    <div class="lg:col-span-2">
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          {{ 'receiptVouchers.create.invoicesDue' | translate }}
+          @if (selectedClientName()) {
+            <span class="text-sm font-normal text-gray-600">- {{ selectedClientName() }}</span>
+          }
+        </h2>
+
+        @if (!selectedClientId()) {
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+            <p class="text-gray-600">{{ 'receiptVouchers.create.selectClientToViewInvoices' | translate }}</p>
+          </div>
+        } @else if (invoices().length === 0) {
+          <div class="text-center py-12">
+            <svg class="w-16 h-16 text-green-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-gray-600">{{ 'receiptVouchers.create.noInvoicesDue' | translate }}</p>
+          </div>
+        } @else {
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[720px]">
+              <thead class="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200">
+                <tr>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoiceNumber' | translate }}</th>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoiceDate' | translate }}</th>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoiceTotal' | translate }}</th>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoicePaid' | translate }}</th>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoiceRemaining' | translate }}</th>
+                  <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.amount' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (invoice of invoices(); track invoice.id) {
+                  <tr class="border-b border-gray-100 hover:bg-purple-50 transition">
+                    <td class="px-4 py-3">
+                      <p class="text-sm font-semibold text-gray-900">{{ invoice.invoice_number }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="text-sm text-gray-700">{{ invoice.issue_date | date:'shortDate' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="text-sm font-semibold text-gray-900">{{ invoice.total_amount | number:'1.2-2' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="text-sm text-green-700">{{ invoice.paid_amount | number:'1.2-2' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <p class="text-sm font-bold text-red-700">{{ invoice.outstanding_balance | number:'1.2-2' }}</p>
+                    </td>
+                    <td class="px-4 py-3">
+                      <input 
+                        type="number"
+                        [ngModel]="invoice.amount_to_pay"
+                        (ngModelChange)="onAmountChange(invoice, $event)"
+                        [max]="invoice.outstanding_balance"
+                        min="0"
+                        step="0.01"
+                        placeholder="{{ 'receiptVouchers.create.amountPlaceholder' | translate }}"
+                        class="w-32 px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition text-sm" />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
 </div>

@@ -28,7 +28,7 @@ type OnLeaveRecord = {
   standalone: true,
   imports: [CommonModule, TranslateModule , FormsModule],
 template: `
-  <div class="min-h-screen bg-gray-50 p-6" dir="rtl">
+  <div class="w-full min-w-0 bg-gray-50 p-4 sm:p-6" dir="rtl">
     <div class="mb-6">
       <h1 class="text-2xl font-bold text-gray-900">{{ 'hr.leaveRequests' | translate }}</h1>
     </div>
@@ -69,7 +69,7 @@ template: `
     }
 
     <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div class="px-3 py-4 sm:px-6 border-b border-gray-100 flex items-center justify-between">
         <div class="text-sm text-gray-600">
           @if (activeTab() === 'pending') {
             {{ 'leaves.tabs.pending' | translate }}:
@@ -106,14 +106,14 @@ template: `
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.employee' | translate }}</th>
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.leaveType' | translate }}</th>
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.from' | translate }}</th>
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.to' | translate }}</th>
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.days' | translate }}</th>
-                <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.status' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.employee' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.leaveType' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.from' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.to' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.days' | translate }}</th>
+                <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.status' | translate }}</th>
                 @if (activeTab() === 'pending') {
-                  <th class="px-6 py-3 text-right font-medium">{{ 'leaves.table.actions' | translate }}</th>
+                  <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'leaves.table.actions' | translate }}</th>
                 }
               </tr>
             </thead>
@@ -121,19 +121,19 @@ template: `
               @if (activeTab() === 'pending') {
                 @for (r of pendingRequests(); track r.id) {
                   <tr class="hover:bg-gray-50 transition-colors cursor-pointer">
-                    <td class="px-6 py-3 font-medium text-gray-900">
+                    <td class="px-3 py-3 sm:px-6 font-medium text-gray-900">
                       {{ r.first_name }} {{ r.last_name }} <span class="text-gray-400">(#{{ r.employee_number || '—' }})</span>
                     </td>
-                    <td class="px-6 py-3 text-gray-700">{{ leaveTypeLabel(r.leave_type) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ formatDate(r.start_date) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ formatDate(r.end_date) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ r.days_count || '—' }}</td>
-                    <td class="px-6 py-3">
+                    <td class="px-3 py-3 sm:px-6 text-gray-700">{{ leaveTypeLabel(r.leave_type) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatDate(r.start_date) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatDate(r.end_date) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ r.days_count || '—' }}</td>
+                    <td class="px-3 py-3 sm:px-6">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(r.status)">
                         {{ r.status_arabic || getStatusLabel(r.status) }}
                       </span>
                     </td>
-                    <td class="px-6 py-3">
+                    <td class="px-3 py-3 sm:px-6">
                       <button
                         (click)="openApprovalModal(r)"
                         class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
@@ -145,14 +145,14 @@ template: `
               } @else {
                 @for (r of records(); track r.leave_request_id) {
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-3 font-medium text-gray-900">
+                    <td class="px-3 py-3 sm:px-6 font-medium text-gray-900">
                       {{ r.first_name }} {{ r.last_name }} <span class="text-gray-400">(#{{ r.employee_number || '—' }})</span>
                     </td>
-                    <td class="px-6 py-3 text-gray-700">{{ leaveTypeLabel(r.leave_type) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ formatDate(r.start_date) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ formatDate(r.end_date) }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ r.days_count || '—' }}</td>
-                    <td class="px-6 py-3">
+                    <td class="px-3 py-3 sm:px-6 text-gray-700">{{ leaveTypeLabel(r.leave_type) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatDate(r.start_date) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatDate(r.end_date) }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ r.days_count || '—' }}</td>
+                    <td class="px-3 py-3 sm:px-6">
                       <span class="px-3 py-1 rounded-full text-xs font-semibold" [ngClass]="getStatusClass(r.status)">
                         {{ getStatusLabel(r.status) }}
                       </span>

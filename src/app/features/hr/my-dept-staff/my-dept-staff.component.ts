@@ -10,7 +10,7 @@ import { EmployeeService, type Employee } from '../../../data/api/employee.servi
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
-    <div class="min-h-screen bg-gray-50 p-6" dir="rtl">
+    <div class="w-full min-w-0 bg-gray-50 p-4 sm:p-6" dir="rtl">
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-900">
           {{ title() | translate }}
@@ -27,7 +27,7 @@ import { EmployeeService, type Employee } from '../../../data/api/employee.servi
       }
 
       <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div class="px-3 py-4 sm:px-6 border-b border-gray-100 flex items-center justify-between">
           <div class="text-sm text-gray-600">
             {{ 'hr.totalEmployees' | translate }}: <span class="font-semibold text-gray-900">{{ employees().length }}</span>
           </div>
@@ -53,19 +53,19 @@ import { EmployeeService, type Employee } from '../../../data/api/employee.servi
             <table class="w-full text-sm">
               <thead>
                 <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                  <th class="px-6 py-3 text-right font-medium">{{ 'hr.employee' | translate }}</th>
-                  <th class="px-6 py-3 text-right font-medium">{{ 'hr.jobTitle' | translate }}</th>
-                  <th class="px-6 py-3 text-right font-medium">{{ 'hr.employeeNumber' | translate }}</th>
+                  <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'hr.employee' | translate }}</th>
+                  <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'hr.jobTitle' | translate }}</th>
+                  <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'hr.employeeNumber' | translate }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-50">
                 @for (e of employees(); track e.id) {
                   <tr class="hover:bg-gray-50 transition-colors">
-                    <td class="px-6 py-3 font-medium text-gray-900">
+                    <td class="px-3 py-3 sm:px-6 font-medium text-gray-900">
                       {{ e.first_name }} {{ e.last_name }}
                     </td>
-                    <td class="px-6 py-3 text-gray-600">{{ e.job_title || '—' }}</td>
-                    <td class="px-6 py-3 text-gray-500">{{ e.employee_number || '—' }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-600">{{ e.job_title || '—' }}</td>
+                    <td class="px-3 py-3 sm:px-6 text-gray-500">{{ e.employee_number || '—' }}</td>
                   </tr>
                 }
               </tbody>

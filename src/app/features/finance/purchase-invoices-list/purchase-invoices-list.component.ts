@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment.prod';
+import { ToastService } from '../../../core/services/toast.service';
+import { openFilePreview } from '../../../utils/file-url.util';
 
 interface PurchaseInvoice {
   id: number;
@@ -18,6 +20,7 @@ interface PurchaseInvoice {
   total_amount: string;
   paid_amount: string;
   status: string;
+  pdf_path: string | null;
   journal_entry_number: number | null;
   journal_entry_id: number | null;
   created_at: string;
@@ -34,6 +37,7 @@ export class PurchaseInvoicesListComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private translate = inject(TranslateService);
+  private toast = inject(ToastService);
 
   invoices = signal<PurchaseInvoice[]>([]);
   filteredInvoices = signal<PurchaseInvoice[]>([]);
@@ -109,6 +113,18 @@ export class PurchaseInvoicesListComponent implements OnInit {
 
   filterBySupplier(): void {
     this.applyFilters();
+  }
+
+  viewPdf(invoice: PurchaseInvoice): void {
+    if (!invoice.pdf_path) {
+      this.toast.warning('لا يوجد ملف PDF مرفق لهذه الفاتورة');
+      console.warn('[PurchaseInvoices] viewPdf: missing pdf_path for invoice', invoice.id);
+      return;
+    }
+
+    if (!openFilePreview(invoice.pdf_path)) {
+      this.toast.warning('تعذر فتح ملف PDF');
+    }
   }
 
   viewInvoiceDetails(invoiceId: number): void {

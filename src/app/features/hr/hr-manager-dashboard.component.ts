@@ -10,10 +10,10 @@ import { AttendanceService } from '../../data/api/attendance.service';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="p-6 bg-linear-to-r from-gray-50 to-gray-100 min-h-screen" dir="rtl">
+    <div class="w-full min-w-0 bg-linear-to-r from-gray-50 to-gray-100 p-4 sm:p-6" dir="rtl">
 
       <div class="mb-6 text-center">
-        <h1 class="text-3xl font-bold text-gray-900">
+        <h1 class="text-2xl font-bold break-words text-gray-900 sm:text-3xl">
           <i class="fas fa-users-cog ml-3 text-blue-600"></i>
           {{ 'hrManagerDashboard.title' | translate }}
         </h1>
@@ -21,7 +21,7 @@ import { AttendanceService } from '../../data/api/attendance.service';
 
       <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
 
-        <div class="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-gray-50 to-gray-100">
+        <div class="px-3 py-4 sm:px-6 border-b border-gray-200 bg-linear-to-r from-gray-50 to-gray-100">
           <div class="flex justify-between items-center flex-wrap gap-4">
             <h2 class="text-xl font-semibold text-gray-800">{{ 'hrManagerDashboard.allEmployees' | translate }}</h2>
             <div class="flex gap-3">
@@ -44,30 +44,30 @@ import { AttendanceService } from '../../data/api/attendance.service';
         </div>
 
         @if (isLoading) {
-          <div class="p-12 flex items-center justify-center">
+          <div class="p-6 sm:p-12 flex items-center justify-center">
             <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           </div>
         }
 
         @if (!isLoading) {
           <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[720px]">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.employee' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.department' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.clockInTime' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.clockOutTime' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.totalHours' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.status' | translate }}</th>
-                  <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.actions' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.employee' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.department' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.clockInTime' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.clockOutTime' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.totalHours' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.status' | translate }}</th>
+                  <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'hrManagerDashboard.columns.actions' | translate }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
                 @for (employee of filteredEmployees; track employee.id) {
                   <tr class="hover:bg-gray-50 transition-colors">
 
-                    <td class="px-6 py-4">
+                    <td class="px-3 py-4 sm:px-6">
                       <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-linear-to-r from-blue-400 to-indigo-600 rounded-full flex items-center justify-center shrink-0">
                           <i class="fas fa-user text-white text-sm"></i>
@@ -83,23 +83,23 @@ import { AttendanceService } from '../../data/api/attendance.service';
                       </div>
                     </td>
 
-                    <td class="px-6 py-4 text-sm text-gray-600">
+                    <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">
                       {{ employee.department_name || '—' }}
                     </td>
 
-                    <td class="px-6 py-4 text-sm text-gray-600">
+                    <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">
                       {{ formatTime(employee.clock_in_time) }}
                     </td>
 
-                    <td class="px-6 py-4 text-sm text-gray-600">
+                    <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">
                       {{ formatTime(employee.clock_out_time) }}
                     </td>
 
-                    <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                    <td class="px-3 py-4 sm:px-6 text-sm font-medium text-gray-900">
                       {{ (+(employee.total_hours || 0)).toFixed(2) }}
                     </td>
 
-                    <td class="px-6 py-4">
+                    <td class="px-3 py-4 sm:px-6">
                       <span
                         class="px-3 py-1 rounded-full text-xs font-semibold"
                         [ngClass]="getStatusClass(employee.attendance_status)"
@@ -108,7 +108,7 @@ import { AttendanceService } from '../../data/api/attendance.service';
                       </span>
                     </td>
 
-                    <td class="px-6 py-4">
+                    <td class="px-3 py-4 sm:px-6">
                       <div class="flex gap-2">
                         @if (!employee.isClockedIn) {
                           <button

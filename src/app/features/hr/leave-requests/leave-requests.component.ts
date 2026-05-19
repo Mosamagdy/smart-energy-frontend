@@ -7,8 +7,8 @@ import { TranslateModule } from '@ngx-translate/core';
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
-    <div class="p-6">
-      <h1 class="text-3xl font-bold text-gray-900">{{ 'hr.leaveRequests' | translate }}</h1>
+    <div class="w-full min-w-0 p-4 sm:p-6">
+      <h1 class="text-2xl font-bold break-words text-gray-900 sm:text-3xl">{{ 'hr.leaveRequests' | translate }}</h1>
       <p class="text-gray-600 mt-2">Leave requests management module - Coming Soon</p>
     </div>
   `

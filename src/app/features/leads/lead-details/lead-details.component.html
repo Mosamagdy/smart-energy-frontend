@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50" [dir]="translate.currentLang === 'ar' ? 'rtl' : 'ltr'">
+<div class="w-full min-w-0 bg-gray-50" [dir]="translate.currentLang === 'ar' ? 'rtl' : 'ltr'">
   <!-- Loading State -->
   @if (loading()) {
     <div class="flex justify-center items-center py-32">
@@ -20,10 +20,10 @@
 
   <!-- Main Content -->
   @if (lead() && !loading()) {
-    <div class="max-w-7xl mx-auto px-6 py-6 space-y-6">
+    <div class="mx-auto w-full min-w-0 max-w-7xl space-y-4 px-4 py-4 sm:space-y-6 sm:px-6 sm:py-6">
 
       <!-- Header with Back Button -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <button
           (click)="goBack()"
           class="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl hover:border-[#2cdc78] hover:text-[#2cdc78] transition-all duration-200">
@@ -32,7 +32,7 @@
           </svg>
           <span class="font-medium">{{ 'leads.backToList' | translate }}</span>
         </button>
-        <h1 class="text-3xl font-bold text-gray-900">{{ 'leads.leadDetails' | translate }}</h1>
+        <h1 class="text-2xl font-bold wrap-break-word text-gray-900 sm:text-3xl">{{ 'leads.leadDetails' | translate }}</h1>
       </div>
 
       <!-- Status Pipeline (4-Phase Progress Bar) -->
@@ -43,7 +43,8 @@
           </svg>
           {{ 'leads.pipeline.title' | translate }}
         </h2>
-        <div class="flex items-center justify-between relative">
+        <div class="overflow-x-auto pb-2">
+        <div class="relative flex min-w-140 items-center justify-between">
           <div class="absolute top-8 left-0 right-0 h-1 bg-gray-200"></div>
           <div class="absolute top-8 left-0 h-1 bg-[#2cdc78] transition-all duration-500"
                [style.width.%]="(getCurrentStage() - 1) * 33.33"></div>
@@ -115,6 +116,7 @@
             </p>
           </div>
         </div>
+        </div>
       </div>
 
       <!-- Smart Action Buttons (Command Bar) — Hidden for Engineers -->
@@ -123,7 +125,7 @@
           <div class="flex flex-wrap gap-3">
             @if (canAssignSalesRep()) {
               <button (click)="openAssignSalesModal()"
-                class="px-6 py-3 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                class="px-3 py-3 sm:px-6 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
@@ -132,7 +134,7 @@
             }
             @if (canRequestSurvey()) {
               <button (click)="requestSurvey()"
-                class="px-6 py-3 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                class="px-3 py-3 sm:px-6 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
@@ -141,7 +143,7 @@
             }
             @if (canAssignEngineer()) {
               <button (click)="openAssignEngineerModal()"
-                class="px-6 py-3 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                class="px-3 py-3 sm:px-6 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>
@@ -150,7 +152,7 @@
             }
             @if (canCreateQuotation()) {
               <button (click)="navigateToCreateQuotation()"
-                class="px-6 py-3 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                class="px-3 py-3 sm:px-6 bg-[#2cdc78] text-[#0c0725] rounded-xl font-bold hover:bg-[#2cdc78]/90 transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
@@ -160,7 +162,7 @@
             <!-- Log Interaction: visible to all except engineers and quotation specialists -->
             @if (canLogInteraction()) {
             <button (click)="openInteractionForm()"
-              class="px-6 py-3 bg-white/10 text-white border-2 border-white/30 rounded-xl font-bold hover:bg-white/20 hover:border-[#2cdc78] transition-all duration-200 flex items-center gap-2">
+              class="px-3 py-3 sm:px-6 bg-white/10 text-white border-2 border-white/30 rounded-xl font-bold hover:bg-white/20 hover:border-[#2cdc78] transition-all duration-200 flex items-center gap-2">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
               </svg>
@@ -179,7 +181,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
         <!-- ── COLUMN 1: Client Info + Project Team ── -->
-        <div class="space-y-6">
+        <div class="w-full min-w-0 space-y-4 sm:space-y-6">
 
           <!-- Client Info Card -->
           <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -424,7 +426,7 @@
 
       <!-- ── INSPECTION REPORTS (Full Width) ── -->
       <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-        <div class="flex items-center justify-between mb-6">
+        <div class="mb-4 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
           <h3 class="text-xl font-bold text-[#0c0725] flex items-center gap-2">
             <svg class="w-6 h-6 text-[#2876c9]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -553,7 +555,7 @@
           <div class="p-6 space-y-4">
             <div>
               <label class="block text-sm font-bold text-gray-700 mb-2">{{ 'leads.timeline.interactionType' | translate }} *</label>
-              <div class="grid grid-cols-4 gap-2">
+              <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
                 @for (type of ['call', 'email', 'meeting', 'note']; track type) {
                   <button type="button" (click)="setInteractionType(type)"
                     class="p-3 border-2 rounded-xl transition-all duration-200 flex flex-col items-center gap-1"
@@ -746,7 +748,7 @@
                   <input type="file" #fileInput (change)="onFileSelected($event)"
                     accept=".pdf,.jpg,.jpeg,.png,.gif,.webp,.doc,.docx,.xls,.xlsx" class="hidden">
                   <button type="button" (click)="fileInput.click()"
-                    class="px-6 py-3 bg-[#2876c9] text-white rounded-xl font-bold hover:bg-[#2876c9]/90 transition flex items-center gap-2 mx-auto">
+                    class="px-3 py-3 sm:px-6 bg-[#2876c9] text-white rounded-xl font-bold hover:bg-[#2876c9]/90 transition flex items-center gap-2 mx-auto">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
                     </svg>
@@ -859,7 +861,7 @@
                 <div class="text-6xl">📄</div>
                 <p class="text-gray-600 text-sm">{{ 'leads.cannotDisplayFile' | translate }}</p>
                 <a [href]="fileViewerUrl()!" target="_blank"
-                  class="px-6 py-3 bg-[#2876c9] text-white rounded-xl font-bold hover:bg-[#2876c9]/90 transition">
+                  class="px-3 py-3 sm:px-6 bg-[#2876c9] text-white rounded-xl font-bold hover:bg-[#2876c9]/90 transition">
                   {{ 'leads.openInNewTab' | translate }}
                 </a>
               </div>

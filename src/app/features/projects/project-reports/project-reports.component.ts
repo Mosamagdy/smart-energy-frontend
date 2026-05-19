@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { AuthStore } from '../../../core/auth/auth.store';
 import { ToastService } from '../../../core/services/toast.service';
 import { environment } from '../../../../environments/environment.prod';
+import { openFilePreview, resolveFileUrl } from '../../../utils/file-url.util';
 
 // ============================================================================
 // Document Interface
@@ -345,39 +346,25 @@ export class ProjectReportsComponent implements OnInit {
   // File Actions - CORRECT URL CONSTRUCTION
   // ============================================================================
   viewDocument(doc: ProjectDocument): void {
-    // Database stores: /uploads/reports/report-123.jpeg
-    // Environment.apiUrl: http://localhost:3000/api
-    // Final URL: http://localhost:3000/uploads/reports/report-123.jpeg
-    
-    let fullUrl: string;
-    
-    if (doc.file_path.startsWith('http')) {
-      // Already absolute URL
-      fullUrl = doc.file_path;
-    } else {
-      // Relative path - combine with backend base URL
-      const baseUrl = environment.apiUrl.replace('/api', ''); // http://localhost:3000
-      const path = doc.file_path.startsWith('/') ? doc.file_path : `/${doc.file_path}`;
-      fullUrl = `${baseUrl}${path}`;
+    if (!doc.file_path) {
+      this.toast.warning(this.translateService.instant('projectReports.errors.noAttachment'));
+      console.warn('[ProjectReports] viewDocument: missing file_path for doc', doc.id);
+      return;
     }
-    
-    console.log('Viewing document:', fullUrl);
-    window.open(fullUrl, '_blank');
+
+    if (!openFilePreview(doc.file_path)) {
+      this.toast.warning(this.translateService.instant('projectReports.errors.failedToLoad'));
+    }
   }
 
   downloadDocument(doc: ProjectDocument): void {
-    // Same URL construction as viewDocument
-    let fullUrl: string;
-    
-    if (doc.file_path.startsWith('http')) {
-      fullUrl = doc.file_path;
-    } else {
-      const baseUrl = environment.apiUrl.replace('/api', '');
-      const path = doc.file_path.startsWith('/') ? doc.file_path : `/${doc.file_path}`;
-      fullUrl = `${baseUrl}${path}`;
+    if (!doc.file_path) {
+      this.toast.warning(this.translateService.instant('projectReports.errors.noAttachment'));
+      console.warn('[ProjectReports] downloadDocument: missing file_path for doc', doc.id);
+      return;
     }
-    
-    console.log('Downloading document:', fullUrl);
+
+    const fullUrl = resolveFileUrl(doc.file_path);
     const link = document.createElement('a');
     link.href = fullUrl;
     link.download = doc.file_name;
@@ -403,10 +390,10 @@ export class ProjectReportsComponent implements OnInit {
   getFileIcon(fileType: string): string {
     const icons: Record<string, string> = {
       pdf: '📄',
-      image: '🖼️',
-      jpg: '🖼️',
-      jpeg: '🖼️',
-      png: '🖼️',
+      image: '🖼',
+      jpg: '🖼',
+      jpeg: '🖼',
+      png: '🖼',
       doc: '📝',
       docx: '📝',
       xls: '📊',

@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6" dir="rtl">
+<div class="w-full min-w-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6" dir="rtl">
   <!-- Header -->
   <div class="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
     <div class="flex items-center justify-between">
@@ -9,14 +9,14 @@
           </svg>
         </div>
         <div>
-          <h1 class="text-3xl font-bold mb-2">{{ 'expensesList.title' | translate }}</h1>
+          <h1 class="text-2xl font-bold break-words mb-2 sm:text-3xl">{{ 'expensesList.title' | translate }}</h1>
           <p class="text-blue-100">{{ 'expensesList.subtitle' | translate }}</p>
         </div>
       </div>
       <button 
         (click)="loadExpenses()"
         [disabled]="isLoading()"
-        class="px-6 py-3 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50">
+        class="px-3 py-3 sm:px-6 bg-white text-blue-600 rounded-xl hover:bg-blue-50 transition font-semibold flex items-center gap-2 shadow-lg disabled:opacity-50">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
         </svg>
@@ -66,7 +66,7 @@
 
   <!-- Loading State -->
   @if (isLoading()) {
-    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-12 text-center">
       <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600 mx-auto mb-4"></div>
       <p class="text-gray-600">{{ 'expensesList.loading' | translate }}</p>
     </div>
@@ -90,7 +90,7 @@
 
   <!-- Empty State -->
   @if (!isLoading() && filteredExpenses().length === 0) {
-    <div class="bg-white rounded-2xl shadow-lg p-12 text-center">
+    <div class="bg-white rounded-2xl shadow-lg p-6 sm:p-12 text-center">
       <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h2a2 2 0 01-2-2z"/>
@@ -105,31 +105,31 @@
   @if (!isLoading() && filteredExpenses().length > 0) {
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
       <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full min-w-[720px]">
           <thead class="bg-gradient-to-r from-blue-50 to-purple-50 border-b-2 border-blue-200">
             <tr>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.date' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.fund' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.custodianLabel' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.expenseAccountLabel' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.description' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.amount' | translate }}</th>
-              <th class="px-6 py-4 text-right text-sm font-bold text-gray-700">{{ 'expensesList.journalEntry' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.date' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.fund' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.custodianLabel' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.expenseAccountLabel' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.description' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.amount' | translate }}</th>
+              <th class="px-3 py-4 sm:px-6 text-right text-sm font-bold text-gray-700">{{ 'expensesList.journalEntry' | translate }}</th>
             </tr>
           </thead>
           <tbody>
             @for (expense of filteredExpenses(); track expense.id) {
               <tr class="border-b border-gray-100 hover:bg-blue-50 transition">
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   <p class="text-sm font-semibold text-gray-900">{{ formatDate(expense.created_at) }}</p>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   <p class="text-sm text-gray-700">{{ expense.fund_name }}</p>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   <p class="text-sm font-semibold text-gray-900">{{ expense.custodian_name }}</p>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   @if (expense.account_code && expense.expense_account_name) {
                     <div>
                       <p class="text-sm font-bold text-blue-700">{{ expense.account_code }}</p>
@@ -141,13 +141,13 @@
                     </span>
                   }
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   <p class="text-sm text-gray-700 max-w-xs truncate">{{ expense.description }}</p>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   <p class="text-lg font-bold text-red-700">{{ formatCurrency(expense.amount) }} {{ 'profitLoss.sar' | translate }}</p>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-4 sm:px-6">
                   @if (expense.journal_entry_id) {
                     <a 
                       [routerLink]="['/accounting/journal-entries', expense.journal_entry_id]"
@@ -168,10 +168,10 @@
           </tbody>
           <tfoot class="bg-gradient-to-r from-orange-50 to-red-50 border-t-2 border-orange-200">
             <tr>
-              <td colspan="5" class="px-6 py-4 text-right">
+              <td colspan="5" class="px-3 py-4 sm:px-6 text-right">
                 <p class="text-lg font-bold text-gray-900">{{ 'expensesList.total' | translate }}</p>
               </td>
-              <td class="px-6 py-4">
+              <td class="px-3 py-4 sm:px-6">
                 <p class="text-xl font-bold text-red-700">{{ formatCurrency(totalAmount()) }} {{ 'profitLoss.sar' | translate }}</p>
               </td>
               <td></td>

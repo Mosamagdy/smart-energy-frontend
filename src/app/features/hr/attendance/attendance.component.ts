@@ -45,7 +45,7 @@ interface DailyReportRecord {
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="min-h-screen bg-gray-50 p-6" dir="rtl">
+    <div class="w-full min-w-0 bg-gray-50 p-4 sm:p-6" dir="rtl">
 
       <div class="mb-8">
         <h1 class="text-2xl font-bold text-gray-900">
@@ -159,33 +159,33 @@ interface DailyReportRecord {
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.employee' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.clockInTime' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.clockOutTime' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.hours' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.status' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.actions' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.employee' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.clockInTime' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.clockOutTime' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.hours' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.status' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.actions' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                   @for (emp of allEmployeesToday(); track emp.employee_id) {
                     <tr class="hover:bg-gray-50 transition-colors"
                       [class.bg-red-50]="emp.status === 'absent'">
-                      <td class="px-6 py-3 font-medium text-gray-900">
+                      <td class="px-3 py-3 sm:px-6 font-medium text-gray-900">
                         {{ emp.employee_first_name }} {{ emp.employee_last_name }}
                       </td>
-                      <td class="px-6 py-3 text-gray-500">{{ formatTime(emp.clock_in_time) }}</td>
-                      <td class="px-6 py-3 text-gray-500">{{ formatTime(emp.clock_out_time) }}</td>
-                      <td class="px-6 py-3 text-gray-700 font-medium">
+                      <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatTime(emp.clock_in_time) }}</td>
+                      <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatTime(emp.clock_out_time) }}</td>
+                      <td class="px-3 py-3 sm:px-6 text-gray-700 font-medium">
                         {{ formatHours(emp.actual_hours) }}
                       </td>
-                      <td class="px-6 py-3">
+                      <td class="px-3 py-3 sm:px-6">
                         <span class="px-2.5 py-1 rounded-full text-xs font-medium"
                           [class]="getStatusClass(emp.status)">
                           {{ getStatusText(emp.status) }}
                         </span>
                       </td>
-                      <td class="px-6 py-3">
+                      <td class="px-3 py-3 sm:px-6">
                         @if (emp.clock_in_time && !emp.clock_out_time) {
                           <button (click)="handleClockOut(emp.employee_id)"
                             class="px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg transition-colors">
@@ -281,14 +281,14 @@ interface DailyReportRecord {
 
       @if (historyEmployeeId()) {
         <div class="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-100">
+          <div class="px-3 py-4 sm:px-6 border-b border-gray-100">
             <h2 class="font-semibold text-gray-900">
               {{ isManager() ? ('attendance.employeeHistory' | translate) : ('attendance.myHistory' | translate) }}
               <span class="text-xs font-normal text-gray-400 mr-2">{{ 'attendance.attendanceHistory' | translate }}</span>
             </h2>
           </div>
 
-          <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <div class="px-3 py-4 sm:px-6 border-b border-gray-100 bg-gray-50">
             <div class="flex flex-wrap gap-3 items-end">
               <div>
                 <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'attendance.from' | translate }}</label>
@@ -320,31 +320,31 @@ interface DailyReportRecord {
               <table class="w-full text-sm">
                 <thead>
                   <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wide">
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.date' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.clockInTime' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.clockOutTime' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.hours' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.status' | translate }}</th>
-                    <th class="px-6 py-3 text-right font-medium">{{ 'attendance.notes' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.date' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.clockInTime' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.clockOutTime' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.hours' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.status' | translate }}</th>
+                    <th class="px-3 py-3 sm:px-6 text-right font-medium">{{ 'attendance.notes' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                   @for (record of employeeHistory(); track record.attendance_date) {
                     <tr class="hover:bg-gray-50 transition-colors"
                       [class.bg-yellow-50]="record.status === 'late'">
-                      <td class="px-6 py-3 text-gray-700">{{ record.attendance_date }}</td>
-                      <td class="px-6 py-3 text-gray-500">{{ formatTime(record.clock_in_time) }}</td>
-                      <td class="px-6 py-3 text-gray-500">{{ formatTime(record.clock_out_time) }}</td>
-                      <td class="px-6 py-3 font-medium text-gray-700">
+                      <td class="px-3 py-3 sm:px-6 text-gray-700">{{ record.attendance_date }}</td>
+                      <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatTime(record.clock_in_time) }}</td>
+                      <td class="px-3 py-3 sm:px-6 text-gray-500">{{ formatTime(record.clock_out_time) }}</td>
+                      <td class="px-3 py-3 sm:px-6 font-medium text-gray-700">
                         {{ formatHours(record.actual_hours) }}
                       </td>
-                      <td class="px-6 py-3">
+                      <td class="px-3 py-3 sm:px-6">
                         <span class="px-2.5 py-1 rounded-full text-xs font-medium"
                           [class]="getStatusClass(record.status)">
                           {{ getStatusText(record.status) }}
                         </span>
                       </td>
-                      <td class="px-6 py-3 text-gray-400">{{ record.notes || '—' }}</td>
+                      <td class="px-3 py-3 sm:px-6 text-gray-400">{{ record.notes || '—' }}</td>
                     </tr>
                   }
                 </tbody>

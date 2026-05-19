@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6" dir="rtl">
+<div class="w-full min-w-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 p-4 sm:p-6" dir="rtl">
   <!-- Header -->
   <div class="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl shadow-xl p-6 mb-6 text-white">
     <div class="flex items-center justify-between">
@@ -9,7 +9,7 @@
           </svg>
         </div>
         <div>
-          <h1 class="text-3xl font-bold mb-2">{{ 'receiptVouchers.create.title' | translate }}</h1>
+          <h1 class="text-2xl font-bold break-words mb-2 sm:text-3xl">{{ 'receiptVouchers.create.title' | translate }}</h1>
           <p class="text-blue-100">{{ 'receiptVouchers.create.subtitle' | translate }}</p>
         </div>
       </div>
@@ -107,7 +107,7 @@
       @if (totalAmount > 0) {
         <div class="bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl shadow-lg p-6 text-white">
           <p class="text-sm opacity-90 mb-2">{{ 'receiptVouchers.create.total' | translate }}</p>
-          <p class="text-4xl font-bold">{{ totalAmount | number:'1.2-2' }} {{ 'profitLoss.sar' | translate }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl">{{ totalAmount | number:'1.2-2' }} {{ 'profitLoss.sar' | translate }}</p>
         </div>
       }
 
@@ -165,7 +165,7 @@
           </div>
         } @else {
           <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[720px]">
               <thead class="bg-gradient-to-r from-purple-50 to-pink-50 border-b-2 border-purple-200">
                 <tr>
                   <th class="px-4 py-3 text-right text-sm font-bold text-gray-700">{{ 'receiptVouchers.create.invoiceNumber' | translate }}</th>

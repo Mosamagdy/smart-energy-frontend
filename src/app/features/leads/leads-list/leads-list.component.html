@@ -1,14 +1,14 @@
-<div class="space-y-6">
+<div class="w-full min-w-0 space-y-4 sm:space-y-6">
   <!-- Header -->
-  <div class="flex justify-between items-center">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="text-4xl font-bold text-gray-900">{{ 'leads.title' | translate }}</h1>
+      <h1 class="text-2xl font-bold break-words sm:text-4xl text-gray-900">{{ 'leads.title' | translate }}</h1>
       <p class="text-gray-600 mt-2">{{ 'leads.subtitle' | translate }}</p>
     </div>
     @if (canCreateLead()) {
       <button 
         (click)="openAddModal()"
-        class="px-6 py-3 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
+        class="px-3 py-3 sm:px-6 bg-linear-to-r from-company-primary to-company-primary/90 text-white rounded-xl shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 font-semibold flex items-center gap-2">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
         </svg>
@@ -19,41 +19,41 @@
 
   <!-- Stats Cards -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-    <div class="bg-linear-to-r from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+    <div class="bg-linear-to-r from-blue-500 to-blue-600 p-4 sm:p-6 rounded-2xl shadow-lg text-white">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-blue-100 text-sm font-medium">{{ 'leads.total' | translate }}</p>
-          <p class="text-4xl font-bold mt-2">{{ stats().total }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl mt-2">{{ stats().total }}</p>
         </div>
         <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">📊</div>
       </div>
     </div>
     
-    <div class="bg-linear-to-r from-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-white">
+    <div class="bg-linear-to-r from-green-500 to-green-600 p-4 sm:p-6 rounded-2xl shadow-lg text-white">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-green-100 text-sm font-medium">{{ 'leads.new' | translate }}</p>
-          <p class="text-4xl font-bold mt-2">{{ stats().new }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl mt-2">{{ stats().new }}</p>
         </div>
         <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">✨</div>
       </div>
     </div>
     
-    <div class="bg-linear-to-r from-purple-500 to-purple-600 p-6 rounded-2xl shadow-lg text-white">
+    <div class="bg-linear-to-r from-purple-500 to-purple-600 p-4 sm:p-6 rounded-2xl shadow-lg text-white">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-purple-100 text-sm font-medium">{{ 'leads.qualified' | translate }}</p>
-          <p class="text-4xl font-bold mt-2">{{ stats().qualified }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl mt-2">{{ stats().qualified }}</p>
         </div>
         <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🎯</div>
       </div>
     </div>
     
-    <div class="bg-linear-to-r from-emerald-500 to-emerald-600 p-6 rounded-2xl shadow-lg text-white">
+    <div class="bg-linear-to-r from-emerald-500 to-emerald-600 p-4 sm:p-6 rounded-2xl shadow-lg text-white">
       <div class="flex items-center justify-between">
         <div>
           <p class="text-emerald-100 text-sm font-medium">{{ 'leads.won' | translate }}</p>
-          <p class="text-4xl font-bold mt-2">{{ stats().won }}</p>
+          <p class="text-2xl font-bold break-words sm:text-4xl mt-2">{{ stats().won }}</p>
         </div>
         <div class="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-3xl">🏆</div>
       </div>
@@ -61,7 +61,7 @@
   </div>
 
   <!-- Filters -->
-  <div class="bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
+  <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-lg border border-gray-100">
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <input 
         type="text" 
@@ -89,7 +89,7 @@
 
       <button 
         (click)="resetFilters()"
-        class="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-semibold">
+        class="px-3 py-3 sm:px-6 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition font-semibold">
         {{ 'leads.reset' | translate }}
       </button>
     </div>
@@ -125,14 +125,14 @@
           
           <!-- Card Header with Priority Badge -->
           <div class="relative bg-linear-to-r from-gray-50 to-gray-100 p-4 border-b border-gray-200">
-            <div class="flex justify-between items-start">
-              <div class="flex-1">
-                <h3 class="text-lg font-bold text-gray-900 mb-1">{{ lead.client_name }}</h3>
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0 flex-1">
+                <h3 class="mb-1 text-lg font-bold text-gray-900 break-words">{{ lead.client_name }}</h3>
                 @if (lead.service_type) {
                   <p class="text-sm text-company-primary font-semibold">{{ lead.service_type }}</p>
                 }
               </div>
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2 shrink-0">
                 <!-- Priority Badge -->
                 <span class="px-3 py-1 text-xs font-bold rounded-full shadow-sm"
                       [ngClass]="getPriorityColor(lead.priority)">
@@ -277,7 +277,7 @@
             <label class="block text-sm font-bold text-gray-700 mb-2">
               {{ 'leads.priority.title' | translate }}
             </label>
-            <div class="grid grid-cols-4 gap-2">
+            <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
               @for (opt of priorityOptions; track opt.value) {
                 <button
                   type="button"

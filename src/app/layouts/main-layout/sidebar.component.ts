@@ -1,9 +1,10 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { AuthStore } from '../../core/auth/auth.store';
 import { I18nService } from '../../core/i18n/i18n.service';
+import { SidebarLayoutService } from './sidebar-layout.service';
 
 interface NavItem {
   label: string;
@@ -17,11 +18,14 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterLink, RouterLinkActive, TranslateModule],
   template: `
-    <aside 
-      class="fixed top-0 h-screen flex flex-col transition-all duration-300 z-50"
+    <aside
+      class="fixed top-0 z-50 flex h-screen w-70 flex-col shadow-2xl transition-transform duration-300 ease-in-out"
       [class.rtl-flip]="i18n.dir() === 'rtl'"
-      [style.background]="'linear-gradient(180deg, #0c0725 0%, #1a0f3d 100%)'"
-      [style.width]="isCollapsed() ? '80px' : '280px'">
+      [class.right-0]="i18n.dir() === 'rtl'"
+      [class.left-0]="i18n.dir() === 'ltr'"
+      [class.translate-x-full]="i18n.dir() === 'rtl' && !layout.isSidebarOpen()"
+      [class.-translate-x-full]="i18n.dir() === 'ltr' && !layout.isSidebarOpen()"
+      [style.background]="'linear-gradient(180deg, #0c0725 0%, #1a0f3d 100%)'">
       
       <!-- Logo Section -->
       <div class="p-6 border-b border-white/10">
@@ -31,12 +35,10 @@ interface NavItem {
             alt="Smart Energy ERP Logo"
             class="h-12 w-12 rounded-xl object-cover shadow-lg shrink-0"
           />
-          @if (!isCollapsed()) {
-            <div class="overflow-hidden">
-              <h1 class="text-white font-bold text-lg leading-tight">{{ 'sidebar.title' | translate }}</h1>
-              <p class="text-white/50 text-xs mt-1">ERP System</p>
-            </div>
-          }
+          <div class="overflow-hidden">
+            <h1 class="text-white font-bold text-lg leading-tight">{{ 'sidebar.title' | translate }}</h1>
+            <p class="text-white/50 text-xs mt-1">ERP System</p>
+          </div>
         </div>
       </div>
 
@@ -48,7 +50,8 @@ interface NavItem {
             routerLinkActive="active-link"
             [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
             class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group"
-            [title]="isCollapsed() ? (item.label | translate) : ''">
+            [title]="item.label | translate"
+            (click)="onNavClick()">
             
             <!-- Icon -->
             <div class="shrink-0 w-6 h-6 flex items-center justify-center">
@@ -56,9 +59,7 @@ interface NavItem {
             </div>
             
             <!-- Label -->
-            @if (!isCollapsed()) {
-              <span class="font-medium">{{ item.label | translate }}</span>
-            }
+            <span class="font-medium">{{ item.label | translate }}</span>
             
             <!-- Active Indicator -->
             <div class="active-indicator"></div>
@@ -68,8 +69,7 @@ interface NavItem {
 
       <!-- User Profile Section -->
       <div class="p-4 border-t border-white/10">
-        @if (!isCollapsed()) {
-          <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-white/5">
             <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2cdc78] to-[#2cdc78]/70 flex items-center justify-center text-[#0c0725] font-bold text-lg shrink-0">
               {{ getUserInitial() }}
             </div>
@@ -88,30 +88,21 @@ interface NavItem {
             </svg>
             <span class="font-medium text-sm">{{ 'app.logout' | translate }}</span>
           </button>
-        } @else {
-          <!-- Collapsed User Avatar -->
-          <div class="flex justify-center mb-3">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2cdc78] to-[#2cdc78]/70 flex items-center justify-center text-[#0c0725] font-bold text-lg">
-              {{ getUserInitial() }}
-            </div>
-          </div>
-        }
 
-        <!-- Collapse Toggle -->
         <button
-          (click)="toggleCollapse()"
-          class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all duration-200">
-          <svg 
-            class="w-5 h-5 transition-transform duration-300" 
-            [class.rotate-180]="isCollapsed()"
-            fill="none" 
-            stroke="currentColor" 
+          type="button"
+          (click)="onSidebarClose()"
+          class="flex w-full items-center justify-center gap-2 rounded-xl bg-white/5 px-4 py-2.5 text-white/70 transition-all duration-300 ease-in-out hover:bg-white/10 hover:text-white"
+          [attr.aria-label]="'sidebar.collapse' | translate">
+          <svg
+            class="h-5 w-5 transition-transform duration-300 ease-in-out"
+            [class.rotate-180]="i18n.dir() === 'rtl'"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
           </svg>
-          @if (!isCollapsed()) {
-            <span class="font-medium text-sm">تصغير</span>
-          }
+          <span class="text-sm font-medium">{{ 'sidebar.collapse' | translate }}</span>
         </button>
       </div>
     </aside>
@@ -186,9 +177,7 @@ export class SidebarComponent {
   private auth = inject(AuthStore);
   private router = inject(Router);
   readonly i18n = inject(I18nService);
-
-  // Sidebar collapse state
-  isCollapsed = signal(false);
+  readonly layout = inject(SidebarLayoutService);
 
   // Navigation items with role-based access
   navItems = computed<NavItem[]>(() => {
@@ -512,8 +501,18 @@ export class SidebarComponent {
     );
   });
 
-  toggleCollapse(): void {
-    this.isCollapsed.update(prev => !prev);
+  onSidebarClose(): void {
+    if (this.layout.isMobile()) {
+      this.layout.closeMobile();
+      return;
+    }
+    this.layout.close();
+  }
+
+  onNavClick(): void {
+    if (this.layout.isMobile()) {
+      this.layout.closeMobile();
+    }
   }
 
   logout(): void {

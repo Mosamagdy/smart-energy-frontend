@@ -7,6 +7,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { environment } from '../../../../environments/environment.prod';
 import { firstValueFrom } from 'rxjs';
 import { TranslateModule } from '@ngx-translate/core';
+import { openFilePreview } from '../../../utils/file-url.util';
 
 @Component({
   selector: 'app-tax-invoices-list',
@@ -49,19 +50,15 @@ export class TaxInvoicesListComponent implements OnInit {
     }
   }
 
-  getPdfUrl(pdfPath: string | null): string {
-    if (!pdfPath) return '';
-    const cleanPath = pdfPath.replace(/\\/g, '/').replace(/^\/+/, '');
-    const backendBase = environment.apiUrl.replace(/\/api\/?$/, '');
-    return `${backendBase}/${cleanPath}`;
-  }
-
   viewPdf(invoice: SalesInvoice): void {
-    const url = this.getPdfUrl(invoice.pdf_path);
-    if (url) {
-      window.open(url, '_blank');
-    } else {
-      this.toast.error('ملف PDF غير متوفر');
+    if (!invoice.pdf_path) {
+      this.toast.warning('لا يوجد ملف PDF مرفق لهذه الفاتورة');
+      console.warn('[TaxInvoices] viewPdf: missing pdf_path for invoice', invoice.id);
+      return;
+    }
+
+    if (!openFilePreview(invoice.pdf_path)) {
+      this.toast.warning('تعذر فتح ملف PDF');
     }
   }
 

@@ -7,6 +7,11 @@
 
 /* Page Header */
 .page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
   border-bottom: 2px solid #e5e7eb;
@@ -542,4 +547,11 @@ textarea.form-control {
 
 .btn-secondary:hover {
   background: #e5e7eb;
+}
+
+
+@media (max-width: 1023px) {
+  :host, .inventory-dashboard, .credit-notes-list-container {
+    padding: 1rem;
+  }
 }

@@ -1,0 +1,73 @@
+/**
+ * Phase 3: responsive overrides for feature components using component-scoped CSS.
+ * Imported globally from styles.css.
+ */
+@media (max-width: 1023px) {
+  .inventory-dashboard,
+  .credit-notes-list-container,
+  .warehouses-list-container,
+  .client-portal-page,
+  .profit-loss-container,
+  .general-ledger-container,
+  .trial-balance-container,
+  .supplier-statement-container {
+    padding: 1rem !important;
+  }
+
+  .page-header,
+  .list-header,
+  .header-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .header-actions,
+  .header-buttons,
+  .list-actions {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .header-actions > button,
+  .header-actions > a,
+  .header-buttons > button,
+  .list-actions > button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .summary-cards,
+  .stats-grid,
+  .cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .table-container,
+  .table-wrapper,
+  .data-table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .credit-notes-table,
+  .data-table,
+  table {
+    min-width: 640px;
+  }
+
+  .filters-row,
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-content,
+  .modal-panel {
+    max-width: calc(100vw - 2rem);
+    margin: 1rem;
+  }
+}

@@ -10,10 +10,10 @@ import { AttendanceService } from '../../../data/api/attendance.service';
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
   template: `
-    <div class="p-6 bg-linear-to-r from-blue-50 to-indigo-100 min-h-screen" dir="rtl">
+    <div class="w-full min-w-0 bg-linear-to-r from-blue-50 to-indigo-100 p-4 sm:p-6" dir="rtl">
 
       <div class="mb-6 text-center">
-        <h1 class="text-3xl font-bold text-gray-900">
+        <h1 class="text-2xl font-bold break-words text-gray-900 sm:text-3xl">
           <i class="fas fa-user-clock ml-3 text-blue-600"></i>
           {{ 'attendance.dashboard.title' | translate }}
         </h1>
@@ -88,11 +88,11 @@ import { AttendanceService } from '../../../data/api/attendance.service';
       </div>
 
       <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 bg-linear-to-r from-blue-50 to-indigo-50">
+        <div class="px-3 py-4 sm:px-6 border-b border-gray-200 bg-linear-to-r from-blue-50 to-indigo-50">
           <h2 class="text-xl font-semibold text-gray-800">{{ 'attendance.dashboard.personalHistory' | translate }}</h2>
         </div>
 
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div class="px-3 py-4 sm:px-6 border-b border-gray-200 bg-gray-50">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'attendance.dashboard.fromDate' | translate }}</label>
@@ -125,15 +125,15 @@ import { AttendanceService } from '../../../data/api/attendance.service';
         </div>
 
         <div class="overflow-x-auto">
-          <table class="w-full">
+          <table class="w-full min-w-[720px]">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.date' | translate }}</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.clockInTime' | translate }}</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.clockOutTime' | translate }}</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.hours' | translate }}</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.status' | translate }}</th>
-                <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ 'attendance.notes' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.date' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.clockInTime' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.clockOutTime' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.hours' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.status' | translate }}</th>
+                <th class="px-3 py-4 sm:px-6 text-right text-sm font-semibold text-gray-700">{{ 'attendance.notes' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -142,13 +142,13 @@ import { AttendanceService } from '../../../data/api/attendance.service';
                   class="hover:bg-gray-50 transition-colors"
                   [ngClass]="{'bg-red-50': record.status === 'late'}"
                 >
-                  <td class="px-6 py-4 text-sm text-gray-900">{{ record.attendance_date }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ formatTime(record.clock_in_time) }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ formatTime(record.clock_out_time) }}</td>
-                  <td class="px-6 py-4 text-sm text-gray-600 font-medium">
+                  <td class="px-3 py-4 sm:px-6 text-sm text-gray-900">{{ record.attendance_date }}</td>
+                  <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">{{ formatTime(record.clock_in_time) }}</td>
+                  <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">{{ formatTime(record.clock_out_time) }}</td>
+                  <td class="px-3 py-4 sm:px-6 text-sm text-gray-600 font-medium">
                     {{ (+( record.actual_hours || 0)).toFixed(2) }}
                   </td>
-                  <td class="px-6 py-4">
+                  <td class="px-3 py-4 sm:px-6">
                     <span
                       class="px-3 py-1 rounded-full text-sm font-medium"
                       [ngClass]="getStatusClass(record.status)"
@@ -156,7 +156,7 @@ import { AttendanceService } from '../../../data/api/attendance.service';
                       {{ getStatusText(record.status) }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-sm text-gray-600">{{ record.notes || '—' }}</td>
+                  <td class="px-3 py-4 sm:px-6 text-sm text-gray-600">{{ record.notes || '—' }}</td>
                 </tr>
               }
               @empty {

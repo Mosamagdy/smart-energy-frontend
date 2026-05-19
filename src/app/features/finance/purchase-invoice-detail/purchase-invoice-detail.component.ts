@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../environments/environment.prod';
 import { ToastService } from '../../../core/services/toast.service';
+import { openFilePreview } from '../../../utils/file-url.util';
 
 interface InvoiceItem {
   id: number;
@@ -106,13 +107,16 @@ export class PurchaseInvoiceDetailComponent implements OnInit {
     });
   }
 
-  downloadPDF(): void {
+  viewPdf(): void {
     const inv = this.invoice();
-    if (inv && inv.pdf_path) {
-      const backendUrl = environment.apiUrl.replace('/api', '');
-      const pdfUrl = `${backendUrl}/${inv.pdf_path}`;
-      console.log('[PDF] Opening:', pdfUrl);
-      window.open(pdfUrl, '_blank');
+    if (!inv?.pdf_path) {
+      this.toast.warning('لا يوجد ملف PDF مرفق لهذه الفاتورة');
+      console.warn('[PurchaseInvoiceDetail] viewPdf: missing pdf_path');
+      return;
+    }
+
+    if (!openFilePreview(inv.pdf_path)) {
+      this.toast.warning('تعذر فتح ملف PDF');
     }
   }
 

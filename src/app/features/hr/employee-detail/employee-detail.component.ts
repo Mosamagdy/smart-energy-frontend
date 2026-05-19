@@ -60,11 +60,11 @@ interface Employee {
   standalone: true,
   imports: [CommonModule, TranslateModule],
   template: `
-    <div class="p-6 bg-gray-50 min-h-screen">
+    <div class="w-full min-w-0 bg-gray-50 p-4 sm:p-6">
       <!-- Header -->
       <div class="mb-6 flex items-center justify-between bg-white p-6 rounded-lg shadow">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">
+          <h1 class="text-2xl font-bold break-words text-gray-900 sm:text-3xl">
             <i class="fas fa-user-tie mr-3 text-blue-600"></i>
             {{ 'employees.detail.title' | translate }}
           </h1>
@@ -73,19 +73,19 @@ interface Employee {
         <div class="flex gap-3">
           <button
             (click)="editEmployee()"
-            class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow">
+            class="px-3 py-3 sm:px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow">
             <i class="fas fa-edit mr-2"></i>
             {{ 'employees.detail.edit' | translate }}
           </button>
           <button
             (click)="deleteEmployee()"
-            class="px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow">
+            class="px-3 py-3 sm:px-6 bg-red-600 hover:bg-red-700 text-white rounded-lg transition shadow">
             <i class="fas fa-trash mr-2"></i>
             {{ 'employees.detail.delete' | translate }}
           </button>
           <button
             (click)="goBack()"
-            class="px-6 py-3 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+            class="px-3 py-3 sm:px-6 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
             <i class="fas fa-arrow-left mr-2"></i>
             {{ 'employees.detail.back' | translate }}
           </button>

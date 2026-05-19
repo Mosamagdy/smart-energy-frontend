@@ -17,6 +17,8 @@
     "collapse": "Collapse",
     "expand": "Expand",
     "pmoDashboard": "PMO Dashboard",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
     "leads": "Leads",
     "departments": "Departments",
     "projects": "Projects",
